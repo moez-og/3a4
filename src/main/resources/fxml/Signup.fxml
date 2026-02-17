@@ -10,7 +10,7 @@
     <children>
         <ImageView fitWidth="900.0" fitHeight="700.0" preserveRatio="false">
             <image>
-                <Image url="@/bg.png"/>
+                <Image url="@/images/bg.png"/>
             </image>
         </ImageView>
         <VBox StackPane.alignment="BOTTOM_RIGHT" spacing="0">
@@ -30,7 +30,7 @@
                             <children>
                                 <ImageView fitWidth="70.0" fitHeight="70.0" preserveRatio="true">
                                     <image>
-                                        <Image url="@/logo.png"/>
+                                        <Image url="@/images/logo.png"/>
                                     </image>
                                 </ImageView>
                             </children>

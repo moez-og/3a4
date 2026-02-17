@@ -162,7 +162,7 @@ public class UserDashboardController {
         Stage dialog = new Stage();
         dialog.setTitle("Ajouter un Utilisateur");
         dialog.setWidth(500);
-        dialog.setHeight(550);
+        dialog.setHeight(600);
 
         VBox dialogRoot = new VBox(15);
         dialogRoot.setPadding(new Insets(20));
@@ -177,12 +177,14 @@ public class UserDashboardController {
         PasswordField passwordField = createStyledPasswordField("Mot de passe");
         ComboBox<String> roleCombo = createRoleCombo();
         TextField telField = createStyledTextField("Téléphone");
+        TextField imageUrlField = createStyledTextField("Image URL");
 
         attachClearOnChange(nomField);
         attachClearOnChange(prenomField);
         attachClearOnChange(emailField);
         attachClearOnChange(passwordField);
         attachClearOnChange(telField);
+        attachClearOnChange(imageUrlField);
 
         Button saveButton = createActionButton("Enregistrer", "#1e3a5f");
         saveButton.setPrefWidth(200);
@@ -194,12 +196,14 @@ public class UserDashboardController {
                 String password = passwordField.getText();
                 String role = roleCombo.getValue();
                 String telephone = telField.getText().trim();
+                String imageUrl = imageUrlField.getText().trim();
 
                 clearInvalid(nomField);
                 clearInvalid(prenomField);
                 clearInvalid(emailField);
                 clearInvalid(passwordField);
                 clearInvalid(telField);
+                clearInvalid(imageUrlField);
 
                 boolean hasError = false;
                 if (nom.isEmpty()) {
@@ -242,7 +246,7 @@ public class UserDashboardController {
                 }
 
                 String hashedPassword = PasswordUtil.hashPassword(password);
-                User newUser = new User(nom, prenom, email, hashedPassword, role, telephone, null);
+                User newUser = new User(nom, prenom, email, hashedPassword, role, telephone, imageUrl);
                 userService.ajouter(newUser);
 
                 showSuccess("Succès", "Utilisateur ajouté!");
@@ -261,6 +265,7 @@ public class UserDashboardController {
                 new Label("Mot de passe:"), passwordField,
                 new Label("Rôle:"), roleCombo,
                 new Label("Téléphone:"), telField,
+                new Label("Image URL:"), imageUrlField,
                 saveButton
         );
 
@@ -280,7 +285,7 @@ public class UserDashboardController {
         Stage dialog = new Stage();
         dialog.setTitle("Modifier Utilisateur");
         dialog.setWidth(500);
-        dialog.setHeight(450);
+        dialog.setHeight(500);
 
         VBox dialogRoot = new VBox(15);
         dialogRoot.setPadding(new Insets(20));
@@ -302,9 +307,13 @@ public class UserDashboardController {
         TextField telField = createStyledTextField("Téléphone");
         telField.setText(selectedUser.getTelephone() != null ? selectedUser.getTelephone() : "");
 
+        TextField imageUrlField = createStyledTextField("Image URL");
+        imageUrlField.setText(selectedUser.getImageUrl() != null ? selectedUser.getImageUrl() : "");
+
         attachClearOnChange(nomField);
         attachClearOnChange(prenomField);
         attachClearOnChange(telField);
+        attachClearOnChange(imageUrlField);
 
         Button saveButton = createActionButton("Enregistrer", "#1e3a5f");
         saveButton.setPrefWidth(200);
@@ -317,6 +326,7 @@ public class UserDashboardController {
                 String nom = nomField.getText().trim();
                 String prenom = prenomField.getText().trim();
                 String telephone = telField.getText().trim();
+                String imageUrl = imageUrlField.getText().trim();
 
                 boolean hasError = false;
                 if (nom.isEmpty()) {
@@ -336,6 +346,7 @@ public class UserDashboardController {
                 selectedUser.setPrenom(prenom);
                 selectedUser.setRole(roleCombo.getValue());
                 selectedUser.setTelephone(telephone);
+                selectedUser.setImageUrl(imageUrl);
 
                 userService.modifier(selectedUser);
                 if (currentUser != null && selectedUser.getId() == currentUser.getId()) {
@@ -343,6 +354,7 @@ public class UserDashboardController {
                     currentUser.setPrenom(selectedUser.getPrenom());
                     currentUser.setRole(selectedUser.getRole());
                     currentUser.setTelephone(selectedUser.getTelephone());
+                    currentUser.setImageUrl(selectedUser.getImageUrl());
                     updateCurrentUserInfo();
                 }
                 showSuccess("Succès", "Utilisateur modifié!");
@@ -360,6 +372,7 @@ public class UserDashboardController {
                 new Label("Email:"), emailField,
                 new Label("Rôle:"), roleCombo,
                 new Label("Téléphone:"), telField,
+                new Label("Image URL:"), imageUrlField,
                 saveButton
         );
 
@@ -527,7 +540,7 @@ public class UserDashboardController {
 
     private Parent buildUserCard(User user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UserCard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/UserCard.fxml"));
             Parent root = loader.load();
             UserCardController controller = loader.getController();
             controller.setUser(user);

@@ -15,7 +15,7 @@ public class UserCardController {
 
     public void setUser(User user) {
         if (user == null) {
-            userImageView.setImage(new Image(getClass().getResource("/bg.png").toExternalForm()));
+            userImageView.setImage(new Image(getClass().getResource("/images/bg.png").toExternalForm()));
             nameLabel.setText("");
             roleLabel.setText("");
             emailLabel.setText("");
@@ -34,10 +34,10 @@ public class UserCardController {
                 }
                 userImageView.setImage(new Image(imageUrl));
             } catch (Exception e) {
-                userImageView.setImage(new Image(getClass().getResource("/bg.png").toExternalForm()));
+                userImageView.setImage(new Image(getClass().getResource("/images/bg.png").toExternalForm()));
             }
         } else {
-            userImageView.setImage(new Image(getClass().getResource("/bg.png").toExternalForm()));
+            userImageView.setImage(new Image(getClass().getResource("/images/bg.png").toExternalForm()));
         }
         
         nameLabel.setText(user.getPrenom() + " " + user.getNom());

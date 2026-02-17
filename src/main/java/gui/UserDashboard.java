@@ -3,12 +3,12 @@ package gui;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
-import controllers.UserDashboardController;
+import controllers.BackDashboardController;
 import java.io.IOException;
 
 public class UserDashboard extends BorderPane {
 
-    private UserDashboardController controller;
+    private BackDashboardController controller;
 
     public UserDashboard(Stage primaryStage) {
         this(primaryStage, null);
@@ -16,7 +16,7 @@ public class UserDashboard extends BorderPane {
 
     public UserDashboard(Stage primaryStage, models.User currentUser) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UserDashboard.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/BackDashboard.fxml"));
             BorderPane root = loader.load();
             
             // On copie le contenu du root chargé dans ce BorderPane
@@ -26,6 +26,8 @@ public class UserDashboard extends BorderPane {
             this.setRight(root.getRight());
             this.setBottom(root.getBottom());
             this.setStyle(root.getStyle());
+            this.getStylesheets().setAll(root.getStylesheets());
+            this.getStyleClass().setAll(root.getStyleClass());
             
             this.controller = loader.getController();
             if (this.controller != null) {

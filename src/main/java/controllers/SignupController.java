@@ -226,7 +226,7 @@ public class SignupController {
 
     private void navigateToLogin() throws Exception {
         Stage stage = resolveStage();
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Login.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
         Parent root = loader.load();
         Scene scene = new Scene(root, 900, 700);
         stage.setTitle("Travel Guide - Login");
