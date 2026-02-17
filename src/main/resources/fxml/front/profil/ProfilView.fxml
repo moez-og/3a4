@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-    <center>
-        <VBox alignment="CENTER" spacing="10" style="-fx-padding: 20;">
-            <Label text="Profil View" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
-            <Label text="Contenu pour la gestion du profil utilisateur" style="-fx-font-size: 14;"/>
-        </VBox>
-    </center>
-</BorderPane>
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.profil.ProfilViewController"
+      spacing="10" styleClass="contentSurface">
+    <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+    <Label text="👤 Profil (Compte pro)" style="-fx-font-size:18; -fx-font-weight:900;"/>
+    <Label text="Ici tu branches: infos perso, sécurité, préférences, activité." style="-fx-opacity:0.75; -fx-font-weight:700;"/>
+</VBox>

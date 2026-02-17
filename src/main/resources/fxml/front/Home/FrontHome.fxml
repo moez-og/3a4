@@ -4,136 +4,108 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.front.home.FrontHomeController"
-            fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
-            styleClass="scrollRoot">
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            styleClass="homeScroll">
 
     <content>
-        <VBox fx:id="homeRoot" spacing="18" styleClass="homeRoot">
+        <VBox spacing="18" styleClass="homeRoot">
             <padding>
-                <Insets top="6" right="6" bottom="16" left="6"/>
+                <Insets top="8" right="8" bottom="18" left="8"/>
             </padding>
 
-            <HBox spacing="14">
-                <VBox spacing="10" styleClass="heroCard" HBox.hgrow="ALWAYS">
-                    <Label text="Bienvenue ✨" styleClass="heroTitle"/>
-                    <Label text="Un front office unique, propre et cohérent. Chaque module garde le même design : navigation claire, cartes élégantes, zéro tableau."
+            <!-- HERO BANNER -->
+            <StackPane styleClass="heroBanner">
+                <VBox spacing="10" styleClass="heroOverlay">
+                    <Label text="وين تحب تخرج؟" styleClass="heroTitle"/>
+                    <Label text="Trouve des lieux, activités, restaurants et sorties — rapide, clair, stylé."
                            wrapText="true" styleClass="heroSubtitle"/>
 
-                    <HBox spacing="10">
-                        <Label text="🎯" styleClass="chipIcon"/>
-                        <Label text="Commun" styleClass="chip"/>
-                        <Label text="🧩" styleClass="chipIcon"/>
-                        <Label text="Modulaire" styleClass="chip"/>
-                        <Label text="🛡" styleClass="chipIcon"/>
-                        <Label text="Pro" styleClass="chip"/>
+                    <HBox spacing="10" styleClass="heroSearchRow">
+                        <HBox spacing="10" styleClass="heroSearch">
+                            <Label text="🔎" styleClass="heroSearchIcon"/>
+                            <TextField fx:id="heroSearchField"
+                                       promptText="Ex: Sidi Bou Saïd, café, musée…"
+                                       styleClass="heroSearchField"/>
+                        </HBox>
+                        <Button text="Explorer" onAction="#explore" styleClass="heroCta"/>
+                    </HBox>
+
+                    <HBox spacing="10" styleClass="chipRow">
+                        <Button text="Cafés" onAction="#chipCafes" styleClass="chipBtn"/>
+                        <Button text="Restaurants" onAction="#chipRestaurants" styleClass="chipBtn"/>
+                        <Button text="Musées" onAction="#chipMusees" styleClass="chipBtn"/>
+                        <Button text="Plages" onAction="#chipPlages" styleClass="chipBtn"/>
+                        <Button text="Sorties" onAction="#chipSorties" styleClass="chipBtn"/>
+                    </HBox>
+                </VBox>
+            </StackPane>
+
+            <!-- SECTION: VILLES TENDANCE -->
+            <HBox alignment="CENTER_LEFT" styleClass="sectionHeader">
+                <VBox spacing="2">
+                    <Label text="Villes tendance" styleClass="sectionTitle"/>
+                    <Label text="Clique sur une ville pour explorer ses lieux." styleClass="sectionHint"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Voir tout" onAction="#seeAllCities" styleClass="linkBtn"/>
+            </HBox>
+
+            <ScrollPane fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="hScroll">
+                <content>
+                    <HBox fx:id="citiesRow" spacing="14" styleClass="cardsRow"/>
+                </content>
+            </ScrollPane>
+
+            <!-- SECTION: RECOMMANDATIONS -->
+            <HBox alignment="CENTER_LEFT" styleClass="sectionHeader">
+                <VBox spacing="2">
+                    <Label text="Recommandations du jour" styleClass="sectionTitle"/>
+                    <Label text="Suggestions rapides selon la tendance." styleClass="sectionHint"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Actualiser" onAction="#refreshReco" styleClass="ghostBtn"/>
+            </HBox>
+
+            <HBox spacing="14">
+                <VBox styleClass="recoCard hoverable" HBox.hgrow="ALWAYS" spacing="8">
+                    <Label text="🔥 Spot populaire" styleClass="recoTitle"/>
+                    <Label text="Café panoramique · vue · chill" wrapText="true" styleClass="recoText"/>
+                    <HBox spacing="8">
+                        <Label text="Top" styleClass="tag"/>
+                        <Label text="Calme" styleClass="tag"/>
                     </HBox>
                 </VBox>
 
-                <VBox spacing="12" styleClass="infoCard" prefWidth="320">
-                    <Label text="À faire" styleClass="sectionTitle"/>
-                    <HBox spacing="10" styleClass="todoItem hoverable">
-                        <Label text="✅" styleClass="todoIcon"/>
-                        <VBox spacing="2">
-                            <Label text="Compléter profil" styleClass="todoTitle"/>
-                            <Label text="Photo + téléphone" styleClass="todoText"/>
-                        </VBox>
+                <VBox styleClass="recoCard hoverable" HBox.hgrow="ALWAYS" spacing="8">
+                    <Label text="🎟 Offre du moment" styleClass="recoTitle"/>
+                    <Label text="-20% partenaire cette semaine" wrapText="true" styleClass="recoText"/>
+                    <HBox spacing="8">
+                        <Label text="Promo" styleClass="tag"/>
+                        <Label text="Limité" styleClass="tag"/>
                     </HBox>
+                </VBox>
 
-                    <HBox spacing="10" styleClass="todoItem hoverable">
-                        <Label text="⭐" styleClass="todoIcon"/>
-                        <VBox spacing="2">
-                            <Label text="Choisir favoris" styleClass="todoTitle"/>
-                            <Label text="Lieux et sorties" styleClass="todoText"/>
-                        </VBox>
+                <VBox styleClass="recoCard hoverable" HBox.hgrow="ALWAYS" spacing="8">
+                    <Label text="🧭 Sortie recommandée" styleClass="recoTitle"/>
+                    <Label text="Balade · photos · départ 16:00" wrapText="true" styleClass="recoText"/>
+                    <HBox spacing="8">
+                        <Label text="Week-end" styleClass="tag"/>
+                        <Label text="Groupe" styleClass="tag"/>
                     </HBox>
                 </VBox>
             </HBox>
 
-            <VBox spacing="10">
-                <HBox>
-                    <Label text="Modules" styleClass="sectionTitle"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="Même design pour tout" styleClass="sectionHint"/>
-                </HBox>
-
-                <HBox spacing="14">
-                    <VBox spacing="8" styleClass="moduleCard hoverable" HBox.hgrow="ALWAYS">
-                        <Label text="🧭 Sorties" styleClass="moduleTitle"/>
-                        <Label text="Explorer, participer, gérer tes demandes." wrapText="true" styleClass="moduleText"/>
-                        <Button text="Ouvrir" styleClass="ghostBtn"/>
-                    </VBox>
-
-                    <VBox spacing="8" styleClass="moduleCard hoverable" HBox.hgrow="ALWAYS">
-                        <Label text="🗺 Lieux" styleClass="moduleTitle"/>
-                        <Label text="Découvrir des endroits, favoris, infos utiles." wrapText="true" styleClass="moduleText"/>
-                        <Button text="Ouvrir" styleClass="ghostBtn"/>
-                    </VBox>
-                </HBox>
-
-                <HBox spacing="14">
-                    <VBox spacing="8" styleClass="moduleCard hoverable" HBox.hgrow="ALWAYS">
-                        <Label text="🎟 Offres" styleClass="moduleTitle"/>
-                        <Label text="Bons plans, promos, partenariats." wrapText="true" styleClass="moduleText"/>
-                        <Button text="Ouvrir" styleClass="ghostBtn"/>
-                    </VBox>
-
-                    <VBox spacing="8" styleClass="moduleCard hoverable" HBox.hgrow="ALWAYS">
-                        <Label text="📅 Événements" styleClass="moduleTitle"/>
-                        <Label text="Agenda, inscriptions, nouveautés." wrapText="true" styleClass="moduleText"/>
-                        <Button text="Ouvrir" styleClass="ghostBtn"/>
-                    </VBox>
-                </HBox>
-            </VBox>
-
-            <VBox spacing="10">
-                <HBox>
-                    <Label text="Recommandations" styleClass="sectionTitle"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label text="Cartes horizontales" styleClass="sectionHint"/>
-                </HBox>
-
-                <ScrollPane fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="hScroll">
-                    <content>
-                        <HBox spacing="14" styleClass="cardsRow">
-                            <VBox spacing="8" styleClass="recCard hoverable" prefWidth="320">
-                                <Label text="Sidi Bou Saïd" styleClass="recTitle"/>
-                                <Label text="Balade + photos, départ 16:00" wrapText="true" styleClass="recText"/>
-                                <HBox spacing="8">
-                                    <Label text="Populaire" styleClass="tag"/>
-                                    <Label text="Week-end" styleClass="tag"/>
-                                </HBox>
-                            </VBox>
-
-                            <VBox spacing="8" styleClass="recCard hoverable" prefWidth="320">
-                                <Label text="Café panoramique" styleClass="recTitle"/>
-                                <Label text="Spot calme, vue, parfait pour chill" wrapText="true" styleClass="recText"/>
-                                <HBox spacing="8">
-                                    <Label text="Calme" styleClass="tag"/>
-                                    <Label text="Vue" styleClass="tag"/>
-                                </HBox>
-                            </VBox>
-
-                            <VBox spacing="8" styleClass="recCard hoverable" prefWidth="320">
-                                <Label text="Offre -20%" styleClass="recTitle"/>
-                                <Label text="Réduction partenaire cette semaine" wrapText="true" styleClass="recText"/>
-                                <HBox spacing="8">
-                                    <Label text="Promo" styleClass="tag"/>
-                                    <Label text="Limité" styleClass="tag"/>
-                                </HBox>
-                            </VBox>
-                        </HBox>
-                    </content>
-                </ScrollPane>
-            </VBox>
-
-            <Region minHeight="8"/>
         </VBox>
     </content>
 </ScrollPane>
