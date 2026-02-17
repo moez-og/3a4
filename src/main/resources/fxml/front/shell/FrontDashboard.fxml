@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="rootPane"
+            fx:controller="controllers.front.shell.FrontDashboardController"
+            stylesheets="@/styles/front/front-layout.css"
+            styleClass="app-root">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <left>
+        <VBox prefWidth="310" styleClass="sidebar">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16"/>
+            </padding>
+
+            <!-- Brand -->
+            <VBox spacing="10" alignment="CENTER" styleClass="brandCard">
+                <HBox spacing="12" alignment="CENTER">
+                    <ImageView fitWidth="46" fitHeight="46" preserveRatio="true">
+                        <image>
+                            <Image url="@/images/logo/logo.png"/>
+                        </image>
+                    </ImageView>
+
+                    <VBox spacing="2">
+                        <Label text="Fin Tokhroj" styleClass="brandTitle"/>
+                        <Label text="Front Office" styleClass="brandSubtitle"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="8" alignment="CENTER">
+                    <Label text="✨" styleClass="pillIcon"/>
+                    <Label text="Design premium" styleClass="pill"/>
+                    <Label text="⚡" styleClass="pillIcon"/>
+                    <Label text="Commun" styleClass="pill"/>
+                </HBox>
+            </VBox>
+
+            <!-- Quick CTA -->
+            <VBox spacing="10" styleClass="ctaCard">
+                <Label text="Raccourci" styleClass="ctaTitle"/>
+                <Button fx:id="btnNew" text="＋ Nouveau" onAction="#newAction"
+                        maxWidth="1.7976931348623157E308" styleClass="primaryBtn"/>
+                <Label text="Créer rapidement (sortie, offre, etc.)" styleClass="ctaHint" wrapText="true"/>
+            </VBox>
+
+            <Label text="MODULES" styleClass="menuLabel"/>
+
+            <VBox spacing="10" styleClass="navBox" fillWidth="true">
+                <Button fx:id="btnAccueil" onAction="#showAccueil"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn" text="🏠  Accueil"/>
+
+                <Button fx:id="btnSorties" onAction="#showSorties"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn" text="🧭  Sorties"/>
+
+                <Button fx:id="btnLieux" onAction="#showLieux"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn" text="🗺  Lieux"/>
+
+                <Button fx:id="btnOffres" onAction="#showOffres"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn" text="🎟  Offres"/>
+
+                <Button fx:id="btnEvents" onAction="#showEvents"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn" text="📅  Événements"/>
+            </VBox>
+
+            <Label text="COMPTE" styleClass="menuLabel"/>
+
+            <VBox spacing="10" styleClass="navBox" fillWidth="true">
+                <Button fx:id="btnProfil" onAction="#showProfil"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn" text="👤  Profil"/>
+                <Button fx:id="btnHelp" onAction="#showHelp"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn" text="❔  Aide"/>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <!-- User mini card -->
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="userMiniCard">
+                <StackPane styleClass="avatarCircle">
+                    <Label fx:id="avatarLetter" text="U" styleClass="avatarLetter"/>
+                </StackPane>
+                <VBox spacing="2">
+                    <Label fx:id="userName" text="Utilisateur" styleClass="userName"/>
+                    <Label fx:id="userHint" text="Bon retour" styleClass="userHint"/>
+                </VBox>
+            </HBox>
+
+            <Button fx:id="btnLogout" text="🚪  Déconnexion" onAction="#logout"
+                    maxWidth="1.7976931348623157E308" styleClass="logoutBtn"/>
+
+            <Label text="© Fin Tokhroj · UI Front" styleClass="sidebarFooter"/>
+        </VBox>
+    </left>
+
+    <!-- ===================== MAIN ===================== -->
+    <center>
+        <BorderPane styleClass="mainArea">
+
+            <top>
+                <StackPane styleClass="topHeader">
+                    <BorderPane>
+                        <left>
+                            <VBox spacing="4" styleClass="headerLeft">
+                                <Label fx:id="breadcrumb" text="Front Office / Accueil" styleClass="breadcrumb"/>
+                                <Label fx:id="pageTitle" text="Accueil" styleClass="headerTitle"/>
+                                <Label fx:id="pageSubtitle" text="Vue d’ensemble" styleClass="headerSubtitle"/>
+                            </VBox>
+                        </left>
+
+                        <right>
+                            <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="headerRight">
+                                <HBox spacing="8" alignment="CENTER_LEFT" styleClass="searchBox">
+                                    <Label text="🔎" styleClass="searchIcon"/>
+                                    <TextField fx:id="searchField" promptText="Rechercher (sortie, lieu, offre…)"
+                                               styleClass="searchField"/>
+                                </HBox>
+
+                                <Button fx:id="btnNotif" text="🔔" onAction="#showNotifications" styleClass="iconBtn"/>
+                                <Button fx:id="btnTheme" text="🌓" onAction="#toggleTheme" styleClass="iconBtn"/>
+
+                                <Button text="Rechercher" onAction="#doSearch" styleClass="ghostBtn"/>
+                            </HBox>
+                        </right>
+                    </BorderPane>
+
+                    <padding>
+                        <Insets top="18" right="22" bottom="18" left="22"/>
+                    </padding>
+                </StackPane>
+            </top>
+
+            <center>
+                <StackPane styleClass="contentPad">
+                    <StackPane fx:id="dynamicContent" styleClass="contentCard"/>
+                </StackPane>
+            </center>
+
+        </BorderPane>
+    </center>
+
+</BorderPane>

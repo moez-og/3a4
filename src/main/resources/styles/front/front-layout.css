@@ -1,0 +1,390 @@
+/* =========================
+   FRONT OFFICE · V2 PREMIUM
+========================= */
+
+.app-root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: linear-gradient(to bottom, #eef3ff, #f7f9fc);
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+    -fx-background-color: linear-gradient(to bottom, #0b2550, #0e345e);
+    -fx-background-radius: 22;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.28), 22, 0.22, 0, 7);
+}
+
+.brandCard {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 22;
+    -fx-padding: 16 14 16 14;
+    -fx-border-color: rgba(255,255,255,0.55);
+    -fx-border-radius: 22;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 14, 0.20, 0, 4);
+}
+
+.brandTitle {
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 17;
+    -fx-font-weight: 900;
+}
+.brandSubtitle {
+    -fx-text-fill: rgba(15,42,68,0.72);
+    -fx-font-size: 11.5;
+    -fx-font-weight: 800;
+}
+
+.pillIcon { -fx-text-fill: #d4af37; -fx-font-size: 12.5; }
+.pill {
+    -fx-text-fill: rgba(15,42,68,0.75);
+    -fx-background-color: rgba(212,175,55,0.14);
+    -fx-background-radius: 999;
+    -fx-padding: 5 10 5 10;
+    -fx-font-size: 11;
+    -fx-font-weight: 900;
+}
+
+.ctaCard {
+    -fx-background-color: rgba(255,255,255,0.14);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(255,255,255,0.18);
+    -fx-border-radius: 18;
+    -fx-padding: 14;
+}
+.ctaTitle {
+    -fx-text-fill: rgba(230,245,255,0.95);
+    -fx-font-size: 12;
+    -fx-font-weight: 900;
+}
+.ctaHint {
+    -fx-text-fill: rgba(230,245,255,0.72);
+    -fx-font-size: 11.2;
+    -fx-font-weight: 700;
+}
+
+.menuLabel {
+    -fx-padding: 18 0 10 6;
+    -fx-text-fill: rgba(220,235,255,0.72);
+    -fx-font-size: 12;
+    -fx-font-weight: 900;
+}
+
+.navBox { -fx-padding: 0 6 0 6; }
+
+.navBtn {
+    -fx-background-color: rgba(255,255,255,0.14);
+    -fx-background-radius: 18;
+
+    -fx-border-color: rgba(255,255,255,0.16);
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+
+    -fx-text-fill: #f3f8ff;
+    -fx-font-size: 13.5;
+    -fx-font-weight: 900;
+
+    -fx-padding: 14 18 14 18;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+}
+
+.navBtn:hover {
+    -fx-background-color: rgba(255,255,255,0.20);
+    -fx-border-color: rgba(255,255,255,0.26);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.16), 12, 0.18, 0, 3);
+}
+
+/* actif : barre dorée à gauche + fond un peu plus clair */
+.navBtn.active {
+    -fx-background-color: rgba(255,255,255,0.24);
+    -fx-border-width: 1 1 1 5; /* top right bottom left */
+    -fx-border-color: rgba(255,255,255,0.28) rgba(255,255,255,0.28) rgba(255,255,255,0.28) #d4af37;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.22), 14, 0.18, 0, 4);
+}
+
+/* mini user card */
+.userMiniCard {
+    -fx-background-color: rgba(255,255,255,0.14);
+    -fx-background-radius: 18;
+    -fx-padding: 12;
+    -fx-border-color: rgba(255,255,255,0.16);
+    -fx-border-radius: 18;
+}
+
+.avatarCircle {
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+    -fx-background-color: rgba(212,175,55,0.20);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(212,175,55,0.45);
+    -fx-border-radius: 999;
+}
+.avatarLetter {
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 14;
+}
+
+.userName {
+    -fx-text-fill: rgba(245,250,255,0.95);
+    -fx-font-size: 13;
+    -fx-font-weight: 900;
+}
+.userHint {
+    -fx-text-fill: rgba(245,250,255,0.70);
+    -fx-font-size: 11.5;
+    -fx-font-weight: 800;
+}
+
+.logoutBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: rgba(255,255,255,0.40);
+    -fx-border-width: 1;
+    -fx-text-fill: white;
+    -fx-font-size: 14;
+    -fx-font-weight: 900;
+    -fx-padding: 15 18 15 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 18, 0.22, 0, 7);
+}
+.logoutBtn:hover {
+    -fx-background-color: linear-gradient(to right, #e8c547, #d4af37);
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.55), 22, 0.26, 0, 10);
+}
+.sidebarFooter {
+    -fx-padding: 12 0 0 8;
+    -fx-text-fill: rgba(220,235,255,0.60);
+    -fx-font-size: 11;
+    -fx-font-weight: 700;
+}
+
+/* ---------- Header ---------- */
+.mainArea { -fx-background-color: transparent; }
+
+.topHeader {
+    -fx-background-color: linear-gradient(to bottom, rgba(240,244,255,0.95), rgba(250,252,255,0.92));
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.14), 18, 0.18, 0, 6);
+}
+
+.breadcrumb {
+    -fx-text-fill: rgba(22,58,92,0.62);
+    -fx-font-size: 11.5;
+    -fx-font-weight: 900;
+}
+
+.headerTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 40;
+    -fx-font-weight: 900;
+}
+
+.headerSubtitle {
+    -fx-text-fill: rgba(22,58,92,0.70);
+    -fx-font-size: 12.5;
+    -fx-font-weight: 800;
+}
+
+.searchBox {
+    -fx-background-color: rgba(15,23,42,0.05);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 16;
+    -fx-padding: 6 10 6 10;
+}
+
+.searchIcon {
+    -fx-text-fill: rgba(22,58,92,0.72);
+    -fx-font-size: 12.5;
+}
+
+.searchField {
+    -fx-pref-width: 280;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 12.5;
+    -fx-font-weight: 800;
+    -fx-text-fill: #173a57;
+}
+
+.iconBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 999;
+    -fx-min-width: 38;
+    -fx-min-height: 38;
+    -fx-font-weight: 900;
+    -fx-cursor: hand;
+}
+.iconBtn:hover {
+    -fx-background-color: rgba(15,23,42,0.10);
+}
+
+.primaryBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-background-radius: 16;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 12.5;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.30), 14, 0.20, 0, 5);
+}
+.primaryBtn:hover {
+    -fx-background-color: linear-gradient(to right, #e8c547, #d4af37);
+}
+
+.ghostBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 14;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.ghostBtn:hover { -fx-background-color: rgba(15,23,42,0.09); }
+
+/* ---------- Content ---------- */
+.contentPad { -fx-padding: 18; }
+
+.contentCard {
+    -fx-background-color: rgba(255,255,255,0.86);
+    -fx-background-radius: 18;
+    -fx-padding: 16;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 18, 0.18, 0, 6);
+}
+
+/* ---------- Home ---------- */
+.scrollRoot { -fx-background-color: transparent; }
+.scrollRoot > .viewport { -fx-background-color: transparent; }
+
+.heroCard {
+    -fx-background-color: linear-gradient(to right, rgba(11,37,80,0.94), rgba(14,52,94,0.94));
+    -fx-background-radius: 18;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.22), 18, 0.20, 0, 7);
+}
+.heroTitle { -fx-text-fill: white; -fx-font-size: 22; -fx-font-weight: 900; }
+.heroSubtitle { -fx-text-fill: rgba(255,255,255,0.82); -fx-font-size: 12.5; -fx-font-weight: 700; }
+
+.chipIcon { -fx-text-fill: white; -fx-font-size: 14; -fx-font-weight: 900; }
+.chip {
+    -fx-text-fill: white;
+    -fx-background-color: rgba(255,255,255,0.12);
+    -fx-background-radius: 999;
+    -fx-padding: 6 12 6 12;
+    -fx-font-size: 11.5;
+    -fx-font-weight: 900;
+}
+
+.infoCard {
+    -fx-background-color: rgba(255,255,255,0.74);
+    -fx-background-radius: 18;
+    -fx-padding: 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+}
+
+.todoItem {
+    -fx-background-color: rgba(15,23,42,0.03);
+    -fx-background-radius: 14;
+    -fx-padding: 10 12 10 12;
+}
+.todoIcon { -fx-font-size: 16; }
+.todoTitle { -fx-text-fill: #163a5c; -fx-font-size: 12.5; -fx-font-weight: 900; }
+.todoText { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 11.8; -fx-font-weight: 700; }
+
+.sectionTitle { -fx-text-fill: #163a5c; -fx-font-size: 14; -fx-font-weight: 900; }
+.sectionHint { -fx-text-fill: rgba(22,58,92,0.60); -fx-font-size: 11.5; -fx-font-weight: 800; }
+
+.moduleCard {
+    -fx-background-color: rgba(255,255,255,0.78);
+    -fx-background-radius: 18;
+    -fx-padding: 16;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 14, 0.18, 0, 5);
+}
+.moduleTitle { -fx-text-fill: #163a5c; -fx-font-size: 13.8; -fx-font-weight: 900; }
+.moduleText { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 12.2; -fx-font-weight: 700; }
+
+.hScroll { -fx-background-color: transparent; }
+.hScroll > .viewport { -fx-background-color: transparent; }
+
+.recCard {
+    -fx-background-color: rgba(255,255,255,0.78);
+    -fx-background-radius: 18;
+    -fx-padding: 16;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 14, 0.18, 0, 5);
+}
+.recTitle { -fx-text-fill: #163a5c; -fx-font-size: 13.8; -fx-font-weight: 900; }
+.recText { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 12.2; -fx-font-weight: 700; }
+.tag {
+    -fx-text-fill: rgba(22,58,92,0.78);
+    -fx-background-color: rgba(212,175,55,0.14);
+    -fx-background-radius: 999;
+    -fx-padding: 5 10 5 10;
+    -fx-font-size: 11;
+    -fx-font-weight: 900;
+}
+
+/* ---------- Dark mode (toggle) ---------- */
+.theme-dark.app-root {
+    -fx-background-color: linear-gradient(to bottom, #0b1220, #0e172a);
+}
+
+.theme-dark .topHeader {
+    -fx-background-color: linear-gradient(to bottom, rgba(15,23,42,0.92), rgba(15,23,42,0.86));
+}
+
+.theme-dark .breadcrumb,
+.theme-dark .headerSubtitle,
+.theme-dark .sectionHint {
+    -fx-text-fill: rgba(226,232,240,0.70);
+}
+
+.theme-dark .headerTitle,
+.theme-dark .sectionTitle {
+    -fx-text-fill: rgba(241,245,249,0.95);
+}
+
+.theme-dark .contentCard,
+.theme-dark .infoCard,
+.theme-dark .moduleCard,
+.theme-dark .recCard {
+    -fx-background-color: rgba(15,23,42,0.55);
+    -fx-border-color: rgba(255,255,255,0.08);
+}
+
+.theme-dark .moduleTitle,
+.theme-dark .recTitle,
+.theme-dark .todoTitle {
+    -fx-text-fill: rgba(241,245,249,0.92);
+}
+
+.theme-dark .moduleText,
+.theme-dark .recText,
+.theme-dark .todoText {
+    -fx-text-fill: rgba(226,232,240,0.72);
+}
+
+.theme-dark .searchBox {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-border-color: rgba(255,255,255,0.10);
+}
+
+.theme-dark .ghostBtn,
+.theme-dark .iconBtn {
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-border-color: rgba(255,255,255,0.10);
+}
+
+.theme-dark .searchIcon { -fx-text-fill: rgba(226,232,240,0.75); }
+.theme-dark .searchField { -fx-text-fill: rgba(241,245,249,0.92); }

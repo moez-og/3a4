@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+    <center>
+        <VBox alignment="CENTER" spacing="10" style="-fx-padding: 20;">
+            <Label text="Gestion des Lieux" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
+            <Label text="Gestion administrative des lieux" style="-fx-font-size: 14;"/>
+        </VBox>
+    </center>
+</BorderPane>

@@ -18,9 +18,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-import controllers.LoginController;
-import services.UserService;
-import models.User;
+import controllers.common.auth.LoginController;
+import services.users.UserService;
+import models.users.User;
 import java.io.InputStream;
 import java.sql.SQLException;
 
@@ -34,7 +34,7 @@ public class LoginApp extends Application {
         primaryStage.setTitle("Travel Guide - Login");
         primaryStage.setResizable(true);
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/Login.fxml"));
             Parent root = loader.load();
             LoginController controller = loader.getController();
             controller.setPrimaryStage(primaryStage);
@@ -51,7 +51,7 @@ public class LoginApp extends Application {
 
         try {
             // Charger BG (2).png - la belle image de Colosseum
-            InputStream is = getClass().getResourceAsStream("/images/bg.png");
+            InputStream is = getClass().getResourceAsStream("/images/logo/bg.png");
             if (is != null) {
                 Image bgImage = new Image(is);
                 ImageView bgImageView = new ImageView(bgImage);
@@ -109,7 +109,7 @@ public class LoginApp extends Application {
         logoBox.setStyle("-fx-spacing: 10;");
 
         try {
-            InputStream is = getClass().getResourceAsStream("/images/logo.png");
+            InputStream is = getClass().getResourceAsStream("/images/logo/logo.png");
             if (is != null) {
                 Image logoImage = new Image(is);
                 ImageView logoImageView = new ImageView(logoImage);
