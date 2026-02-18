@@ -1,15 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-    <center>
-        <VBox alignment="CENTER" spacing="10" style="-fx-padding: 20;">
-            <Label text="Sorties View" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
-            <Label text="Contenu pour la gestion des sorties" style="-fx-font-size: 14;"/>
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.front.sorties.SortiesController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            styleClass="moduleScroll">
+
+    <content>
+        <VBox spacing="18" styleClass="moduleRoot">
+            <padding>
+                <Insets top="8" right="8" bottom="18" left="8"/>
+            </padding>
+
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="moduleToolbar">
+                <HBox spacing="8" alignment="CENTER_LEFT" styleClass="moduleSearchBox">
+                    <Label text="🔎" styleClass="moduleSearchIcon"/>
+                    <TextField fx:id="searchField"
+                               promptText="Rechercher une sortie (titre, ville, tag)…"
+                               styleClass="moduleSearchField"/>
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="Mes participations" onAction="#showMyParticipations" styleClass="ghostBtn"/>
+                <Button text="＋ Créer une annonce" onAction="#createAnnonce" styleClass="primaryBtn"/>
+            </HBox>
+
+            <HBox spacing="14">
+                <VBox styleClass="metricCard" HBox.hgrow="ALWAYS" spacing="4">
+                    <Label fx:id="statUpcoming" text="0" styleClass="metricNumber"/>
+                    <Label text="Sorties à venir" styleClass="metricLabel"/>
+                </VBox>
+
+                <VBox styleClass="metricCard" HBox.hgrow="ALWAYS" spacing="4">
+                    <Label fx:id="statToday" text="0" styleClass="metricNumber"/>
+                    <Label text="Aujourd’hui" styleClass="metricLabel"/>
+                </VBox>
+
+                <VBox styleClass="metricCard" HBox.hgrow="ALWAYS" spacing="4">
+                    <Label fx:id="statMy" text="0" styleClass="metricNumber"/>
+                    <Label text="Mes participations" styleClass="metricLabel"/>
+                </VBox>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" styleClass="sectionHeader">
+                <VBox spacing="2">
+                    <Label text="À venir" styleClass="sectionTitle"/>
+                    <Label text="Les prochaines sorties publiées." styleClass="sectionHint"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <HBox spacing="6" styleClass="chipGroup">
+                    <ToggleButton fx:id="chipAll" text="Tous" onAction="#filterAll" styleClass="filterChip"/>
+                    <ToggleButton fx:id="chipToday" text="Aujourd’hui" onAction="#filterToday" styleClass="filterChip"/>
+                    <ToggleButton fx:id="chipWeekend" text="Week-end" onAction="#filterWeekend" styleClass="filterChip"/>
+                    <ToggleButton fx:id="chipPopular" text="Populaires" onAction="#filterPopular" styleClass="filterChip"/>
+                </HBox>
+            </HBox>
+
+            <ScrollPane fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="hScroll">
+                <content>
+                    <HBox fx:id="upcomingRow" spacing="14" styleClass="cardsRow"/>
+                </content>
+            </ScrollPane>
+
+            <HBox alignment="CENTER_LEFT" styleClass="sectionHeader">
+                <VBox spacing="2">
+                    <Label text="Populaires" styleClass="sectionTitle"/>
+                    <Label text="Celles qui attirent le plus de monde." styleClass="sectionHint"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Actualiser" onAction="#refresh" styleClass="ghostBtn"/>
+            </HBox>
+
+            <ScrollPane fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="hScroll">
+                <content>
+                    <HBox fx:id="popularRow" spacing="14" styleClass="cardsRow"/>
+                </content>
+            </ScrollPane>
+
         </VBox>
-    </center>
-</BorderPane>
+    </content>
+</ScrollPane>

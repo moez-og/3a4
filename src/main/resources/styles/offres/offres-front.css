@@ -1,0 +1,62 @@
+/* Styles pour l'interface utilisateur des offres */
+
+.offre-list-item {
+    -fx-padding: 12;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4;
+    -fx-background-color: #ffffff;
+    -fx-margin: 5;
+}
+
+.offre-list-item:hover {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #f44336;
+    -fx-cursor: hand;
+}
+
+.offre-card-container {
+    -fx-spacing: 10;
+    -fx-padding: 0 10;
+}
+
+.offre-card-title {
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.offre-card-type {
+    -fx-font-size: 12;
+    -fx-text-fill: #666;
+    -fx-font-style: italic;
+}
+
+.offre-card-prix {
+    -fx-font-size: 13;
+    -fx-text-fill: #f44336;
+    -fx-font-weight: bold;
+}
+
+.offre-details-header {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: #222;
+    -fx-padding: 10 0;
+}
+
+.offre-details-subheader {
+    -fx-font-size: 14;
+    -fx-text-fill: #555;
+}
+
+.offre-details-section-title {
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+    -fx-padding: 10 0 5 0;
+}
+
+.offre-image {
+    -fx-border-radius: 4;
+    -fx-border-color: #ddd;
+}

@@ -63,7 +63,7 @@
 
             <ScrollPane fitToHeight="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="hScroll">
                 <content>
-                    <HBox fx:id="citiesRow" spacing="14" styleClass="cardsRow"/>
+                    <HBox fx:id="citiesRow" spacing="14" alignment="CENTER_LEFT" styleClass="cardsRow"/>
                 </content>
             </ScrollPane>
 
@@ -77,33 +77,81 @@
                 <Button text="Actualiser" onAction="#refreshReco" styleClass="ghostBtn"/>
             </HBox>
 
+            <!-- Featured cards -->
             <HBox spacing="14">
-                <VBox styleClass="recoCard hoverable" HBox.hgrow="ALWAYS" spacing="8">
-                    <Label text="🔥 Spot populaire" styleClass="recoTitle"/>
-                    <Label text="Café panoramique · vue · chill" wrapText="true" styleClass="recoText"/>
-                    <HBox spacing="8">
-                        <Label text="Top" styleClass="tag"/>
-                        <Label text="Calme" styleClass="tag"/>
-                    </HBox>
-                </VBox>
 
-                <VBox styleClass="recoCard hoverable" HBox.hgrow="ALWAYS" spacing="8">
-                    <Label text="🎟 Offre du moment" styleClass="recoTitle"/>
-                    <Label text="-20% partenaire cette semaine" wrapText="true" styleClass="recoText"/>
-                    <HBox spacing="8">
-                        <Label text="Promo" styleClass="tag"/>
-                        <Label text="Limité" styleClass="tag"/>
-                    </HBox>
-                </VBox>
+                <StackPane fx:id="recoSpotCard"
+                           onMouseClicked="#openRecoSpotClick"
+                           styleClass="recoImageCard hoverable"
+                           HBox.hgrow="ALWAYS"
+                           maxWidth="1.7976931348623157E308"
+                           prefHeight="220"
+                           style="-fx-background-image: url('/images/demo/cities/marsa.jpg');">
+                    <VBox spacing="10" styleClass="recoOverlay">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="🔥 Spot populaire" styleClass="recoKicker"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="Top" styleClass="recoPill"/>
+                        </HBox>
+                        <Label text="Café panoramique" styleClass="recoHeadline"/>
+                        <Label text="Vue · chill · bon plan pour une pause rapide." wrapText="true" styleClass="recoSub"/>
+                        <HBox spacing="8">
+                            <Label text="Calme" styleClass="recoPill"/>
+                            <Label text="Vue" styleClass="recoPill"/>
+                        </HBox>
+                        <Region VBox.vgrow="ALWAYS"/>
+                        <Button text="Découvrir" onAction="#openRecoSpotAction" styleClass="recoCta"/>
+                    </VBox>
+                </StackPane>
 
-                <VBox styleClass="recoCard hoverable" HBox.hgrow="ALWAYS" spacing="8">
-                    <Label text="🧭 Sortie recommandée" styleClass="recoTitle"/>
-                    <Label text="Balade · photos · départ 16:00" wrapText="true" styleClass="recoText"/>
-                    <HBox spacing="8">
-                        <Label text="Week-end" styleClass="tag"/>
-                        <Label text="Groupe" styleClass="tag"/>
-                    </HBox>
-                </VBox>
+                <StackPane fx:id="recoOfferCard"
+                           onMouseClicked="#openRecoOfferClick"
+                           styleClass="recoImageCard hoverable"
+                           HBox.hgrow="ALWAYS"
+                           maxWidth="1.7976931348623157E308"
+                           prefHeight="220"
+                           style="-fx-background-image: url('/images/demo/cities/hero/hero-food.jpg');">
+                    <VBox spacing="10" styleClass="recoOverlay">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="🎟 Offre du moment" styleClass="recoKicker"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="-20%" styleClass="recoPill"/>
+                        </HBox>
+                        <Label text="Offre partenaire" styleClass="recoHeadline"/>
+                        <Label text="Réduction limitée cette semaine sur une sélection d’adresses." wrapText="true" styleClass="recoSub"/>
+                        <HBox spacing="8">
+                            <Label text="Promo" styleClass="recoPill"/>
+                            <Label text="Limité" styleClass="recoPill"/>
+                        </HBox>
+                        <Region VBox.vgrow="ALWAYS"/>
+                        <Button text="Voir l’offre" onAction="#openRecoOfferAction" styleClass="recoCta"/>
+                    </VBox>
+                </StackPane>
+
+                <StackPane fx:id="recoSortieCard"
+                           onMouseClicked="#openRecoSortieClick"
+                           styleClass="recoImageCard hoverable"
+                           HBox.hgrow="ALWAYS"
+                           maxWidth="1.7976931348623157E308"
+                           prefHeight="220"
+                           style="-fx-background-image: url('/images/demo/cities/sidi.jpg');">
+                    <VBox spacing="10" styleClass="recoOverlay">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="🧭 Sortie recommandée" styleClass="recoKicker"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label text="16:00" styleClass="recoPill"/>
+                        </HBox>
+                        <Label text="Balade photo" styleClass="recoHeadline"/>
+                        <Label text="Départ 16:00 · spots photos · ambiance week-end." wrapText="true" styleClass="recoSub"/>
+                        <HBox spacing="8">
+                            <Label text="Week-end" styleClass="recoPill"/>
+                            <Label text="Groupe" styleClass="recoPill"/>
+                        </HBox>
+                        <Region VBox.vgrow="ALWAYS"/>
+                        <Button text="Participer" onAction="#openRecoSortieAction" styleClass="recoCta"/>
+                    </VBox>
+                </StackPane>
+
             </HBox>
 
         </VBox>

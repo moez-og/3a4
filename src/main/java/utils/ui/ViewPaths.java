@@ -7,7 +7,7 @@ public final class ViewPaths {
 
     // Front shell + pages
     public static final String FRONT_SHELL = "/fxml/front/shell/FrontDashboard.fxml";
-    public static final String FRONT_HOME = "/fxml/front/home/FrontHome.fxml";
+    public static final String FRONT_HOME = "/fxml/front/Home/FrontHome.fxml"; // ✅ correction (Home ≠ home)
     public static final String FRONT_SORTIES = "/fxml/front/sorties/SortiesView.fxml";
     public static final String FRONT_LIEUX = "/fxml/front/lieux/LieuxView.fxml";
     public static final String FRONT_OFFRES = "/fxml/front/offres/OffresView.fxml";
