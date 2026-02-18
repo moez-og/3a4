@@ -16,7 +16,7 @@
     -fx-border-color: rgba(15,23,42,0.06);
 
     /* Image de fond (optionnel) */
-    -fx-background-image: url("/images/demo/hero/hero-food.jpg");
+    -fx-background-image: url("/images/demo/hero/hero.jpg");
     -fx-background-size: cover;
     -fx-background-position: center;
 

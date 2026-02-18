@@ -225,7 +225,7 @@
     -fx-border-radius: 18;
     -fx-border-color: rgba(15,23,42,0.06);
 
-    -fx-background-image: url("/images/demo/cities/hero/hero-food.jpg");
+    -fx-background-image: url("/images/demo/cities/hero/hero.jpg");
     -fx-background-size: cover;
     -fx-background-position: center;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 18, 0.18, 0, 8);

@@ -110,7 +110,8 @@
                            HBox.hgrow="ALWAYS"
                            maxWidth="1.7976931348623157E308"
                            prefHeight="220"
-                           style="-fx-background-image: url('/images/demo/cities/hero/hero-food.jpg');">
+                           style="-fx-background-image: url('/images/demo
+                           /hero/hero.jpg');">
                     <VBox spacing="10" styleClass="recoOverlay">
                         <HBox alignment="CENTER_LEFT" spacing="8">
                             <Label text="🎟 Offre du moment" styleClass="recoKicker"/>
