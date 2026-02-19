@@ -1,0 +1,386 @@
+/* ===================================================
+   ÉVÉNEMENTS FRONT · Style cohérent avec lieux-view
+   Statuts réels : OUVERT / FERME / ANNULE
+   =================================================== */
+
+.evScroll { -fx-background-color: transparent; }
+.evScroll > .viewport { -fx-background-color: transparent; }
+.evRoot { -fx-background-color: transparent; }
+
+/* ═══════ HERO HEADER ═══════ */
+.evHero {
+    -fx-background-color: linear-gradient(to right, #0b2550, #1a4a7a);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-padding: 20 20 20 20;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 18, 0.18, 0, 8);
+}
+.evTitle {
+    -fx-text-fill: rgba(255,255,255,0.98);
+    -fx-font-size: 28;
+    -fx-font-weight: 900;
+}
+.evSubtitle {
+    -fx-text-fill: rgba(255,255,255,0.80);
+    -fx-font-size: 12.5;
+    -fx-font-weight: 700;
+}
+
+/* ═══════ SEARCH BOX ═══════ */
+.evSearchBox {
+    -fx-background-color: rgba(255,255,255,0.15);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-radius: 14;
+    -fx-padding: 8 12 8 12;
+}
+.evSearchIcon { -fx-text-fill: rgba(255,255,255,0.85); }
+.evSearchField {
+    -fx-pref-width: 240;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: rgba(255,255,255,0.95);
+    -fx-prompt-text-fill: rgba(255,255,255,0.60);
+    -fx-font-size: 12.5;
+    -fx-font-weight: 800;
+}
+
+/* ═══════ STATS BAR ═══════ */
+.evStatsBar {
+    -fx-background-color: rgba(255,255,255,0.84);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 14;
+    -fx-padding: 10 14 10 14;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.08), 12, 0.18, 0, 4);
+}
+.evCountBadge {
+    -fx-background-color: rgba(22,58,92,0.10);
+    -fx-background-radius: 999;
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 12.5;
+    -fx-padding: 5 12 5 12;
+}
+.evInscritBadge {
+    -fx-background-color: rgba(22,163,74,0.12);
+    -fx-background-radius: 999;
+    -fx-text-fill: #15803d;
+    -fx-font-weight: 900;
+    -fx-font-size: 12.5;
+    -fx-padding: 5 12 5 12;
+}
+
+/* ═══════ SECTIONS ═══════ */
+.evSection { -fx-padding: 0; }
+.evSectionTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 14.5;
+    -fx-font-weight: 900;
+    -fx-padding: 4 0 2 0;
+}
+
+/* ═══════ CHIPS ═══════ */
+.evChipsScroll { -fx-background-color: transparent; }
+.evChipsScroll > .viewport { -fx-background-color: transparent; }
+.evChipsRow { -fx-padding: 2 0 4 0; }
+
+.evChip {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 999;
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-padding: 8 14 8 14;
+    -fx-cursor: hand;
+}
+.evChip:hover { -fx-background-color: rgba(15,23,42,0.10); }
+
+.evChipSelected {
+    -fx-background-color: rgba(11,37,80,0.88) !important;
+    -fx-text-fill: white !important;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.30), 10, 0.18, 0, 4);
+}
+
+.evChipMuted {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(15,23,42,0.12);
+    -fx-text-fill: rgba(22,58,92,0.70);
+    -fx-font-size: 12;
+}
+
+/* ═══════ CARDS PANE ═══════ */
+.evCardsPane { -fx-background-color: transparent; }
+
+/* ═══════ EVENT CARD ═══════ */
+.evCard {
+    -fx-background-color: rgba(255,255,255,0.90);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 18;
+    -fx-padding: 0 0 14 0;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.12), 16, 0.18, 0, 6);
+}
+.evCard:hover {
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.22), 22, 0.22, 0, 10);
+}
+.evCardImageWrap {
+    -fx-background-color: rgba(15,23,42,0.04);
+    -fx-background-radius: 18 18 0 0;
+}
+.evCardTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 14.5;
+    -fx-font-weight: 900;
+}
+.evCardMeta {
+    -fx-text-fill: rgba(22,58,92,0.68);
+    -fx-font-size: 12;
+    -fx-font-weight: 800;
+}
+.evCardDate {
+    -fx-text-fill: rgba(22,58,92,0.78);
+    -fx-font-size: 12;
+    -fx-font-weight: 800;
+}
+.evCardPlaces {
+    -fx-text-fill: rgba(22,58,92,0.65);
+    -fx-font-size: 11.5;
+    -fx-font-weight: 700;
+}
+
+/* ═══════ BADGES STATUT ═══════ */
+.evCardBadge {
+    -fx-background-radius: 999;
+    -fx-padding: 5 10 5 10;
+    -fx-font-size: 11;
+    -fx-font-weight: 900;
+}
+/* OUVERT → vert */
+.evBadgeOuvert {
+    -fx-background-color: rgba(22,163,74,0.90);
+    -fx-text-fill: white;
+}
+/* FERME → orange */
+.evBadgeFerme {
+    -fx-background-color: rgba(217,119,6,0.90);
+    -fx-text-fill: white;
+}
+/* ANNULE → rouge */
+.evBadgeAnnule {
+    -fx-background-color: rgba(220,38,38,0.90);
+    -fx-text-fill: white;
+}
+
+/* Icône type sur image */
+.evCardTypeIcon {
+    -fx-font-size: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 6, 0.3, 0, 2);
+}
+
+/* ═══════ BOUTONS ═══════ */
+.evPrimaryBtn {
+    -fx-background-color: linear-gradient(to right, #0b2550, #1a4a7a);
+    -fx-background-radius: 14;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.evPrimaryBtn:hover { -fx-background-color: linear-gradient(to right, #163a5c, #245f9e); }
+.evPrimaryBtn:disabled { -fx-opacity: 0.5; }
+
+.evInscritBtn {
+    -fx-background-color: rgba(22,163,74,0.15);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(22,163,74,0.45);
+    -fx-border-radius: 14;
+    -fx-text-fill: #15803d;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.evGhostBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 14;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.evGhostBtn:hover { -fx-background-color: rgba(15,23,42,0.09); }
+
+.evGhostBtnActive {
+    -fx-background-color: rgba(11,37,80,0.10);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(11,37,80,0.25);
+    -fx-border-radius: 14;
+    -fx-text-fill: #0b2550;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.evDangerBtn {
+    -fx-background-color: rgba(220,38,38,0.10);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(220,38,38,0.30);
+    -fx-border-radius: 12;
+    -fx-text-fill: #b91c1c;
+    -fx-font-weight: 900;
+    -fx-padding: 7 12 7 12;
+    -fx-cursor: hand;
+}
+.evBackBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 14;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.evBackBtn:hover { -fx-background-color: rgba(15,23,42,0.10); }
+
+/* ═══════ STATE LABEL ═══════ */
+.evStateLabel {
+    -fx-text-fill: rgba(22,58,92,0.70);
+    -fx-font-weight: 800;
+    -fx-font-size: 13;
+    -fx-padding: 12 0 0 0;
+}
+
+/* ═══════ PAGE DÉTAILS ═══════ */
+.evDetailsRoot { -fx-background-color: transparent; }
+.evDetailsScroll { -fx-background-color: transparent; }
+.evDetailsScroll > .viewport { -fx-background-color: transparent; }
+
+.evDetailsHeroImg {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 16, 0.18, 0, 8);
+}
+
+.evDetailsCard {
+    -fx-background-color: rgba(255,255,255,0.90);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 18;
+    -fx-padding: 18 20 18 20;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 14, 0.18, 0, 5);
+}
+.evDetailsTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 26;
+    -fx-font-weight: 900;
+    -fx-wrap-text: true;
+}
+.evDetailsSubtitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 16;
+    -fx-font-weight: 900;
+}
+.evBadge {
+    -fx-background-color: rgba(11,37,80,0.12);
+    -fx-background-radius: 999;
+    -fx-text-fill: #0b2550;
+    -fx-font-weight: 900;
+    -fx-font-size: 12;
+    -fx-padding: 5 12 5 12;
+}
+.evBadgeMuted {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 999;
+    -fx-text-fill: rgba(22,58,92,0.75);
+    -fx-font-weight: 800;
+    -fx-font-size: 12;
+    -fx-padding: 5 12 5 12;
+}
+.evDetailsRow   { -fx-padding: 2 0 2 0; }
+.evDetailsIcon  { -fx-font-size: 14; }
+.evDetailsLine  { -fx-text-fill: #163a5c; -fx-font-size: 13; -fx-font-weight: 800; }
+.evDetailsHint  { -fx-text-fill: rgba(22,58,92,0.65); -fx-font-size: 12; -fx-font-weight: 700; }
+.evDetailsDesc  {
+    -fx-text-fill: rgba(22,58,92,0.82);
+    -fx-font-size: 13;
+    -fx-font-weight: 700;
+    -fx-line-spacing: 4;
+    -fx-padding: 6 0 0 0;
+}
+.evActionBar {
+    -fx-padding: 10 0 0 0;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ═══════ MESSAGES ═══════ */
+.evMessageLabel {
+    -fx-font-weight: 800;
+    -fx-font-size: 12.5;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 10;
+}
+.evMsgSuccess {
+    -fx-text-fill: #15803d;
+    -fx-background-color: rgba(22,163,74,0.12);
+}
+.evMsgError {
+    -fx-text-fill: #b91c1c;
+    -fx-background-color: rgba(220,38,38,0.10);
+}
+
+/* ═══════ PLACES LABEL ═══════ */
+.evPlacesLabel {
+    -fx-font-size: 12.5;
+    -fx-font-weight: 900;
+    -fx-text-fill: #163a5c;
+    -fx-background-color: rgba(22,163,74,0.12);
+    -fx-background-radius: 999;
+    -fx-padding: 4 10 4 10;
+}
+
+/* ═══════ PROGRESS BAR ═══════ */
+.evProgressTrack {
+    -fx-background-color: rgba(15,23,42,0.10);
+    -fx-background-radius: 999;
+}
+.evProgressFill { -fx-background-radius: 999; }
+
+/* ═══════ PARTICIPANTS CARD ═══════ */
+.evParticipantsCard {
+    -fx-background-color: rgba(255,255,255,0.90);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 18;
+    -fx-padding: 18 20 18 20;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 14, 0.18, 0, 5);
+}
+.evParticipantRow {
+    -fx-background-color: rgba(15,23,42,0.03);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 12;
+}
+.evParticipantRow:hover { -fx-background-color: rgba(15,23,42,0.05); }
+
+.evParticipantAvatar {
+    -fx-min-width: 38; -fx-min-height: 38;
+    -fx-max-width: 38; -fx-max-height: 38;
+    -fx-background-color: rgba(11,37,80,0.12);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(11,37,80,0.22);
+    -fx-border-radius: 999;
+}
+.evParticipantAvatarTxt {
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 11;
+}
+.evParticipantNom {
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 13;
+}
+.evParticipantDate {
+    -fx-text-fill: rgba(22,58,92,0.65);
+    -fx-font-weight: 700;
+    -fx-font-size: 11.5;
+}

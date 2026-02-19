@@ -1,0 +1,214 @@
+/* =========================
+   Evenements Admin (Back)
+   Compatible avec EvenementsAdmin.fxml
+   ========================= */
+
+.events-root {
+    -fx-background-color: transparent;
+}
+
+/* Top bar interne de la page */
+.events-top {
+    -fx-background-color: rgba(255,255,255,0.95);
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(0,0,0,0.06);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 14, 0, 0, 4);
+}
+
+/* Titres */
+.page-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 800;
+}
+
+.section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+}
+
+.sub-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+
+.muted {
+    -fx-opacity: 0.75;
+}
+
+/* Champ recherche */
+.searchField {
+    -fx-background-color: rgba(245,247,250,1);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(0,0,0,0.08);
+    -fx-padding: 10 12;
+}
+
+/* Panels / blocs */
+.events-body .panel {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(0,0,0,0.06);
+    -fx-padding: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 14, 0, 0, 4);
+}
+
+.subpanel {
+    -fx-background-color: rgba(250,252,255,1);
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(0,0,0,0.06);
+    -fx-padding: 10;
+}
+
+/* ScrollPane clean */
+.panel-scroll {
+    -fx-background-color: transparent;
+}
+.panel-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+.panel-scroll .scroll-bar:vertical,
+.panel-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+/* Grille des cards */
+.events-grid {
+    -fx-padding: 4;
+}
+
+/* =========================
+   Cards événements
+   ========================= */
+.eventCard {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(0,0,0,0.06);
+    -fx-padding: 12;
+    -fx-pref-width: 320;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 3);
+}
+
+.eventCard:hover {
+    -fx-border-color: rgba(33, 114, 255, 0.35);
+    -fx-effect: dropshadow(three-pass-box, rgba(33,114,255,0.18), 14, 0, 0, 4);
+}
+
+.eventTitle {
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+}
+
+/* =========================
+   Rows inscriptions/tickets
+   ========================= */
+.rowCard {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(0,0,0,0.06);
+    -fx-padding: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 10, 0, 0, 3);
+}
+
+.rowTitle {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+
+/* Petit bloc hint */
+.hint-box {
+    -fx-background-color: rgba(33,114,255,0.07);
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(33,114,255,0.12);
+    -fx-padding: 10;
+}
+
+.hint-title {
+    -fx-font-weight: 900;
+}
+
+/* =========================
+   Boutons (bleu template)
+   ========================= */
+.btnBlue {
+    -fx-background-color: #1f6fff;
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+.btnBlue:hover {
+    -fx-background-color: #185fe0;
+}
+
+.btnOutline {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1f6fff;
+    -fx-font-weight: 800;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(31,111,255,0.55);
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+.btnOutline:hover {
+    -fx-background-color: rgba(31,111,255,0.08);
+}
+
+.btnDanger {
+    -fx-background-color: #e23b3b;
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+.btnDanger:hover {
+    -fx-background-color: #c93434;
+}
+
+/* =========================
+   Chips statut
+   ========================= */
+.chip {
+    -fx-padding: 4 10;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-max-width: 120;
+}
+
+.chipOk {
+    -fx-background-color: rgba(46, 204, 113, 0.16);
+    -fx-text-fill: #1e7a43;
+    -fx-border-color: rgba(46, 204, 113, 0.22);
+}
+
+.chipWarn {
+    -fx-background-color: rgba(255, 193, 7, 0.18);
+    -fx-text-fill: #8a6a00;
+    -fx-border-color: rgba(255, 193, 7, 0.25);
+}
+
+.chipBad {
+    -fx-background-color: rgba(226, 59, 59, 0.14);
+    -fx-text-fill: #a12424;
+    -fx-border-color: rgba(226, 59, 59, 0.20);
+}
+
+.chipNeutral {
+    -fx-background-color: rgba(120, 120, 120, 0.10);
+    -fx-text-fill: #3b3b3b;
+    -fx-border-color: rgba(120, 120, 120, 0.18);
+}
