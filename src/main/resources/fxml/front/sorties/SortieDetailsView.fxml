@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.sorties.SortieDetailsController"
+      spacing="14"
+      styleClass="sortieDetailsRoot"
+      stylesheets="@/styles/sorties/sorties-details.css">
+
+    <padding>
+        <Insets top="14" right="14" bottom="18" left="14"/>
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Button text="← Retour" onAction="#goBack" styleClass="backLinkBtn"/>
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button text="Copier infos" onAction="#copyInfos" styleClass="ghostBtn"/>
+
+            <!-- ✅ NOUVEAU -->
+            <Button fx:id="btnParticiper" text="Participer" onAction="#participer"
+                    styleClass="primaryBtn" visible="false" managed="false"/>
+
+            <Button fx:id="btnEdit" text="Modifier" onAction="#edit"
+                    styleClass="primaryBtn" visible="false" managed="false"/>
+            <Button fx:id="btnDelete" text="Supprimer" onAction="#delete"
+                    styleClass="dangerBtn" visible="false" managed="false"/>
+        </HBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="detailsScroll">
+        <content>
+            <VBox spacing="14">
+
+                <!-- HERO (responsive) -->
+                <StackPane fx:id="heroBox" styleClass="detailsHero"
+                           minHeight="340" prefHeight="340" maxHeight="340">
+                    <ImageView fx:id="heroImage"
+                               preserveRatio="true"
+                               smooth="true"
+                               cache="true"
+                               styleClass="detailsHeroImg"/>
+
+                    <VBox spacing="10" styleClass="heroOverlay" StackPane.alignment="BOTTOM_LEFT">
+                        <Label fx:id="title" text="Titre" styleClass="detailsTitle" wrapText="true"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="heroChips">
+                            <Label fx:id="chipStatut" text="OUVERTE" styleClass="statusChip status-ouverte"/>
+                            <Label fx:id="chipActivite" text="Activité" styleClass="badge"/>
+                            <Label fx:id="dateText" text="📅 —" styleClass="detailsHint"/>
+                        </HBox>
+                    </VBox>
+                </StackPane>
+
+                <HBox spacing="14" alignment="TOP_LEFT">
+
+                    <VBox spacing="14" HBox.hgrow="ALWAYS">
+
+                        <VBox spacing="10" styleClass="detailsCard">
+                            <Label text="Localisation" styleClass="detailsSectionTitle"/>
+                            <Label fx:id="locationLine" text="📍 —" styleClass="detailsLine" wrapText="true"/>
+                            <Label fx:id="meetingLine" text="🤝 —" styleClass="detailsLine" wrapText="true"/>
+                        </VBox>
+
+                        <VBox spacing="10" styleClass="detailsCard">
+                            <Label text="Description" styleClass="detailsSectionTitle"/>
+                            <Label fx:id="description" text="" styleClass="detailsDesc" wrapText="true"/>
+                        </VBox>
+
+                        <VBox spacing="10" styleClass="detailsCard">
+                            <Label text="Questions" styleClass="detailsSectionTitle"/>
+                            <Label fx:id="questionsEmpty" text="Aucune question."
+                                   styleClass="detailsHint" visible="false" managed="false"/>
+                            <FlowPane fx:id="questionsPane" hgap="10" vgap="10" prefWrapLength="760"/>
+                        </VBox>
+
+                    </VBox>
+
+                    <VBox spacing="14" prefWidth="360">
+                        <VBox spacing="12" styleClass="sideCard">
+                            <Label text="Résumé" styleClass="detailsSectionTitle"/>
+
+                            <VBox spacing="10" styleClass="infoList">
+                                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
+                                    <Label text="🗓" styleClass="infoIcon"/>
+                                    <VBox spacing="2">
+                                        <Label text="Date" styleClass="infoK"/>
+                                        <Label fx:id="infoDate" text="—" styleClass="infoV"/>
+                                    </VBox>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
+                                    <Label text="💰" styleClass="infoIcon"/>
+                                    <VBox spacing="2">
+                                        <Label text="Budget" styleClass="infoK"/>
+                                        <Label fx:id="infoBudget" text="—" styleClass="infoV"/>
+                                    </VBox>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
+                                    <Label text="👥" styleClass="infoIcon"/>
+                                    <VBox spacing="2">
+                                        <Label text="Places" styleClass="infoK"/>
+                                        <Label fx:id="infoPlaces" text="—" styleClass="infoV"/>
+                                    </VBox>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
+                                    <Label text="✅" styleClass="infoIcon"/>
+                                    <VBox spacing="2">
+                                        <Label text="Statut" styleClass="infoK"/>
+                                        <Label fx:id="infoStatut" text="—" styleClass="infoV"/>
+                                    </VBox>
+                                </HBox>
+
+                                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
+                                    <Label text="👤" styleClass="infoIcon"/>
+                                    <VBox spacing="2">
+                                        <Label text="Organisateur" styleClass="infoK"/>
+                                        <Label fx:id="infoOrganisateur" text="—" styleClass="infoV"/>
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+                        </VBox>
+                    </VBox>
+
+                </HBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+</VBox>
