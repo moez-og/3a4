@@ -1,0 +1,151 @@
+.front-offres-root {
+    -fx-background-color: transparent;
+}
+
+.front-card {
+    -fx-background-color: rgba(255,255,255,0.90);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(17, 40, 77, 0.10);
+    -fx-border-radius: 16;
+    -fx-padding: 14;
+    -fx-effect: dropshadow(gaussian, rgba(16,38,84,0.08), 18, 0.08, 0, 4);
+}
+
+.front-detail-card {
+    -fx-min-width: 390;
+}
+
+.front-offres-title {
+    -fx-font-size: 24;
+    -fx-font-weight: 900;
+    -fx-text-fill: #163a5c;
+}
+
+.front-offres-subtitle {
+    -fx-font-size: 12;
+    -fx-font-weight: 700;
+    -fx-text-fill: rgba(22,58,92,0.70);
+}
+
+.front-section-title {
+    -fx-font-size: 14;
+    -fx-font-weight: 800;
+    -fx-text-fill: #1c456f;
+}
+
+.front-filter,
+.front-card .text-field,
+.front-card .combo-box {
+    -fx-background-color: #f8fbff;
+    -fx-background-radius: 10;
+    -fx-border-color: #d7e4f2;
+    -fx-border-radius: 10;
+    -fx-padding: 7 10;
+}
+
+.front-outline-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: #2f6fb2;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-text-fill: #2f6fb2;
+    -fx-font-weight: 800;
+    -fx-padding: 7 11;
+}
+
+.front-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.front-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.offres-list-wrap {
+    -fx-background-color: transparent;
+}
+
+.offre-item {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #e1ebf6;
+    -fx-border-radius: 12;
+    -fx-padding: 10 12;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+}
+
+.offre-item:hover {
+    -fx-border-color: #9fc2ea;
+    -fx-background-color: #f8fbff;
+}
+
+.offre-item-title {
+    -fx-font-size: 14;
+    -fx-font-weight: 900;
+    -fx-text-fill: #173d63;
+}
+
+.offre-item-meta {
+    -fx-font-size: 12;
+    -fx-font-weight: 700;
+    -fx-text-fill: #647f9a;
+}
+
+.offre-see-btn {
+    -fx-background-color: #2a72be;
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-background-radius: 9;
+    -fx-padding: 6 11;
+}
+
+.offre-see-btn:hover {
+    -fx-opacity: 0.9;
+}
+
+.detail-title {
+    -fx-font-size: 19;
+    -fx-font-weight: 900;
+    -fx-text-fill: #173d63;
+}
+
+.detail-meta {
+    -fx-font-size: 12;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5f7890;
+}
+
+.detail-description {
+    -fx-font-size: 12.5;
+    -fx-font-weight: 700;
+    -fx-text-fill: #355875;
+    -fx-background-color: #f8fbff;
+    -fx-background-radius: 10;
+    -fx-border-color: #dce8f5;
+    -fx-border-radius: 10;
+    -fx-padding: 10;
+}
+
+.front-primary-btn {
+    -fx-background-color: linear-gradient(to right, #26753a, #2e8a43);
+    -fx-text-fill: white;
+    -fx-font-size: 12;
+    -fx-font-weight: 900;
+    -fx-background-radius: 10;
+    -fx-padding: 10 14;
+}
+
+.promo-info {
+    -fx-font-size: 12;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f5f2b;
+}
+
+.offres-empty {
+    -fx-font-size: 12;
+    -fx-font-weight: 700;
+    -fx-text-fill: #6a8097;
+    -fx-padding: 6;
+}

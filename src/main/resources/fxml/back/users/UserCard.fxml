@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.back.users.UserCardController" minWidth="200" prefWidth="250" maxWidth="300" prefHeight="300" style="-fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 10, 0, 0, 4);" HBox.hgrow="ALWAYS">
+    <children>
+        <!-- Image de fond pleine hauteur -->
+        <ImageView fx:id="userImageView" fitWidth="230" fitHeight="300" preserveRatio="false" style="-fx-background-radius: 12;" StackPane.alignment="TOP_CENTER"/>
+        
+        <!-- Gradient overlay en bas pour les infos -->
+        <VBox style="-fx-background-color: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0)); -fx-background-radius: 0 0 12 12;" StackPane.alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="80" right="12" bottom="12" left="12"/>
+            </padding>
+            <children>
+                <!-- Nom et Rôle -->
+                <HBox spacing="6" alignment="CENTER_LEFT">
+                    <children>
+                        <Label fx:id="nameLabel" text="Nom Prenom" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: white;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="roleLabel" text="ABONNE" style="-fx-font-size: 9; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 3 8 3 8; -fx-background-color: #e67e22; -fx-background-radius: 10;"/>
+                    </children>
+                </HBox>
+                
+                <!-- Email -->
+                <Label fx:id="emailLabel" text="email@example.com" style="-fx-font-size: 10; -fx-text-fill: rgba(255,255,255,0.9); -fx-wrap-text: true;" wrapText="true"/>
+                
+                <!-- Téléphone -->
+                <Label fx:id="phoneLabel" text="Tel: -" style="-fx-font-size: 10; -fx-text-fill: rgba(255,255,255,0.8);"/>
+            </children>
+        </VBox>
+    </children>
+</StackPane>

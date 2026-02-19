@@ -1,0 +1,174 @@
+/* =========================
+   GLOBAL
+========================= */
+.app-root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: linear-gradient(to bottom, #eaf0f6, #f7f9fc);
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar {
+    -fx-background-color: linear-gradient(to bottom, #0b2550, #0e345e);
+    -fx-background-radius: 22;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.25), 20, 0.20, 0, 6);
+}
+
+.brandCard {
+    -fx-background-color: rgba(255,255,255,0.88);
+    -fx-background-radius: 22;
+    -fx-padding: 16 14 16 14;
+    -fx-border-color: rgba(255,255,255,0.55);
+    -fx-border-radius: 22;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 14, 0.20, 0, 4);
+}
+
+.brandTitle {
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 16.5;
+    -fx-font-weight: 900;
+}
+
+.brandSubtitle {
+    -fx-text-fill: rgba(15,42,68,0.70);
+    -fx-font-size: 11.5;
+    -fx-font-weight: 800;
+}
+
+.menuLabel {
+    -fx-padding: 18 0 12 6;
+    -fx-text-fill: rgba(220,235,255,0.72);
+    -fx-font-size: 12;
+    -fx-font-weight: 900;
+}
+
+.navBox {
+    -fx-padding: 0 6 0 6;
+}
+
+/* Boutons */
+.navBtn {
+    -fx-background-color: rgba(255,255,255,0.16);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(255,255,255,0.18);
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+
+    -fx-text-fill: #f3f8ff;
+    -fx-font-size: 13.5;
+    -fx-font-weight: 900;
+
+    -fx-padding: 14 18 14 18;
+    -fx-alignment: CENTER;
+    -fx-content-display: CENTER;
+    -fx-cursor: hand;
+}
+
+.navBtn:hover {
+    -fx-background-color: rgba(255,255,255,0.22);
+    -fx-border-color: rgba(255,255,255,0.28);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.16), 12, 0.18, 0, 3);
+}
+
+/* ✅ État actif (JavaFX ne supporte pas :current -> on utilise une classe .active) */
+.navBtn.active {
+    -fx-background-color: rgba(255,255,255,0.30);
+    -fx-border-color: rgba(255,255,255,0.40);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 14, 0.20, 0, 4);
+}
+
+/* Déconnexion ultra stylée */
+.logoutBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: rgba(255,255,255,0.40);
+    -fx-border-width: 1;
+
+    -fx-text-fill: white;
+    -fx-font-size: 14;
+    -fx-font-weight: 900;
+
+    -fx-padding: 15 18 15 18;
+
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.26), 18, 0.22, 0, 7);
+}
+
+.logoutBtn:hover {
+    -fx-background-color: linear-gradient(to right, #e8c547, #d4af37);
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.55), 22, 0.26, 0, 10);
+}
+
+.logoutBtn:pressed {
+    -fx-translate-y: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 12, 0.18, 0, 4);
+}
+
+.sidebarFooter {
+    -fx-padding: 12 0 0 8;
+    -fx-text-fill: rgba(220,235,255,0.60);
+    -fx-font-size: 11;
+    -fx-font-weight: 700;
+}
+
+/* =========================
+   HEADER
+========================= */
+.mainArea { -fx-background-color: transparent; }
+
+.topHeader {
+    -fx-background-color: linear-gradient(to bottom, rgba(210,220,232,0.95), rgba(245,247,250,0.92));
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.14), 18, 0.18, 0, 6);
+}
+
+.headerLeft { }
+
+.headerTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 42;
+    -fx-font-weight: 900;
+}
+
+.headerSubtitle {
+    -fx-text-fill: rgba(22,58,92,0.70);
+    -fx-font-size: 12.5;
+    -fx-font-weight: 800;
+}
+
+.headerUserBox {
+    -fx-background-color: rgba(255,255,255,0.65);
+    -fx-background-radius: 18;
+    -fx-padding: 10 14 10 14;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+}
+
+.userName {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 13;
+    -fx-font-weight: 900;
+}
+
+.roleChip {
+    -fx-text-fill: white;
+    -fx-background-color: #d08a2a;
+    -fx-background-radius: 999;
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 11;
+    -fx-font-weight: 900;
+}
+
+/* =========================
+   CONTENT CARD
+========================= */
+.contentPad { -fx-padding: 18; }
+
+.contentCard {
+    -fx-background-color: rgba(255,255,255,0.84);
+    -fx-background-radius: 18;
+    -fx-padding: 16;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 18, 0.18, 0, 6);
+}

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.front.lieux.LieuxController"
+            fx:id="lieuxPane"
+            stylesheets="@/styles/offres/offres-front.css"
+            styleClass="front-offres-root">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8" />
+    </padding>
+
+    <center>
+        <HBox spacing="12" BorderPane.alignment="CENTER">
+            <VBox spacing="8" styleClass="front-card" prefWidth="420">
+                <Label text="Lieux" styleClass="front-section-title" />
+                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="front-scroll">
+                    <content>
+                        <VBox fx:id="lieuxListBox" spacing="8" styleClass="offres-list-wrap">
+                            <padding>
+                                <Insets top="4" right="4" bottom="4" left="4" />
+                            </padding>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+            </VBox>
+
+            <VBox spacing="10" styleClass="front-card" HBox.hgrow="ALWAYS">
+                <Label text="Détail du lieu" styleClass="front-section-title" />
+                <Label fx:id="lieuTitle" text="Sélectionne un lieu" styleClass="detail-title" />
+                <Label fx:id="lieuMeta" text="-" styleClass="detail-meta" />
+                <Label text="Offres liées" styleClass="front-section-title" />
+
+                <VBox fx:id="lieuOffersBox" spacing="8">
+                    <VBox.vgrow>
+                        <Priority fx:constant="ALWAYS" />
+                    </VBox.vgrow>
+                </VBox>
+            </VBox>
+        </HBox>
+    </center>
+</BorderPane>
