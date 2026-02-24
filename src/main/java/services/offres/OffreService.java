@@ -56,7 +56,10 @@ public class OffreService {
             while (rs.next()) {
                 int id = rs.getInt(lieuPkCol);
                 String nom = extractLieuLabel(rs);
-                lieux.add(new Lieu(id, nom));
+                Lieu lieu = new Lieu();
+                lieu.setId(id);
+                lieu.setNom(nom);
+                lieux.add(lieu);
             }
         }
         return lieux;
