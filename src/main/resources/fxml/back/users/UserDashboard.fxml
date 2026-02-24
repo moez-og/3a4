@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.back.users.UserDashboardController" style="-fx-background-color: #f0f4f8;">
+    <top>
+        <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-background-color: #f0f4f8;" prefHeight="70">
+            <padding>
+                <Insets top="15" right="30" bottom="15" left="30"/>
+            </padding>
+            <children>
+                <HBox HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="searchField" promptText="Rechercher (nom / email / rôle / statut)..." prefWidth="400" prefHeight="38" style="-fx-padding: 8; -fx-font-size: 12; -fx-background-radius: 22; -fx-border-radius: 22; -fx-background-color: #e8eef5; -fx-border-color: #d0d8e8; -fx-text-fill: #1e3a5f;"/>
+                <Button fx:id="refreshBtn" text="Refresh" prefHeight="38" prefWidth="90" onAction="#loadUsers" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: #1e3a5f; -fx-background-radius: 8; -fx-cursor: hand;"/>
+            </children>
+        </HBox>
+    </top>
+    
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <VBox spacing="20" style="-fx-background-color: #f5f7fa;">
+                    <padding>
+                        <Insets top="30" right="30" bottom="30" left="30"/>
+                    </padding>
+                    <children>
+                        <!-- KPI Row -->
+                        <HBox spacing="20">
+                            <children>
+                                <VBox spacing="6" HBox.hgrow="ALWAYS" style="-fx-background-color: #e8eef5; -fx-padding: 16; -fx-border-radius: 10; -fx-background-radius: 10;">
+                                    <children>
+                                        <Label text="Total Utilisateurs" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #7a8fa3;"/>
+                                        <Label fx:id="totalUsersLabel" text="0" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #1e3a5f;"/>
+                                        <Label text="Nombre total" style="-fx-font-size: 12; -fx-text-fill: #7a8fa3;"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="6" HBox.hgrow="ALWAYS" style="-fx-background-color: #e8eef5; -fx-padding: 16; -fx-border-radius: 10; -fx-background-radius: 10;">
+                                    <children>
+                                        <Label text="Administrateurs" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #7a8fa3;"/>
+                                        <Label fx:id="activeUsersLabel" text="0" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #1e3a5f;"/>
+                                        <Label text="Rôle admin" style="-fx-font-size: 12; -fx-text-fill: #7a8fa3;"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="6" HBox.hgrow="ALWAYS" style="-fx-background-color: #e8eef5; -fx-padding: 16; -fx-border-radius: 10; -fx-background-radius: 10;">
+                                    <children>
+                                        <Label text="Visiteurs" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #7a8fa3;"/>
+                                        <Label fx:id="adminsLabel" text="0" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #1e3a5f;"/>
+                                        <Label text="Rôle visiteur" style="-fx-font-size: 12; -fx-text-fill: #7a8fa3;"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+
+                        <!-- Action Buttons -->
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <children>
+                                <Button fx:id="addBtn" text="Ajouter" prefHeight="42" prefWidth="130" onAction="#showAddUserDialog" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: #1e3a5f; -fx-background-radius: 12; -fx-padding: 10; -fx-cursor: hand;"/>
+                                <Button fx:id="editBtn" text="Modifier" prefHeight="42" prefWidth="130" onAction="#showEditUserDialog" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: #1e3a5f; -fx-background-radius: 12; -fx-padding: 10; -fx-cursor: hand;"/>
+                                <Button fx:id="deleteBtn" text="Supprimer" prefHeight="42" prefWidth="130" onAction="#deleteUser" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: #1e3a5f; -fx-background-radius: 12; -fx-padding: 10; -fx-cursor: hand;"/>
+                            </children>
+                        </HBox>
+
+                        <!-- Users Cards with Pagination (3 per page, no wrap) -->
+                        <VBox spacing="12" VBox.vgrow="ALWAYS">
+                            <children>
+                                <HBox fx:id="usersRow" spacing="16" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;"/>
+                                <Pagination fx:id="usersPagination" maxPageIndicatorCount="7"/>
+                            </children>
+                        </VBox>
+                    </children>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

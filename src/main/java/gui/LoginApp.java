@@ -11,18 +11,16 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.effect.DropShadow;
-import javafx.scene.effect.GaussianBlur;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
-import javafx.scene.paint.CycleMethod;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
-import controllers.LoginController;
-import services.UserService;
-import models.User;
+import controllers.common.auth.LoginController;
+import services.users.UserService;
+import models.users.User;
 import java.io.InputStream;
 import java.sql.SQLException;
 
@@ -36,7 +34,7 @@ public class LoginApp extends Application {
         primaryStage.setTitle("Travel Guide - Login");
         primaryStage.setResizable(true);
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/Login.fxml"));
             Parent root = loader.load();
             LoginController controller = loader.getController();
             controller.setPrimaryStage(primaryStage);
@@ -53,7 +51,7 @@ public class LoginApp extends Application {
 
         try {
             // Charger BG (2).png - la belle image de Colosseum
-            InputStream is = getClass().getResourceAsStream("/bg.png");
+            InputStream is = getClass().getResourceAsStream("/images/logo/bg.png");
             if (is != null) {
                 Image bgImage = new Image(is);
                 ImageView bgImageView = new ImageView(bgImage);
@@ -76,10 +74,10 @@ public class LoginApp extends Application {
 
     private void applyGradient(StackPane root) {
         Stop[] stops = new Stop[]{
-            new Stop(0.0, Color.web("#e8dcc8")),      // Beige clair
-            new Stop(0.3, Color.web("#d9b8a8")),      // Beige rosé
-            new Stop(0.6, Color.web("#e0b080")),      // Beige doré
-            new Stop(1.0, Color.web("#d5a89a"))       // Rose/beige
+                new Stop(0.0, Color.web("#e8dcc8")),      // Beige clair
+                new Stop(0.3, Color.web("#d9b8a8")),      // Beige rosé
+                new Stop(0.6, Color.web("#e0b080")),      // Beige doré
+                new Stop(1.0, Color.web("#d5a89a"))       // Rose/beige
         };
         LinearGradient gradient = new LinearGradient(0, 0, 1, 1, true, javafx.scene.paint.CycleMethod.NO_CYCLE, stops);
         root.setBackground(new Background(new BackgroundFill(gradient, CornerRadii.EMPTY, Insets.EMPTY)));
@@ -111,7 +109,7 @@ public class LoginApp extends Application {
         logoBox.setStyle("-fx-spacing: 10;");
 
         try {
-            InputStream is = getClass().getResourceAsStream("/logo.png");
+            InputStream is = getClass().getResourceAsStream("/images/logo/logo.png");
             if (is != null) {
                 Image logoImage = new Image(is);
                 ImageView logoImageView = new ImageView(logoImage);

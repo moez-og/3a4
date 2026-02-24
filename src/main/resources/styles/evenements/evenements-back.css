@@ -1,0 +1,60 @@
+/* Styles pour l'interface admin des événements */
+
+.evenement-card {
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-padding: 10;
+    -fx-spacing: 10;
+    -fx-background-color: #ffffff;
+}
+
+.evenement-card:hover {
+    -fx-border-color: #28a745;
+    -fx-background-color: #f9f9f9;
+}
+
+.evenement-table {
+    -fx-font-size: 12;
+}
+
+.evenement-header {
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.evenement-form {
+    -fx-spacing: 10;
+    -fx-padding: 15;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+}
+
+.evenement-button-primary {
+    -fx-padding: 8 20;
+    -fx-font-size: 12;
+    -fx-background-color: #28a745;
+    -fx-text-fill: white;
+}
+
+.evenement-button-primary:hover {
+    -fx-background-color: #218838;
+}
+
+.evenement-button-danger {
+    -fx-padding: 8 20;
+    -fx-font-size: 12;
+    -fx-background-color: #dc3545;
+    -fx-text-fill: white;
+}
+
+.evenement-button-danger:hover {
+    -fx-background-color: #c82333;
+}
+
+.evenement-search-field {
+    -fx-padding: 8;
+    -fx-font-size: 12;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 4;
+}
