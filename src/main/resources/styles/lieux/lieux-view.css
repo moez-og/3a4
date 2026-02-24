@@ -1,0 +1,147 @@
+/* =========================
+   LIEUX VIEW (Front) - template style
+========================= */
+
+.lieuxScroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.lieuxScroll .viewport { -fx-background-color: transparent; }
+
+.lieuxRoot { -fx-background-color: transparent; }
+
+/* Hero */
+.lieuxHero {
+    -fx-background-color: rgba(255,255,255,0.82);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 16, 0.18, 0, 6);
+    -fx-padding: 16 16 16 16;
+}
+.lieuxTitle { -fx-text-fill: #163a5c; -fx-font-size: 26; -fx-font-weight: 900; }
+.lieuxSubtitle { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 12.5; -fx-font-weight: 800; }
+
+.lieuxSearchBox {
+    -fx-background-color: rgba(15,23,42,0.05);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 16;
+    -fx-padding: 8 10 8 10;
+}
+.lieuxSearchIcon { -fx-text-fill: rgba(22,58,92,0.72); -fx-font-weight: 900; }
+.lieuxSearchField {
+    -fx-pref-width: 260;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 800;
+}
+.lieuxGhostBtn {
+    -fx-background-color: rgba(255,255,255,0.70);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 12;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.lieuxGhostBtn:hover { -fx-background-color: rgba(255,255,255,0.92); }
+
+/* Sections */
+.lieuxSection { -fx-background-color: transparent; }
+.lieuxSectionTitle { -fx-text-fill: #163a5c; -fx-font-size: 15; -fx-font-weight: 900; }
+
+.countLabel {
+    -fx-text-fill: rgba(22,58,92,0.78);
+    -fx-font-size: 12;
+    -fx-font-weight: 900;
+}
+
+/* Chips */
+.chipsScroll { -fx-background-color: transparent; -fx-background: transparent; }
+.chipsScroll .viewport { -fx-background-color: transparent; }
+.chipsRow { -fx-padding: 2 2 2 2; }
+
+.chip {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 999;
+    -fx-text-fill: rgba(22,58,92,0.86);
+    -fx-font-weight: 900;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.chip:hover { -fx-background-color: rgba(15,23,42,0.10); }
+
+.chipMuted {
+    -fx-background-color: rgba(212,175,55,0.12);
+    -fx-border-color: rgba(212,175,55,0.30);
+}
+
+.chipSelected {
+    -fx-background-color: rgba(212,175,55,0.22);
+    -fx-border-color: rgba(212,175,55,0.55);
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.22), 12, 0.18, 0, 4);
+}
+
+/* Cards */
+.cardsPane { -fx-padding: 2 0 6 0; }
+
+.lieuCard {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 16, 0.18, 0, 6);
+}
+.lieuCard:hover {
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.16), 18, 0.20, 0, 8);
+    -fx-translate-y: -2;
+}
+.cardImageWrap { -fx-background-radius: 18; }
+
+.cardTitle { -fx-text-fill: #163a5c; -fx-font-size: 14.5; -fx-font-weight: 900; }
+.cardMeta { -fx-text-fill: rgba(22,58,92,0.75); -fx-font-size: 12; -fx-font-weight: 800; }
+.cardAddr { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 11.6; -fx-font-weight: 700; }
+
+/* Buttons */
+.primaryBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.primaryBtn:hover { -fx-background-color: linear-gradient(to right, #e8c547, #d4af37); }
+
+.ghostBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 12;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.ghostBtn:hover { -fx-background-color: rgba(15,23,42,0.10); }
+
+/* State */
+.stateLabel {
+    -fx-text-fill: rgba(22,58,92,0.72);
+    -fx-font-size: 12.5;
+    -fx-font-weight: 800;
+    -fx-padding: 10 0 0 0;
+}
+
+/* Modal details (simple for this étape) */
+.detailsModalRoot { -fx-padding: 14; -fx-background-color: transparent; }
+.detailsTitle { -fx-text-fill: #163a5c; -fx-font-size: 22; -fx-font-weight: 900; }
+.detailsSub { -fx-text-fill: rgba(22,58,92,0.72); -fx-font-size: 12.5; -fx-font-weight: 800; }
+.detailsLine { -fx-text-fill: rgba(22,58,92,0.78); -fx-font-size: 12.2; -fx-font-weight: 800; }
+.detailsDesc { -fx-text-fill: rgba(22,58,92,0.72); -fx-font-size: 12; -fx-font-weight: 700; }
