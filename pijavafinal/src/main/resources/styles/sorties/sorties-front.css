@@ -1,0 +1,62 @@
+/* Styles pour l'interface utilisateur des sorties */
+
+.sortie-list-item {
+    -fx-padding: 12;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 4;
+    -fx-background-color: #ffffff;
+    -fx-margin: 5;
+}
+
+.sortie-list-item:hover {
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #ff9800;
+    -fx-cursor: hand;
+}
+
+.sortie-card-container {
+    -fx-spacing: 10;
+    -fx-padding: 0 10;
+}
+
+.sortie-card-title {
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.sortie-card-date {
+    -fx-font-size: 12;
+    -fx-text-fill: #666;
+    -fx-font-style: italic;
+}
+
+.sortie-card-prix {
+    -fx-font-size: 12;
+    -fx-text-fill: #ff9800;
+    -fx-font-weight: bold;
+}
+
+.sortie-details-header {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: #222;
+    -fx-padding: 10 0;
+}
+
+.sortie-details-subheader {
+    -fx-font-size: 14;
+    -fx-text-fill: #555;
+}
+
+.sortie-details-section-title {
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+    -fx-padding: 10 0 5 0;
+}
+
+.sortie-image {
+    -fx-border-radius: 4;
+    -fx-border-color: #ddd;
+}
