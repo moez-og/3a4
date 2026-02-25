@@ -28,6 +28,7 @@ import models.users.User;
 import services.evenements.EvenementService;
 import services.evenements.InscriptionService;
 import services.evenements.TicketService;
+import services.evenements.WeatherService;
 import utils.Mydb;
 
 import java.io.File;
@@ -79,6 +80,7 @@ public class EvenementsAdminController {
     private final EvenementService   evenementService   = new EvenementService();
     private final InscriptionService inscriptionService = new InscriptionService();
     private final TicketService      ticketService      = new TicketService();
+    private final WeatherService     weatherService     = new WeatherService();
     private List<Lieu> allLieux = List.of();
     private List<User> allUsers = List.of();
 
@@ -257,6 +259,66 @@ public class EvenementsAdminController {
         Label lieu = new Label("📍 " + lieuName);
         lieu.getStyleClass().add("cardLine");
 
+        // ── Estimation météo de présence ──
+        Label weatherEstLabel = new Label("⏳ Chargement…");
+        weatherEstLabel.getStyleClass().add("adminWeatherRow");
+
+        // Charger l'estimation en arrière-plan (coordonnées par défaut = Tunis)
+        if (e.getDateDebut() != null) {
+            double wLat = 36.8065;
+            double wLon = 10.1815;
+
+            if (e.getLieuId() != null) {
+                Lieu lieuObj = allLieux.stream()
+                        .filter(l -> l.getId() == e.getLieuId()).findFirst().orElse(null);
+                if (lieuObj != null && lieuObj.getLatitude() != null && lieuObj.getLongitude() != null
+                        && lieuObj.getLatitude() != 0 && lieuObj.getLongitude() != 0) {
+                    wLat = lieuObj.getLatitude();
+                    wLon = lieuObj.getLongitude();
+                }
+            }
+
+            boolean isOutdoor = e.getType() != null &&
+                    (e.getType().toLowerCase().contains("plein air")
+                            || e.getType().toLowerCase().contains("outdoor")
+                            || e.getType().toLowerCase().contains("ext")
+                            || "PUBLIC".equalsIgnoreCase(e.getType()));
+
+            final double finalLat = wLat;
+            final double finalLon = wLon;
+            new Thread(() -> {
+                try {
+                    WeatherService.WeatherResult wr = weatherService.getWeather(
+                            finalLat, finalLon, e.getDateDebut(), isOutdoor);
+                    if (wr != null) {
+                        javafx.application.Platform.runLater(() -> {
+                            weatherEstLabel.setText(wr.icon + "  " + wr.attendancePercent + "%");
+                            if (wr.attendancePercent >= 75) {
+                                weatherEstLabel.getStyleClass().add("adminEstGood");
+                            } else if (wr.attendancePercent >= 50) {
+                                weatherEstLabel.getStyleClass().add("adminEstCaution");
+                            } else {
+                                weatherEstLabel.getStyleClass().add("adminEstBad");
+                            }
+                        });
+                    } else {
+                        javafx.application.Platform.runLater(() -> {
+                            weatherEstLabel.setText("⛅  Estimation indisponible");
+                            weatherEstLabel.getStyleClass().add("adminEstNeutral");
+                        });
+                    }
+                } catch (Exception ex) {
+                    javafx.application.Platform.runLater(() -> {
+                        weatherEstLabel.setText("⛅  Estimation indisponible");
+                        weatherEstLabel.getStyleClass().add("adminEstNeutral");
+                    });
+                }
+            }).start();
+        } else {
+            weatherEstLabel.setText("⛅  Date inconnue");
+            weatherEstLabel.getStyleClass().add("adminEstNeutral");
+        }
+
         Button btnEdit = new Button("Modifier");
         Button btnDel  = new Button("Supprimer");
         btnEdit.getStyleClass().add("card-btn");
@@ -275,7 +337,7 @@ public class EvenementsAdminController {
 
         HBox actions = new HBox(10, btnEdit, btnDel);
         actions.getStyleClass().add("card-actions");
-        card.getChildren().addAll(imgWrap, title, meta, details, lieu, actions);
+        card.getChildren().addAll(imgWrap, title, meta, details, lieu, weatherEstLabel, actions);
         card.setOnMouseClicked(ev -> { selectCard(card); showPanelInscriptions(e); });
         return card;
     }
@@ -1500,7 +1562,7 @@ public class EvenementsAdminController {
 
     private List<Lieu> loadAllLieux() {
         List<Lieu> lieux = new java.util.ArrayList<>();
-        String sql = "SELECT id, nom, ville, adresse, categorie, type FROM lieu ORDER BY nom";
+        String sql = "SELECT id, nom, ville, adresse, categorie, type, latitude, longitude FROM lieu ORDER BY nom";
         try {
             Connection cnx = Mydb.getInstance().getConnection();
             PreparedStatement ps = cnx.prepareStatement(sql);
@@ -1513,6 +1575,10 @@ public class EvenementsAdminController {
                 l.setAdresse(rs.getString("adresse"));
                 l.setCategorie(rs.getString("categorie"));
                 l.setType(rs.getString("type"));
+                double lat = rs.getDouble("latitude");
+                l.setLatitude(rs.wasNull() ? null : lat);
+                double lon = rs.getDouble("longitude");
+                l.setLongitude(rs.wasNull() ? null : lon);
                 lieux.add(l);
             }
             rs.close(); ps.close();

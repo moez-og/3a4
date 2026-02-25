@@ -11,10 +11,13 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Rectangle;
 import models.evenements.Evenement;
 import models.evenements.Inscription;
+import models.lieux.Lieu;
 import models.users.User;
 import services.evenements.EvenementService;
 import services.evenements.InscriptionService;
 import services.evenements.PaiementService;
+import services.evenements.WeatherService;
+import services.lieux.LieuService;
 import utils.ui.ShellNavigator;
 
 import java.net.URL;
@@ -58,6 +61,15 @@ public class EvenementDetailsController {
     @FXML private Button desinscrireBtn;
     @FXML private Label messageLabel;
 
+    // ── WEATHER CARD ──
+    @FXML private VBox weatherCard;
+    @FXML private Label weatherIcon;
+    @FXML private Label weatherDesc;
+    @FXML private Label weatherTemp;
+    @FXML private Label weatherWind;
+    @FXML private Label weatherPrecip;
+    @FXML private Label weatherAdvice;
+
     // ── PARTICIPANTS ──
     @FXML private Label participantsTitle;
     @FXML private Label placesRestantes;
@@ -70,6 +82,12 @@ public class EvenementDetailsController {
     private final EvenementService evenementService     = new EvenementService();
     private final InscriptionService inscriptionService = new InscriptionService();
     private final PaiementService paiementService       = new PaiementService();
+    private final WeatherService weatherService         = new WeatherService();
+    private LieuService lieuService;
+    {
+        try { lieuService = new LieuService(); }
+        catch (Exception e) { lieuService = null; System.err.println("LieuService init error: " + e.getMessage()); }
+    }
 
     // ── ÉTAT ──
     private ShellNavigator navigator;
@@ -311,6 +329,92 @@ public class EvenementDetailsController {
 
         loadUserInscription();
         refreshButtons();
+        loadWeather();
+    }
+
+    // ── CHARGEMENT MÉTÉO ──
+
+    private void loadWeather() {
+        if (current == null || weatherCard == null) return;
+
+        // Masquer par défaut
+        weatherCard.setVisible(false);
+        weatherCard.setManaged(false);
+
+        // Charger en arrière-plan pour ne pas bloquer l'UI
+        new Thread(() -> {
+            try {
+                // Récupérer le lieu pour les coordonnées GPS
+                // Valeurs par défaut : Tunis
+                double lat = 36.8065;
+                double lon = 10.1815;
+
+                if (current.getLieuId() != null && current.getLieuId() > 0 && lieuService != null) {
+                    try {
+                        Lieu lieu = lieuService.getById(current.getLieuId());
+                        if (lieu != null && lieu.getLatitude() != null && lieu.getLongitude() != null
+                                && lieu.getLatitude() != 0 && lieu.getLongitude() != 0) {
+                            lat = lieu.getLatitude();
+                            lon = lieu.getLongitude();
+                        }
+                    } catch (Exception ignored) { /* garde les coords par défaut */ }
+                }
+
+                // Déterminer si l'événement est en extérieur
+                boolean isOutdoor = current.getType() != null &&
+                        (current.getType().toLowerCase().contains("plein air")
+                                || current.getType().toLowerCase().contains("outdoor")
+                                || current.getType().toLowerCase().contains("extérieur")
+                                || current.getType().toLowerCase().contains("ext")
+                                || "PUBLIC".equalsIgnoreCase(current.getType()));
+
+                // Appel API météo
+                WeatherService.WeatherResult weather = weatherService.getWeather(
+                        lat, lon,
+                        current.getDateDebut(), isOutdoor);
+
+                if (weather == null) return;
+
+                // Mettre à jour l'UI sur le thread JavaFX
+                javafx.application.Platform.runLater(() -> {
+                    weatherCard.setVisible(true);
+                    weatherCard.setManaged(true);
+
+                    if (weatherIcon != null)
+                        weatherIcon.setText(weather.icon);
+                    if (weatherDesc != null)
+                        weatherDesc.setText(weather.description);
+                    if (weatherTemp != null)
+                        weatherTemp.setText(String.format("%.0f°", weather.temperature));
+                    if (weatherWind != null)
+                        weatherWind.setText(String.format("Vent  %.0f km/h", weather.windSpeed));
+                    if (weatherPrecip != null)
+                        weatherPrecip.setText(weather.precipitation > 0
+                                ? String.format("Pluie  %.1f mm", weather.precipitation)
+                                : "Pas de pluie");
+
+                    if (weatherAdvice != null) {
+                        // Short advice text for the pill
+                        String shortAdvice;
+                        if (weather.attendancePercent >= 75) shortAdvice = "✓ Idéal";
+                        else if (weather.attendancePercent >= 50) shortAdvice = "⚠ Mitigé";
+                        else shortAdvice = "✗ Défavorable";
+                        weatherAdvice.setText(shortAdvice);
+                        weatherAdvice.getStyleClass().removeAll(
+                                "evWeatherAdviceGood", "evWeatherAdviceCaution", "evWeatherAdviceBad");
+                        if (weather.attendancePercent >= 75) {
+                            weatherAdvice.getStyleClass().add("evWeatherAdviceGood");
+                        } else if (weather.attendancePercent >= 50) {
+                            weatherAdvice.getStyleClass().add("evWeatherAdviceCaution");
+                        } else {
+                            weatherAdvice.getStyleClass().add("evWeatherAdviceBad");
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                System.err.println("Erreur chargement météo: " + e.getMessage());
+            }
+        }).start();
     }
 
     // ── CHARGEMENT INSCRIPTION UTILISATEUR ──

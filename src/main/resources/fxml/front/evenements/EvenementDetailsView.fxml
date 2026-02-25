@@ -76,6 +76,29 @@
                     <!-- Description -->
                     <Label fx:id="description" text="" wrapText="true" styleClass="evDetailsDesc"/>
 
+                    <!-- ═══════ WEATHER CARD ═══════ -->
+                    <VBox fx:id="weatherCard" spacing="10" styleClass="evWeatherCard"
+                          visible="false" managed="false">
+                        <!-- Header -->
+                        <HBox alignment="CENTER_LEFT" styleClass="evWeatherHeaderRow">
+                            <Label text="PRÉVISIONS MÉTÉO" styleClass="evWeatherTitle"/>
+                        </HBox>
+                        <!-- Main row: icon + temp | desc + wind/precip -->
+                        <HBox spacing="14" alignment="CENTER_LEFT">
+                            <VBox alignment="CENTER" spacing="2">
+                                <Label fx:id="weatherIcon" text="" styleClass="evWeatherIcon"/>
+                                <Label fx:id="weatherTemp" text="" styleClass="evWeatherTemp"/>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label fx:id="weatherDesc" text="" styleClass="evWeatherDesc"/>
+                                <Label fx:id="weatherWind" text="" styleClass="evWeatherSub"/>
+                                <Label fx:id="weatherPrecip" text="" styleClass="evWeatherSub"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="weatherAdvice" text="" wrapText="true" styleClass="evWeatherAdvice"/>
+                        </HBox>
+                    </VBox>
+
                     <!-- ═══════ ACTION BAR BAS ═══════ -->
                     <HBox fx:id="actionBarBottom" spacing="14" alignment="CENTER_LEFT" styleClass="evActionBar">
                         <Button fx:id="inscriptionBtnBottom" text="✓ S'inscrire"

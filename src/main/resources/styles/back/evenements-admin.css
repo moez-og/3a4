@@ -146,3 +146,240 @@
     -fx-text-fill: rgba(185,28,28,1);
 }
 .card-btn.danger:hover { -fx-background-color: rgba(220,38,38,0.18); }
+
+/* ═══════════════════════════════════════════════════════════════
+   Card image + status chip overlay (tiles)
+   ═══════════════════════════════════════════════════════════════ */
+.cardImageWrap {
+    -fx-background-radius: 14;
+    -fx-background-color: rgba(232,238,245,0.55);
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(30,58,95,0.10);
+}
+.cardTitle  { -fx-font-size: 16; -fx-font-weight: 900; -fx-text-fill: #0f2a44; }
+.cardMeta   { -fx-text-fill: rgba(15,42,68,0.70); -fx-font-weight: 800; }
+.cardLine   { -fx-text-fill: rgba(15,42,68,0.72); -fx-font-weight: 800; }
+
+/* Status chip (on cards + preview) */
+.statusChip {
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 4 10;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+}
+.status-ouvert {
+    -fx-background-color: rgba(34,197,94,0.18);
+    -fx-text-fill: #15803d;
+}
+.status-ferme {
+    -fx-background-color: rgba(251,146,60,0.18);
+    -fx-text-fill: #c2410c;
+}
+.status-annule {
+    -fx-background-color: rgba(220,38,38,0.18);
+    -fx-text-fill: #b91c1c;
+}
+
+/* Inscription-specific status chips */
+.status-confirmee {
+    -fx-background-color: rgba(34,197,94,0.18);
+    -fx-text-fill: #15803d;
+}
+.status-en-attente {
+    -fx-background-color: rgba(234,179,8,0.18);
+    -fx-text-fill: #a16207;
+}
+.status-annulee {
+    -fx-background-color: rgba(220,38,38,0.18);
+    -fx-text-fill: #b91c1c;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Editor dialog (SplitPane add/edit)
+   ═══════════════════════════════════════════════════════════════ */
+.dialogRoot {
+    -fx-background-color: rgba(255,255,255,0.98);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.12), 20, 0.20, 0, 8);
+}
+.dialogTitle {
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+}
+.formLabel {
+    -fx-text-fill: rgba(15,42,68,0.78);
+    -fx-font-weight: 900;
+}
+.hint {
+    -fx-text-fill: rgba(15,42,68,0.60);
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+/* Buttons (save / cancel) */
+.primaryBtn {
+    -fx-background-color: linear-gradient(to right, #1e3a5f, #2b5aa0);
+    -fx-background-radius: 14;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 10 16;
+    -fx-cursor: hand;
+}
+.primaryBtn:hover { -fx-background-color: linear-gradient(to right, #24476f, #3b82f6); }
+
+.ghostBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 14;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 10 16;
+    -fx-cursor: hand;
+}
+.ghostBtn:hover { -fx-background-color: rgba(15,23,42,0.10); }
+
+/* SplitPane divider */
+.editorSplit > .split-pane-divider {
+    -fx-padding: 0 1 0 1;
+    -fx-background-color: rgba(15,42,68,0.08);
+}
+
+/* Spinner inside dialog */
+.dialogRoot .spinner .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 6 8;
+}
+.dialogRoot .spinner .increment-arrow-button,
+.dialogRoot .spinner .decrement-arrow-button {
+    -fx-background-color: transparent;
+}
+.dialogRoot .spinner .increment-arrow,
+.dialogRoot .spinner .decrement-arrow {
+    -fx-background-color: #0f2a44;
+}
+
+/* Editor scroll area */
+.editorScroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.editorScroll .viewport { -fx-background-color: transparent; }
+
+/* Image upload area in editor */
+.imageWrap {
+    -fx-background-color: rgba(232,238,245,0.55);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(30,58,95,0.14);
+    -fx-border-width: 1;
+    -fx-padding: 0;
+}
+.imageEmpty {
+    -fx-text-fill: rgba(15,42,68,0.65);
+    -fx-font-weight: 900;
+    -fx-background-color: rgba(255,255,255,0.80);
+    -fx-padding: 8 12;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-border-color: rgba(15,23,42,0.08);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Preview card (right column)
+   ═══════════════════════════════════════════════════════════════ */
+.previewCard {
+    -fx-background-color: rgba(255,255,255,0.96);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.12), 18, 0.18, 0, 6);
+}
+.previewHeader {
+    -fx-text-fill: rgba(15,42,68,0.80);
+    -fx-font-weight: 900;
+    -fx-font-size: 12.5px;
+}
+.previewImageWrap {
+    -fx-background-radius: 18;
+    -fx-background-color: rgba(232,238,245,0.55);
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(30,58,95,0.10);
+}
+.previewImageEmpty {
+    -fx-text-fill: rgba(15,42,68,0.65);
+    -fx-font-weight: 900;
+    -fx-background-color: rgba(255,255,255,0.80);
+    -fx-padding: 8 12;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-border-color: rgba(15,23,42,0.08);
+}
+.previewTitle {
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+}
+.previewMeta {
+    -fx-text-fill: rgba(15,42,68,0.70);
+    -fx-font-weight: 800;
+}
+.previewLine {
+    -fx-text-fill: rgba(15,42,68,0.78);
+    -fx-font-weight: 800;
+}
+.previewSectionTitle {
+    -fx-text-fill: #0f2a44;
+    -fx-font-weight: 900;
+    -fx-padding: 6 0 0 0;
+}
+.previewDesc {
+    -fx-text-fill: rgba(15,42,68,0.72);
+    -fx-font-weight: 700;
+}
+.liveHint {
+    -fx-text-fill: rgba(185,28,28,1);
+    -fx-font-weight: 900;
+    -fx-padding: 8 10;
+    -fx-background-color: rgba(220,38,38,0.10);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(220,38,38,0.16);
+}
+
+/* ═══════ WEATHER ESTIMATION (ADMIN CARDS) ═══════ */
+.adminWeatherRow {
+    -fx-font-size: 11;
+    -fx-font-weight: 800;
+    -fx-padding: 5 10 5 10;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-background-color: rgba(15,23,42,0.03);
+    -fx-text-fill: rgba(15,42,68,0.55);
+}
+.adminEstGood {
+    -fx-text-fill: #15803d;
+    -fx-background-color: rgba(22,163,74,0.08);
+    -fx-border-color: rgba(22,163,74,0.14);
+}
+.adminEstCaution {
+    -fx-text-fill: #92400e;
+    -fx-background-color: rgba(217,119,6,0.08);
+    -fx-border-color: rgba(217,119,6,0.14);
+}
+.adminEstBad {
+    -fx-text-fill: #b91c1c;
+    -fx-background-color: rgba(220,38,38,0.06);
+    -fx-border-color: rgba(220,38,38,0.12);
+}
+.adminEstNeutral {
+    -fx-text-fill: rgba(15,42,68,0.45);
+    -fx-background-color: rgba(15,23,42,0.03);
+    -fx-border-color: rgba(15,23,42,0.06);
+}

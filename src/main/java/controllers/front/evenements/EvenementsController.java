@@ -15,6 +15,7 @@ import models.evenements.Evenement;
 import models.users.User;
 import services.evenements.EvenementService;
 import services.evenements.InscriptionService;
+import services.evenements.WeatherService;
 import utils.ui.ShellNavigator;
 
 import java.net.URL;
@@ -43,6 +44,7 @@ public class EvenementsController {
     // ====== SERVICES ======
     private final EvenementService evenementService     = new EvenementService();
     private final InscriptionService inscriptionService = new InscriptionService();
+    private final WeatherService weatherService         = new WeatherService();
 
     // ====== ÉTAT ======
     private ShellNavigator navigator;
@@ -283,6 +285,49 @@ public class EvenementsController {
         places.getStyleClass().add("evCardPlaces");
         places.setPadding(new javafx.geometry.Insets(0, 14, 0, 14));
 
+        // ── WEATHER ADVICE PILL ──
+        Label weatherAdvice = new Label("⏳ Chargement…");
+        weatherAdvice.getStyleClass().add("evWeatherAdvicePill");
+        weatherAdvice.setPadding(new javafx.geometry.Insets(0, 14, 0, 14));
+
+        // Charger la météo en arrière-plan
+        if (ev.getDateDebut() != null) {
+            new Thread(() -> {
+                try {
+                    WeatherService.WeatherResult wr = weatherService.getWeather(
+                            36.8065, 10.1815, ev.getDateDebut(),
+                            "PUBLIC".equalsIgnoreCase(ev.getType()));
+                    if (wr != null) {
+                        javafx.application.Platform.runLater(() -> {
+                            if (wr.attendancePercent >= 75) {
+                                weatherAdvice.setText(wr.icon + "  Météo idéale");
+                                weatherAdvice.getStyleClass().add("evAdviceGood");
+                            } else if (wr.attendancePercent >= 50) {
+                                weatherAdvice.setText(wr.icon + "  Météo incertaine");
+                                weatherAdvice.getStyleClass().add("evAdviceCaution");
+                            } else {
+                                weatherAdvice.setText(wr.icon + "  Météo défavorable");
+                                weatherAdvice.getStyleClass().add("evAdviceBad");
+                            }
+                        });
+                    } else {
+                        javafx.application.Platform.runLater(() -> {
+                            weatherAdvice.setText("⛅  Météo indisponible");
+                            weatherAdvice.getStyleClass().add("evAdviceNeutral");
+                        });
+                    }
+                } catch (Exception ex) {
+                    javafx.application.Platform.runLater(() -> {
+                        weatherAdvice.setText("⛅  Météo indisponible");
+                        weatherAdvice.getStyleClass().add("evAdviceNeutral");
+                    });
+                }
+            }).start();
+        } else {
+            weatherAdvice.setText("⛅  Date inconnue");
+            weatherAdvice.getStyleClass().add("evAdviceNeutral");
+        }
+
         // ── BOUTONS ──
         HBox actions = new HBox(10);
         actions.setPadding(new javafx.geometry.Insets(0, 14, 4, 14));
@@ -311,7 +356,7 @@ public class EvenementsController {
         inscBtn.setOnAction(e -> handleToggleInscription(ev, inscBtn, inscritRef, places, inscritsRef));
 
         actions.getChildren().addAll(details, inscBtn);
-        card.getChildren().addAll(imgWrap, titre, typeTxt, dates, prixLabel, places, actions);
+        card.getChildren().addAll(imgWrap, titre, typeTxt, dates, prixLabel, places, weatherAdvice, actions);
         card.setOnMouseClicked(e -> { if (e.getClickCount() >= 2) openDetailsPage(ev); });
         return card;
     }
