@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.help.HelpViewController"
+      spacing="10" styleClass="contentSurface">
+    <padding><Insets top="12" right="12" bottom="12" left="12"/></padding>
+    <Label text="❔ Aide" style="-fx-font-size:18; -fx-font-weight:900;"/>
+    <Label text="FAQ, contact, règles, tutoriel d’utilisation." style="-fx-opacity:0.75; -fx-font-weight:700;"/>
+</VBox>
