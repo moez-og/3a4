@@ -1,0 +1,496 @@
+/* =========================
+   FRONT V3 · PRO APP + HOME DYNAMIC
+========================= */
+
+.app-root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: linear-gradient(to bottom, #eef3ff, #f7f9fc);
+}
+
+.main-pane { -fx-background-color: transparent; }
+
+/* ===== APPBAR ===== */
+.appbar {
+    -fx-background-color: rgba(255,255,255,0.82);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.12), 18, 0.18, 0, 6);
+}
+
+.brandBox { -fx-padding: 6 8 6 8; }
+.brandTitle { -fx-text-fill: #163a5c; -fx-font-size: 15.5; -fx-font-weight: 900; }
+.brandSubtitle { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 11.5; -fx-font-weight: 800; }
+
+/* ===== NAV PILLS ===== */
+.navPills {
+    -fx-background-color: rgba(15,23,42,0.04);
+    -fx-background-radius: 999;
+    -fx-padding: 6;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 999;
+}
+
+.navPill {
+    -fx-background-color: transparent;
+    -fx-background-radius: 999;
+    -fx-text-fill: rgba(22,58,92,0.82);
+    -fx-font-weight: 900;
+    -fx-font-size: 12.5;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.navPill:hover { -fx-background-color: rgba(15,23,42,0.06); }
+.navPill:selected {
+    -fx-background-color: rgba(212,175,55,0.18);
+    -fx-text-fill: #163a5c;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.26), 12, 0.18, 0, 4);
+}
+
+/* ===== SEARCH (top bar) ===== */
+.searchBox {
+    -fx-background-color: rgba(15,23,42,0.05);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 16;
+    -fx-padding: 6 10 6 10;
+}
+.searchIcon { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-weight: 900; }
+.searchField {
+    -fx-pref-width: 210;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 12.5;
+    -fx-font-weight: 800;
+    -fx-text-fill: #173a57;
+}
+.miniBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.miniBtn:hover { -fx-background-color: linear-gradient(to right, #e8c547, #d4af37); }
+
+/* ===== ICON BUTTONS ===== */
+.iconBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 999;
+    -fx-min-width: 38;
+    -fx-min-height: 38;
+    -fx-font-weight: 900;
+    -fx-cursor: hand;
+}
+.iconBtn:hover { -fx-background-color: rgba(15,23,42,0.10); }
+
+/* ===== ACCOUNT BUTTON ===== */
+.accountBtn {
+    -fx-background-color: rgba(255,255,255,0.70);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-padding: 8 10 8 10;
+    -fx-cursor: hand;
+}
+.accountBtn:hover {
+    -fx-background-color: rgba(255,255,255,0.88);
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 14, 0.16, 0, 4);
+}
+
+.avatarCircle {
+    -fx-min-width: 34; -fx-min-height: 34;
+    -fx-max-width: 34; -fx-max-height: 34;
+    -fx-background-color: rgba(212,175,55,0.18);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(212,175,55,0.45);
+    -fx-border-radius: 999;
+}
+.avatarLetter { -fx-text-fill: #163a5c; -fx-font-weight: 900; }
+
+.accountName { -fx-text-fill: #163a5c; -fx-font-size: 12.5; -fx-font-weight: 900; }
+.accountRole { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 11.2; -fx-font-weight: 800; }
+
+/* ===== PAGE ===== */
+.pageRoot { -fx-background-color: transparent; }
+.pageTitle { -fx-text-fill: #163a5c; -fx-font-size: 36; -fx-font-weight: 900; }
+.pageSubtitle { -fx-text-fill: rgba(22,58,92,0.72); -fx-font-size: 12.5; -fx-font-weight: 800; }
+
+.contentSurface {
+    -fx-background-color: rgba(255,255,255,0.82);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 18, 0.18, 0, 6);
+}
+
+/* ===== Overlay + Drawer ===== */
+.overlay { -fx-background-color: transparent; }
+.overlayBg { -fx-background-color: rgba(10,20,40,0.35); }
+
+.drawer {
+    -fx-pref-width: 380;
+    -fx-min-width: 380;
+    -fx-max-width: 380;
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18 0 0 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-width: 1 0 1 1;
+    -fx-border-radius: 18 0 0 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 24, 0.22, -8, 0);
+}
+
+.avatarCircleLarge {
+    -fx-min-width: 46; -fx-min-height: 46;
+    -fx-max-width: 46; -fx-max-height: 46;
+    -fx-background-color: rgba(212,175,55,0.18);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(212,175,55,0.45);
+    -fx-border-radius: 999;
+}
+.avatarLetterLarge { -fx-text-fill: #163a5c; -fx-font-weight: 900; -fx-font-size: 16; }
+
+.drawerName { -fx-text-fill: #163a5c; -fx-font-size: 14; -fx-font-weight: 900; }
+.drawerEmail { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 11.8; -fx-font-weight: 800; }
+
+.closeBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 12;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-cursor: hand;
+}
+.closeBtn:hover { -fx-background-color: rgba(15,23,42,0.10); }
+
+.sep { -fx-opacity: 0.25; }
+
+.drawerSectionTitle {
+    -fx-text-fill: rgba(22,58,92,0.72);
+    -fx-font-size: 12;
+    -fx-font-weight: 900;
+    -fx-padding: 8 0 6 0;
+}
+
+.drawerBtn {
+    -fx-background-color: rgba(15,23,42,0.05);
+    -fx-background-radius: 14;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 12 14 12 14;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+}
+.drawerBtn:hover { -fx-background-color: rgba(15,23,42,0.08); }
+
+.drawerBtnPrimary {
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-background-radius: 14;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 12 14 12 14;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+}
+.drawerBtnPrimary:hover { -fx-background-color: linear-gradient(to right, #e8c547, #d4af37); }
+
+.logoutBtn {
+    -fx-background-color: rgba(220,38,38,0.12);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(220,38,38,0.35);
+    -fx-border-radius: 14;
+    -fx-text-fill: #b91c1c;
+    -fx-font-weight: 900;
+    -fx-padding: 12 14 12 14;
+    -fx-cursor: hand;
+}
+.logoutBtn:hover { -fx-background-color: rgba(220,38,38,0.16); }
+
+/* =========================
+   HOME DYNAMIC (like screenshot)
+========================= */
+
+.homeScroll { -fx-background-color: transparent; }
+.homeScroll > .viewport { -fx-background-color: transparent; }
+
+.homeRoot { -fx-background-color: transparent; }
+
+/* HERO */
+.heroBanner {
+    -fx-min-height: 320;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+
+    -fx-background-image: url("/images/demo/hero/hero.jpg");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 18, 0.18, 0, 8);
+}
+
+.heroOverlay {
+    -fx-padding: 26;
+    -fx-background-radius: 18;
+    -fx-background-color: linear-gradient(to right, rgba(10,20,40,0.78), rgba(10,20,40,0.40));
+}
+
+.heroTitle {
+    -fx-text-fill: rgba(255,255,255,0.98);
+    -fx-font-size: 44;
+    -fx-font-weight: 900;
+}
+
+.heroSubtitle {
+    -fx-text-fill: rgba(255,255,255,0.85);
+    -fx-font-size: 13;
+    -fx-font-weight: 700;
+    -fx-max-width: 760;
+}
+
+.heroSearchRow { -fx-padding: 6 0 0 0; }
+
+.heroSearch {
+    -fx-background-color: rgba(255,255,255,0.22);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(255,255,255,0.25);
+    -fx-border-radius: 999;
+    -fx-padding: 10 14 10 14;
+    -fx-alignment: CENTER_LEFT;
+    -fx-min-width: 520;
+}
+
+.heroSearchIcon { -fx-text-fill: rgba(255,255,255,0.88); -fx-font-weight: 900; }
+
+.heroSearchField {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: rgba(255,255,255,0.95);
+    -fx-prompt-text-fill: rgba(255,255,255,0.70);
+    -fx-font-size: 13;
+    -fx-font-weight: 800;
+}
+
+.heroCta {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 999;
+    -fx-text-fill: #0b254f;
+    -fx-font-weight: 900;
+    -fx-padding: 12 18 12 18;
+    -fx-cursor: hand;
+}
+.heroCta:hover { -fx-background-color: rgba(255,255,255,0.98); }
+
+/* Chips */
+.chipRow { -fx-padding: 10 0 0 0; }
+.chipBtn {
+    -fx-background-color: rgba(255,255,255,0.16);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-radius: 999;
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-font-weight: 900;
+    -fx-padding: 8 14 8 14;
+    -fx-cursor: hand;
+}
+.chipBtn:hover { -fx-background-color: rgba(255,255,255,0.22); }
+
+/* Section headers */
+.sectionHeader { -fx-padding: 6 2 2 2; }
+.sectionTitle { -fx-text-fill: #163a5c; -fx-font-size: 16; -fx-font-weight: 900; }
+.sectionHint { -fx-text-fill: rgba(22,58,92,0.65); -fx-font-size: 12; -fx-font-weight: 700; }
+
+.linkBtn {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(212,175,55,0.95);
+    -fx-font-weight: 900;
+    -fx-cursor: hand;
+}
+.linkBtn:hover { -fx-underline: true; }
+
+/* Horizontal scroll */
+.hScroll { -fx-background-color: transparent; }
+.hScroll > .viewport { -fx-background-color: transparent; }
+
+.cardsRow { -fx-padding: 4 2 10 2; -fx-alignment: CENTER_LEFT; }
+
+/* City cards */
+.cityCard {
+    -fx-background-color: rgba(15,23,42,0.04);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-insets: 0;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.12), 18, 0.18, 0, 7);
+}
+
+.cityOverlay {
+    -fx-padding: 14;
+    -fx-background-radius: 0 0 22 22;
+    -fx-background-color: linear-gradient(to top, rgba(10,20,40,0.80), rgba(10,20,40,0.00));
+}
+
+.cityName {
+    -fx-text-fill: rgba(255,255,255,0.96);
+    -fx-font-size: 16;
+    -fx-font-weight: 900;
+}
+
+.cityMeta {
+    -fx-text-fill: rgba(255,255,255,0.78);
+    -fx-font-size: 12;
+    -fx-font-weight: 700;
+}
+
+/* Featured recommendations (image cards) */
+.recoImageCard {
+    -fx-background-color: rgba(15,23,42,0.04);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-insets: 0;
+    -fx-min-height: 220;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.12), 18, 0.18, 0, 7);
+}
+
+.recoOverlay {
+    -fx-padding: 16;
+    -fx-background-radius: 22;
+    -fx-background-color: linear-gradient(to top, rgba(10,20,40,0.88), rgba(10,20,40,0.20));
+}
+
+.recoKicker {
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-font-size: 12.2;
+    -fx-font-weight: 900;
+}
+
+.recoHeadline {
+    -fx-text-fill: rgba(255,255,255,0.98);
+    -fx-font-size: 16.6;
+    -fx-font-weight: 900;
+}
+
+.recoSub {
+    -fx-text-fill: rgba(255,255,255,0.80);
+    -fx-font-size: 12.2;
+    -fx-font-weight: 700;
+}
+
+.recoPill {
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-background-color: rgba(255,255,255,0.16);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(255,255,255,0.18);
+    -fx-border-radius: 999;
+    -fx-padding: 5 10 5 10;
+    -fx-font-size: 11;
+    -fx-font-weight: 900;
+}
+
+.recoCta {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 14;
+    -fx-text-fill: #0b254f;
+    -fx-font-weight: 900;
+    -fx-padding: 10 12 10 12;
+    -fx-cursor: hand;
+}
+.recoCta:hover { -fx-background-color: rgba(255,255,255,0.98); }
+
+/* Ghost button (reuse) */
+.ghostBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 14;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.ghostBtn:hover { -fx-background-color: rgba(15,23,42,0.09); }
+
+/* Hover class hook */
+.hoverable {}
+.hoverable:hover {
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.18), 24, 0.22, 0, 10);
+}
+
+/* ===== DARK MODE ===== */
+.theme-dark.app-root {
+    -fx-background-color: linear-gradient(to bottom, #0b1220, #0e172a);
+}
+
+.theme-dark .appbar {
+    -fx-background-color: rgba(15,23,42,0.88);
+    -fx-border-color: rgba(255,255,255,0.08);
+}
+
+.theme-dark .brandTitle,
+.theme-dark .pageTitle,
+.theme-dark .sectionTitle { -fx-text-fill: rgba(241,245,249,0.95); }
+
+.theme-dark .brandSubtitle,
+.theme-dark .pageSubtitle,
+.theme-dark .sectionHint { -fx-text-fill: rgba(226,232,240,0.72); }
+
+.theme-dark .navPills {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-border-color: rgba(255,255,255,0.08);
+}
+
+.theme-dark .navPill { -fx-text-fill: rgba(241,245,249,0.80); }
+.theme-dark .navPill:hover { -fx-background-color: rgba(255,255,255,0.08); }
+.theme-dark .navPill:selected { -fx-background-color: rgba(212,175,55,0.22); }
+
+.theme-dark .searchBox {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-border-color: rgba(255,255,255,0.10);
+}
+.theme-dark .searchIcon { -fx-text-fill: rgba(241,245,249,0.72); }
+.theme-dark .searchField { -fx-text-fill: rgba(241,245,249,0.92); }
+
+.theme-dark .iconBtn {
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-border-color: rgba(255,255,255,0.10);
+}
+
+.theme-dark .accountBtn {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-border-color: rgba(255,255,255,0.10);
+}
+
+.theme-dark .accountName,
+.theme-dark .drawerName { -fx-text-fill: rgba(241,245,249,0.92); }
+
+.theme-dark .accountRole,
+.theme-dark .drawerEmail { -fx-text-fill: rgba(226,232,240,0.72); }
+
+.theme-dark .contentSurface { -fx-background-color: rgba(15,23,42,0.55); -fx-border-color: rgba(255,255,255,0.08); }
+
+.theme-dark .drawer { -fx-background-color: rgba(15,23,42,0.92); -fx-border-color: rgba(255,255,255,0.10); }
+
+.theme-dark .drawerSectionTitle { -fx-text-fill: rgba(226,232,240,0.72); }
+.theme-dark .drawerBtn { -fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: rgba(241,245,249,0.92); }
+.theme-dark .closeBtn { -fx-text-fill: rgba(241,245,249,0.92); }
+/* ===== NAV CHATBOT PILL ===== */
+.navPillChatbot {
+    -fx-background-color: rgba(212,175,55,0.15);
+    -fx-text-fill: #c9920f;
+    -fx-border-color: rgba(212,175,55,0.30);
+    -fx-border-radius: 999;
+    -fx-font-weight: 900;
+}
+.navPillChatbot:hover {
+    -fx-background-color: rgba(212,175,55,0.25);
+}
+.navPillChatbot:selected {
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.45), 12, 0.2, 0, 4);
+}

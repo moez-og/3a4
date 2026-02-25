@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.lieux.ChatbotController"
+      styleClass="chatRoot"
+      stylesheets="@/styles/lieux/chatbot.css"
+      spacing="0">
+
+    <!-- HEADER -->
+    <HBox styleClass="chatHeader" alignment="CENTER_LEFT" spacing="12">
+        <padding>
+            <Insets top="16" right="20" bottom="16" left="20"/>
+        </padding>
+
+        <Label text="🤖" styleClass="chatHeaderIcon"/>
+
+        <VBox spacing="2">
+            <Label text="Assistant Travel Guide" styleClass="chatHeaderTitle"/>
+            <Label text="Posez vos questions sur les lieux" styleClass="chatHeaderSub"/>
+        </VBox>
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <Label fx:id="statusLabel" text="En train de répondre..." styleClass="chatStatus" visible="false" managed="false"/>
+
+        <Button text="🗑 Effacer" onAction="#clearHistory" styleClass="chatClearBtn"/>
+    </HBox>
+
+    <!-- MESSAGES ZONE -->
+    <ScrollPane fx:id="messagesScroll"
+                styleClass="chatScroll"
+                fitToWidth="true"
+                hbarPolicy="NEVER"
+                vbarPolicy="AS_NEEDED"
+                VBox.vgrow="ALWAYS">
+        <content>
+            <VBox fx:id="messagesBox" styleClass="chatMessages" spacing="8">
+                <padding>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
+                </padding>
+            </VBox>
+        </content>
+    </ScrollPane>
+
+    <!-- INPUT ZONE -->
+    <HBox styleClass="chatInputBar" spacing="10" alignment="CENTER">
+        <padding>
+            <Insets top="12" right="16" bottom="12" left="16"/>
+        </padding>
+
+        <TextField fx:id="inputField"
+                   promptText="Demandez-moi un lieu, une adresse, un horaire..."
+                   styleClass="chatInput"
+                   HBox.hgrow="ALWAYS"/>
+
+        <Button fx:id="sendBtn" text="Envoyer ➤"
+                onAction="#sendMessage"
+                styleClass="chatSendBtn"/>
+    </HBox>
+
+</VBox>

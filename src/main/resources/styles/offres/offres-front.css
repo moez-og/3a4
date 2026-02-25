@@ -1,0 +1,173 @@
+/*
+  Offres (Front)
+  - Layout V3: hero + surfaces + cards
+  - Aligné avec le style global (Sorties/Lieux)
+*/
+
+/* ===== Root / Scroll ===== */
+
+.offresScroll{
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.offresScroll .viewport{
+    -fx-background-color: transparent;
+}
+
+.offresRoot{
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: transparent;
+}
+
+/* ===== HERO ===== */
+
+.offresHero{
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-padding: 14 16;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 18, 0.18, 0, 6);
+}
+
+.offresTitle{
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+}
+
+.offresSubtitle{
+    -fx-text-fill: rgba(15,42,68,0.70);
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 800;
+}
+
+.offresTools{ }
+
+/* ===== Shared controls (same as other modules) ===== */
+
+.filterCombo{
+    -fx-min-height: 42px;
+    -fx-pref-height: 42px;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-background-color: rgba(232,238,245,0.90);
+    -fx-border-color: rgba(30,58,95,0.16);
+    -fx-border-width: 1;
+    -fx-padding: 0 10;
+    -fx-font-weight: 900;
+}
+.filterCombo .list-cell{ -fx-text-fill: #1e3a5f; -fx-font-weight: 900; }
+.filterCombo .arrow-button{ -fx-background-color: transparent; }
+.filterCombo .arrow{ -fx-background-color: rgba(30,58,95,0.75); }
+
+.primaryBtn{
+    -fx-background-color: linear-gradient(to right, #1e3a5f, #2b5aa0);
+    -fx-background-radius: 14;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 10 16;
+    -fx-cursor: hand;
+}
+.primaryBtn:hover{ -fx-background-color: linear-gradient(to right, #24476f, #3b82f6); }
+
+.ghostBtn{
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 14;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14;
+    -fx-cursor: hand;
+}
+.ghostBtn:hover{ -fx-background-color: rgba(15,23,42,0.10); }
+
+/* ===== Surfaces ===== */
+
+.offresSurface{
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-padding: 12 14 14 14;
+}
+
+.sectionTitle{
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 14.5px;
+    -fx-font-weight: 900;
+}
+
+.listScroll{
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.listScroll .viewport{ -fx-background-color: transparent; }
+
+.offersList{ -fx-padding: 2 2 2 2; }
+
+/* ===== Offer cards (list) ===== */
+
+.offreCard{
+    -fx-background-color: rgba(255,255,255,0.98);
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-padding: 12;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 12, 0, 0, 6);
+    -fx-cursor: hand;
+}
+.offreCard:hover{ -fx-border-color: rgba(59,130,246,0.35); }
+
+.cardTitle{ -fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #0f2a44; }
+.cardMeta{ -fx-text-fill: rgba(15,42,68,0.70); -fx-font-weight: 800; }
+.cardLine{ -fx-text-fill: rgba(15,42,68,0.78); -fx-font-weight: 800; }
+
+.cardActions{ -fx-padding: 6 0 0 0; }
+
+.actionBtn{
+    -fx-background-color: rgba(30,58,95,0.10);
+    -fx-text-fill: #1e3a5f;
+    -fx-font-weight: 900;
+    -fx-background-radius: 12;
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+.actionBtn:hover{ -fx-background-color: rgba(30,58,95,0.16); }
+
+/* ===== Status chip (detail) ===== */
+
+.statusChip{
+    -fx-padding: 6 10;
+    -fx-background-radius: 999;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 10, 0.18, 0, 3);
+}
+.status-ouverte{ -fx-background-color: linear-gradient(to right, #16a34a, #22c55e); }
+.status-cloturee{ -fx-background-color: linear-gradient(to right, #64748b, #94a3b8); }
+.status-annulee{ -fx-background-color: linear-gradient(to right, #dc2626, #ef4444); }
+
+/* ===== Detail ===== */
+
+.detailsLines{ -fx-padding: 2 0 2 0; }
+
+.detailsDesc{
+    -fx-text-fill: rgba(15,42,68,0.72);
+    -fx-font-weight: 700;
+    -fx-padding: 2 0 6 0;
+}
+
+.stateLabel{
+    -fx-text-fill: rgba(122,143,163,0.95);
+    -fx-font-weight: 900;
+    -fx-padding: 6 0 0 0;
+}
+
+.offres-empty{
+    -fx-text-fill: rgba(122,143,163,0.95);
+    -fx-font-weight: 900;
+    -fx-padding: 10 6;
+}
