@@ -1,0 +1,316 @@
+/* ===================================================
+   PAIEMENT VIEW · Intégration API (Stripe / Flouci / Crypto)
+   =================================================== */
+
+.payRoot { -fx-background-color: transparent; }
+.payScroll { -fx-background-color: transparent; }
+.payScroll > .viewport { -fx-background-color: transparent; }
+.payMainContent { -fx-padding: 6 0 18 0; }
+
+/* ═══════ TOP BAR ═══════ */
+.payTopBar { -fx-padding: 0 0 6 0; }
+
+.payBackBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 14;
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+}
+.payBackBtn:hover { -fx-background-color: rgba(15,23,42,0.10); }
+
+.payPageTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 20;
+    -fx-font-weight: 900;
+}
+
+/* ═══════ MODE LABEL ═══════ */
+.payModeLabel {
+    -fx-text-fill: rgba(22,58,92,0.55);
+    -fx-font-size: 11;
+    -fx-font-weight: 700;
+    -fx-font-style: italic;
+    -fx-padding: 0 0 2 0;
+}
+
+/* ═══════ CARDS ═══════ */
+.payCard {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 18;
+    -fx-padding: 18 22 18 22;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 14, 0.18, 0, 5);
+}
+
+.payCardTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 16;
+    -fx-font-weight: 900;
+    -fx-padding: 0 0 4 0;
+}
+
+/* ═══════ LABELS ═══════ */
+.payLabel {
+    -fx-text-fill: rgba(22,58,92,0.70);
+    -fx-font-weight: 800;
+    -fx-font-size: 12.5;
+}
+
+.payValue {
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 13;
+}
+
+.payValueMuted {
+    -fx-text-fill: rgba(22,58,92,0.65);
+    -fx-font-weight: 700;
+    -fx-font-size: 12.5;
+}
+
+/* ═══════ TOTAL ROW ═══════ */
+.payTotalRow {
+    -fx-padding: 10 0 0 0;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-width: 1 0 0 0;
+}
+
+.payTotalLabel {
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 15;
+}
+
+.payTotalValue {
+    -fx-text-fill: #d97706;
+    -fx-font-weight: 900;
+    -fx-font-size: 18;
+}
+
+/* ═══════ MÉTHODE TOGGLE BUTTONS ═══════ */
+.payMethodeRow { -fx-padding: 4 0 4 0; }
+
+.payMethodeBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.12);
+    -fx-border-radius: 14;
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 12;
+    -fx-padding: 10 16 10 16;
+    -fx-cursor: hand;
+}
+.payMethodeBtn:hover {
+    -fx-background-color: rgba(15,23,42,0.10);
+}
+.payMethodeBtn:selected {
+    -fx-background-color: linear-gradient(to right, #d97706, #f59e0b);
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(217,119,6,0.35), 10, 0.18, 0, 4);
+}
+
+/* ── Bouton Crypto (accent violet/bleu) ── */
+.payCryptoBtn:selected {
+    -fx-background-color: linear-gradient(to right, #7c3aed, #a78bfa);
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.35), 10, 0.18, 0, 4);
+}
+
+.payCryptoToggle:selected {
+    -fx-background-color: linear-gradient(to right, #7c3aed, #a78bfa);
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.30), 8, 0.15, 0, 3);
+}
+
+/* ═══════ API NOTE ═══════ */
+.payApiNote {
+    -fx-text-fill: #15803d;
+    -fx-background-color: rgba(22,163,74,0.08);
+    -fx-background-radius: 12;
+    -fx-padding: 12 16 12 16;
+    -fx-font-weight: 800;
+    -fx-font-size: 12.5;
+    -fx-border-color: rgba(22,163,74,0.20);
+    -fx-border-radius: 12;
+}
+
+/* ═══════ FORM SECTION ═══════ */
+.payFormSection {
+    -fx-padding: 12 0 0 0;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-width: 1 0 0 0;
+}
+
+.payFieldLabel {
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 800;
+    -fx-font-size: 12;
+}
+
+.payField {
+    -fx-background-color: rgba(15,23,42,0.04);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(15,23,42,0.12);
+    -fx-border-radius: 12;
+    -fx-padding: 10 14 10 14;
+    -fx-font-size: 13;
+    -fx-font-weight: 700;
+}
+.payField:focused {
+    -fx-border-color: #d97706;
+    -fx-background-color: rgba(217,119,6,0.04);
+}
+
+.payHint {
+    -fx-text-fill: rgba(22,58,92,0.60);
+    -fx-font-size: 11.5;
+    -fx-font-weight: 700;
+    -fx-font-style: italic;
+}
+
+/* ═══════ CRYPTO SECTION ═══════ */
+.payCryptoCard {
+    -fx-background-color: rgba(124,58,237,0.05);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(124,58,237,0.15);
+    -fx-border-radius: 14;
+    -fx-padding: 16 18 16 18;
+}
+
+.payCryptoAddress {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 11.5;
+    -fx-text-fill: #4c1d95;
+}
+
+.payCryptoAmount {
+    -fx-text-fill: #7c3aed;
+    -fx-font-weight: 900;
+    -fx-font-size: 20;
+    -fx-padding: 4 0 4 0;
+}
+
+.payCopyBtn {
+    -fx-background-color: rgba(124,58,237,0.12);
+    -fx-background-radius: 10;
+    -fx-border-color: rgba(124,58,237,0.25);
+    -fx-border-radius: 10;
+    -fx-text-fill: #5b21b6;
+    -fx-font-weight: 900;
+    -fx-font-size: 11;
+    -fx-padding: 8 12 8 12;
+    -fx-cursor: hand;
+}
+.payCopyBtn:hover {
+    -fx-background-color: rgba(124,58,237,0.20);
+}
+
+/* ═══════ ERROR ═══════ */
+.payError {
+    -fx-text-fill: #b91c1c;
+    -fx-background-color: rgba(220,38,38,0.10);
+    -fx-background-radius: 10;
+    -fx-padding: 8 14 8 14;
+    -fx-font-weight: 800;
+    -fx-font-size: 12;
+}
+
+/* ═══════ CONFIRM BUTTON ═══════ */
+.payConfirmBtn {
+    -fx-background-color: linear-gradient(to right, #d97706, #f59e0b);
+    -fx-background-radius: 14;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 14;
+    -fx-padding: 12 28 12 28;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(217,119,6,0.30), 10, 0.18, 0, 4);
+}
+.payConfirmBtn:hover {
+    -fx-background-color: linear-gradient(to right, #b45309, #d97706);
+}
+.payConfirmBtn:disabled {
+    -fx-opacity: 0.5;
+}
+
+/* ═══════ WEBVIEW PANE ═══════ */
+.payWebViewPane {
+    -fx-background-color: #f8fafc;
+}
+
+.payWebTopBar {
+    -fx-background-color: rgba(22,58,92,0.06);
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-width: 0 0 1 0;
+}
+
+.payWebTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 14;
+}
+
+.payWebCancelBtn {
+    -fx-background-color: rgba(220,38,38,0.12);
+    -fx-background-radius: 10;
+    -fx-text-fill: #b91c1c;
+    -fx-font-weight: 900;
+    -fx-font-size: 12;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+}
+.payWebCancelBtn:hover {
+    -fx-background-color: rgba(220,38,38,0.22);
+}
+
+/* ═══════ LOADING PANE ═══════ */
+.payLoadingPane {
+    -fx-background-color: rgba(248,250,252,0.95);
+    -fx-padding: 60 20 60 20;
+}
+
+.payLoadingIcon {
+    -fx-font-size: 48;
+}
+
+.payLoadingText {
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 18;
+}
+
+.payLoadingHint {
+    -fx-text-fill: rgba(22,58,92,0.60);
+    -fx-font-weight: 700;
+    -fx-font-size: 13;
+}
+
+/* ═══════ REÇU PANE ═══════ */
+.payRecuPane {
+    -fx-background-color: rgba(248,250,252,0.95);
+    -fx-padding: 40 20 40 20;
+}
+
+.payRecuIcon {
+    -fx-font-size: 52;
+}
+
+.payRecuTitle {
+    -fx-text-fill: #15803d;
+    -fx-font-weight: 900;
+    -fx-font-size: 24;
+}
+
+.payRecuCard {
+    -fx-background-color: rgba(22,163,74,0.08);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(22,163,74,0.20);
+    -fx-border-radius: 18;
+    -fx-padding: 18 22 18 22;
+    -fx-min-width: 360;
+}

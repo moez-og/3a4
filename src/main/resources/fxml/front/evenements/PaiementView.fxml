@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controllers.front.evenements.PaiementController"
+           styleClass="payRoot"
+           stylesheets="@/styles/evenements/paiement-view.css">
+
+    <!-- ╔═══════════════════════════════════════════════════════╗ -->
+    <!-- ║  LAYER 1 — MAIN CONTENT (formulaires)                ║ -->
+    <!-- ╚═══════════════════════════════════════════════════════╝ -->
+    <ScrollPane fx:id="mainScroll" fitToWidth="true" hbarPolicy="NEVER"
+                vbarPolicy="AS_NEEDED" styleClass="payScroll">
+        <content>
+            <VBox spacing="18" styleClass="payMainContent">
+                <padding><Insets top="14" right="14" bottom="18" left="14"/></padding>
+
+                <!-- ── TOP BAR ── -->
+                <HBox alignment="CENTER_LEFT" spacing="12" styleClass="payTopBar">
+                    <Button text="← Retour" onAction="#goBack" styleClass="payBackBtn"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label text="💳 Paiement" styleClass="payPageTitle"/>
+                </HBox>
+
+                <!-- ── MODE INDICATOR ── -->
+                <Label fx:id="modeLabel" text="" styleClass="payModeLabel" wrapText="true"/>
+
+                <!-- ══════════════ RÉCAP ══════════════ -->
+                <VBox spacing="10" styleClass="payCard">
+                    <Label text="📋 Récapitulatif" styleClass="payCardTitle"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Événement :" styleClass="payLabel"/>
+                        <Label fx:id="recapTitre" text="—" styleClass="payValue"/>
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Dates :" styleClass="payLabel"/>
+                        <Label fx:id="recapDates" text="—" styleClass="payValueMuted"/>
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label text="Tickets :" styleClass="payLabel"/>
+                        <Label fx:id="recapTickets" text="—" styleClass="payValue"/>
+                    </HBox>
+                    <HBox spacing="8" alignment="CENTER_LEFT" styleClass="payTotalRow">
+                        <Label text="Total à payer :" styleClass="payTotalLabel"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="recapTotal" text="0,00 TND" styleClass="payTotalValue"/>
+                    </HBox>
+                </VBox>
+
+                <!-- ══════════════ MÉTHODE DE PAIEMENT ══════════════ -->
+                <VBox spacing="10" styleClass="payCard">
+                    <Label text="💰 Méthode de paiement" styleClass="payCardTitle"/>
+
+                    <HBox spacing="10" alignment="CENTER_LEFT" styleClass="payMethodeRow">
+                        <ToggleButton fx:id="btnCarte"    text="💳 Carte"    styleClass="payMethodeBtn"/>
+                        <ToggleButton fx:id="btnEspeces"  text="💵 Espèces"  styleClass="payMethodeBtn"/>
+                        <ToggleButton fx:id="btnVirement" text="🏦 Virement" styleClass="payMethodeBtn"/>
+                        <ToggleButton fx:id="btnFlouci"   text="📱 Flouci"   styleClass="payMethodeBtn"/>
+                        <ToggleButton fx:id="btnCrypto"   text="₿ Crypto"    styleClass="payMethodeBtn"/>
+                    </HBox>
+
+                    <!-- ── FORM : CARTE BANCAIRE ── -->
+                    <VBox fx:id="formCarte" spacing="10" visible="false" managed="false"
+                          styleClass="payFormSection">
+
+                        <!-- Note API (visible uniquement si Stripe est configuré) -->
+                        <Label fx:id="carteApiNote" visible="false" managed="false"
+                               text="🔒 Paiement sécurisé via Stripe — Vous serez redirigé vers la page Stripe Checkout."
+                               wrapText="true" styleClass="payApiNote"/>
+
+                        <!-- Champs locaux (masqués quand Stripe est configuré) -->
+                        <VBox fx:id="carteFieldsBox" spacing="10">
+                            <Label text="Nom sur la carte" styleClass="payFieldLabel"/>
+                            <TextField fx:id="carteNom" promptText="Jean Dupont" styleClass="payField"/>
+                            <Label text="Numéro de carte" styleClass="payFieldLabel"/>
+                            <TextField fx:id="carteNumero" promptText="4242 4242 4242 4242" styleClass="payField"/>
+                            <HBox spacing="12">
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="Expiration (MM/YY)" styleClass="payFieldLabel"/>
+                                    <TextField fx:id="carteExpiry" promptText="12/26" styleClass="payField"/>
+                                </VBox>
+                                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                                    <Label text="CVV" styleClass="payFieldLabel"/>
+                                    <TextField fx:id="carteCvv" promptText="123" styleClass="payField"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+                    </VBox>
+
+                    <!-- ── FORM : ESPÈCES ── -->
+                    <VBox fx:id="formEspeces" spacing="10" visible="false" managed="false"
+                          styleClass="payFormSection">
+                        <Label text="💵 Paiement en espèces" styleClass="payFieldLabel"/>
+                        <Label text="Rendez-vous au guichet de l'événement avec le montant exact. Votre paiement sera confirmé sur place."
+                               wrapText="true" styleClass="payHint"/>
+                    </VBox>
+
+                    <!-- ── FORM : VIREMENT ── -->
+                    <VBox fx:id="formVirement" spacing="10" visible="false" managed="false"
+                          styleClass="payFormSection">
+                        <Label text="Référence de virement" styleClass="payFieldLabel"/>
+                        <TextField fx:id="virementRef" promptText="Référence bancaire" styleClass="payField"/>
+                        <Label text="Effectuez un virement avec la référence ci-dessus vers le RIB affiché dans votre confirmation."
+                               wrapText="true" styleClass="payHint"/>
+                    </VBox>
+
+                    <!-- ── FORM : FLOUCI ── -->
+                    <VBox fx:id="formFlouci" spacing="10" visible="false" managed="false"
+                          styleClass="payFormSection">
+
+                        <!-- Note API (visible uniquement si Flouci sandbox est configuré) -->
+                        <Label fx:id="flouciApiNote" visible="false" managed="false"
+                               text="📱 Paiement via Flouci — Vous serez redirigé vers la page Flouci pour finaliser."
+                               wrapText="true" styleClass="payApiNote"/>
+
+                        <!-- Champs locaux (masqués quand Flouci est configuré) -->
+                        <VBox fx:id="flouciFieldsBox" spacing="10">
+                            <Label text="Numéro de téléphone Flouci" styleClass="payFieldLabel"/>
+                            <TextField fx:id="flouciPhone" promptText="22 345 678" styleClass="payField"/>
+                            <Label text="Vous recevrez une notification Flouci pour confirmer le paiement."
+                                   wrapText="true" styleClass="payHint"/>
+                        </VBox>
+                    </VBox>
+
+                    <!-- ── FORM : CRYPTO ── -->
+                    <VBox fx:id="formCrypto" spacing="12" visible="false" managed="false"
+                          styleClass="payFormSection">
+
+                        <Label text="Choisissez une crypto-monnaie" styleClass="payFieldLabel"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <ToggleButton fx:id="btnBTC" text="₿ Bitcoin (BTC)"
+                                          styleClass="payMethodeBtn"/>
+                            <ToggleButton fx:id="btnETH" text="⟠ Ethereum (ETH)"
+                                          styleClass="payMethodeBtn"/>
+                        </HBox>
+
+                        <!-- Loading pendant l'appel CoinGecko -->
+                        <Label fx:id="cryptoLoadingLabel" text="⏳ Récupération du taux en cours..."
+                               visible="false" managed="false" styleClass="payHint"/>
+
+                        <!-- Détails crypto (adresse + montant) -->
+                        <VBox fx:id="cryptoDetails" spacing="10" visible="false" managed="false"
+                              styleClass="payCryptoCard">
+
+                            <Label text="Adresse de réception :" styleClass="payFieldLabel"/>
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <TextField fx:id="cryptoAddress" editable="false"
+                                           styleClass="payField" HBox.hgrow="ALWAYS"/>
+                                <Button text="📋 Copier" onAction="#copyCryptoAddress"
+                                        styleClass="payCopyBtn"/>
+                            </HBox>
+
+                            <Label text="Montant exact à envoyer :" styleClass="payFieldLabel"/>
+                            <Label fx:id="cryptoAmount" text="—" styleClass="payCryptoAmount"/>
+                            <Label fx:id="cryptoRate" text="" styleClass="payValueMuted"/>
+
+                            <Label text="⚠️ Envoyez le montant EXACT à l'adresse ci-dessus. Le paiement sera vérifié manuellement."
+                                   wrapText="true" styleClass="payHint"/>
+                        </VBox>
+                    </VBox>
+                </VBox>
+
+                <!-- ══════════════ ERREUR + CONFIRMER ══════════════ -->
+                <VBox spacing="10" alignment="CENTER">
+                    <Label fx:id="errorLabel" text="" visible="false" managed="false"
+                           styleClass="payError" wrapText="true"/>
+                    <Button fx:id="payerBtn" text="Confirmer le paiement"
+                            onAction="#handlePayer" styleClass="payConfirmBtn"
+                            prefWidth="320"/>
+                </VBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+
+    <!-- ╔═══════════════════════════════════════════════════════╗ -->
+    <!-- ║  LAYER 2 — WEBVIEW (Stripe Checkout / Flouci)        ║ -->
+    <!-- ╚═══════════════════════════════════════════════════════╝ -->
+    <VBox fx:id="webViewPane" visible="false" managed="false" styleClass="payWebViewPane">
+        <HBox alignment="CENTER_LEFT" spacing="12" styleClass="payWebTopBar">
+            <padding><Insets top="8" right="14" bottom="8" left="14"/></padding>
+            <Label text="🔒 Paiement sécurisé" styleClass="payWebTitle"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="✕ Annuler" onAction="#cancelWebPayment" styleClass="payWebCancelBtn"/>
+        </HBox>
+        <WebView fx:id="paymentWebView" VBox.vgrow="ALWAYS"/>
+    </VBox>
+
+    <!-- ╔═══════════════════════════════════════════════════════╗ -->
+    <!-- ║  LAYER 3 — LOADING                                   ║ -->
+    <!-- ╚═══════════════════════════════════════════════════════╝ -->
+    <VBox fx:id="loadingPane" spacing="14" alignment="CENTER"
+          visible="false" managed="false" styleClass="payLoadingPane">
+        <Label text="⏳" styleClass="payLoadingIcon"/>
+        <Label fx:id="loadingText" text="Traitement du paiement en cours..."
+               styleClass="payLoadingText"/>
+        <Label text="Veuillez patienter" styleClass="payLoadingHint"/>
+    </VBox>
+
+    <!-- ╔═══════════════════════════════════════════════════════╗ -->
+    <!-- ║  LAYER 4 — REÇU DE CONFIRMATION                     ║ -->
+    <!-- ╚═══════════════════════════════════════════════════════╝ -->
+    <VBox fx:id="recuPane" spacing="16" alignment="CENTER"
+          visible="false" managed="false" styleClass="payRecuPane">
+        <Label text="✅" styleClass="payRecuIcon"/>
+        <Label text="Paiement confirmé !" styleClass="payRecuTitle"/>
+        <VBox spacing="8" styleClass="payRecuCard">
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="Référence :" styleClass="payLabel"/>
+                <Label fx:id="recuRef" text="—" styleClass="payValue"/>
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="Montant :" styleClass="payLabel"/>
+                <Label fx:id="recuMontant" text="—" styleClass="payTotalValue"/>
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="Méthode :" styleClass="payLabel"/>
+                <Label fx:id="recuMethode" text="—" styleClass="payValue"/>
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label text="Date :" styleClass="payLabel"/>
+                <Label fx:id="recuDate" text="—" styleClass="payValueMuted"/>
+            </HBox>
+        </VBox>
+        <Button text="Retour à l'événement" onAction="#handleRetourEvenement"
+                styleClass="payConfirmBtn" prefWidth="260"/>
+    </VBox>
+</StackPane>
