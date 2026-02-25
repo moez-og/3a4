@@ -4,24 +4,23 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import models.lieux.Lieu;
 import models.lieux.LieuHoraire;
 import services.lieux.LieuService;
 
-import java.io.OutputStream;
+import javax.sound.sampled.*;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.nio.file.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,22 +30,45 @@ public class ChatbotController {
     @FXML private ScrollPane messagesScroll;
     @FXML private TextField  inputField;
     @FXML private Button     sendBtn;
+    @FXML private Button     voiceBtn;
     @FXML private Label      statusLabel;
+    @FXML private VBox       historySidebar;
+    @FXML private ScrollPane historyScroll;
+    @FXML private Button     newChatBtn;
 
     // ============================================================
-    //  CONFIGURATION GROQ
-    //  - Creer une cle sur https://console.groq.com
-    //  - Exporter GROQ_API_KEY dans votre environment
+    //  CONFIG GROQ
     // ============================================================
-    private static final String GROQ_API_KEY = System.getenv("GROQ_API_KEY");
-    private static final String GROQ_URL     = "https://api.groq.com/openai/v1/chat/completions";
-    private static final String GROQ_MODEL   = "llama-3.3-70b-versatile";
+    private static final String GROQ_API_KEY  = "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";
+    private static final String GROQ_URL      = "https://api.groq.com/openai/v1/chat/completions";
+    private static final String GROQ_WHISPER  = "https://api.groq.com/openai/v1/audio/transcriptions";
+    private static final String GROQ_MODEL    = "llama-3.3-70b-versatile";
+    private static final String WHISPER_MODEL = "whisper-large-v3-turbo";
+
+    // ============================================================
+    //  HISTORIQUE — fichier JSON local
+    // ============================================================
+    private static final Path HISTORY_DIR  = Paths.get(System.getProperty("user.home"), ".travel-guide");
+    private static final Path HISTORY_FILE = HISTORY_DIR.resolve("chat-history.json");
+    private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final LieuService     lieuService = new LieuService();
     private final ExecutorService executor    = Executors.newSingleThreadExecutor();
     private final List<String[]>  history     = new ArrayList<>();
     private List<Lieu>            allLieux    = new ArrayList<>();
 
+    // Sessions sauvegardées : chaque session = {id, titre, date, messages[]}
+    private final List<ChatSession> sessions  = new ArrayList<>();
+    private ChatSession             currentSession;
+
+    // Enregistrement vocal
+    private TargetDataLine micLine;
+    private volatile boolean recording = false;
+    private ByteArrayOutputStream audioBuffer;
+
+    // ============================================================
+    //  INIT
+    // ============================================================
     @FXML
     public void initialize() {
         inputField.setOnAction(e -> sendMessage());
@@ -54,25 +76,58 @@ public class ChatbotController {
             try { allLieux = lieuService.getAll(); }
             catch (Exception ignored) {}
         });
-        addBotMessage("👋 Bonjour ! Je suis votre assistant Travel Guide propulsé par LLaMA 3 (Groq).\n\n"
-            + "Je connais tous les lieux de votre base de données.\n\n"
-            + "Exemples :\n"
+        loadHistoryFromDisk();
+        refreshHistorySidebar();
+        startNewChat();
+    }
+
+    // ============================================================
+    //  NOUVELLE CONVERSATION
+    // ============================================================
+    @FXML
+    public void startNewChat() {
+        if (currentSession != null && !currentSession.messages.isEmpty()) {
+            saveCurrentSession();
+        }
+        history.clear();
+        messagesBox.getChildren().clear();
+        currentSession = new ChatSession();
+        currentSession.id    = UUID.randomUUID().toString();
+        currentSession.date  = LocalDateTime.now().format(DT_FMT);
+        currentSession.title = "Nouvelle conversation";
+
+        addBotMessage("👋 Bonjour ! Je suis votre assistant Travel Guide propulsé par LLaMA 3.\n\n"
+            + "Exemples de questions :\n"
             + "• « lieux à Tunis »\n"
             + "• « restaurants à La Marsa »\n"
             + "• « horaires de [lieu] »\n"
             + "• « lieux moins de 30 TND »\n\n"
-            + "Que puis-je faire pour vous ? 🗺️");
+            + "Vous pouvez aussi utiliser le 🎤 micro pour parler !");
     }
 
+    // ============================================================
+    //  ENVOI TEXTE
+    // ============================================================
     @FXML
     public void sendMessage() {
         String text = inputField.getText().trim();
         if (text.isEmpty()) return;
         inputField.clear();
+        processUserMessage(text);
+    }
+
+    private void processUserMessage(String text) {
         inputField.setDisable(true);
         sendBtn.setDisable(true);
+        if (voiceBtn != null) voiceBtn.setDisable(true);
         setStatus("Réflexion en cours...", true);
         addUserMessage(text);
+
+        // Mettre à jour le titre de la session avec le premier message
+        if (currentSession.title.equals("Nouvelle conversation") && !text.isEmpty()) {
+            currentSession.title = text.length() > 40 ? text.substring(0, 40) + "..." : text;
+            refreshHistorySidebar();
+        }
 
         executor.submit(() -> {
             try {
@@ -80,21 +135,23 @@ public class ChatbotController {
                 String response = callGroqAPI(text);
                 Platform.runLater(() -> {
                     addBotMessage(response);
+                    // TTS : lire la réponse à voix haute
+                    speakText(response);
                     inputField.setDisable(false);
                     sendBtn.setDisable(false);
+                    if (voiceBtn != null) voiceBtn.setDisable(false);
                     inputField.requestFocus();
                     setStatus("", false);
+                    saveCurrentSession();
+                    refreshHistorySidebar();
                 });
             } catch (Exception e) {
                 String msg = e.getMessage() == null ? e.getClass().getName() : e.getMessage();
                 Platform.runLater(() -> {
-                    addBotMessage("❌ Erreur : " + msg
-                        + "\n\n🔍 Vérifications :\n"
-                        + "• Clé commence par gsk_ ?\n"
-                        + "• Connexion internet active ?\n"
-                        + "• VPN désactivé ?");
+                    addBotMessage("❌ Erreur : " + msg);
                     inputField.setDisable(false);
                     sendBtn.setDisable(false);
+                    if (voiceBtn != null) voiceBtn.setDisable(false);
                     setStatus("", false);
                 });
             }
@@ -102,20 +159,246 @@ public class ChatbotController {
     }
 
     // ============================================================
-    //  APPEL API GROQ (compatible OpenAI)
+    //  VOICE INPUT — bouton micro
     // ============================================================
+    @FXML
+    public void toggleVoice() {
+        if (!recording) startRecording();
+        else stopRecordingAndTranscribe();
+    }
 
+    private void startRecording() {
+        try {
+            AudioFormat fmt = new AudioFormat(16000, 16, 1, true, false);
+            DataLine.Info info = new DataLine.Info(TargetDataLine.class, fmt);
+            if (!AudioSystem.isLineSupported(info)) {
+                addBotMessage("❌ Microphone non disponible sur ce système.");
+                return;
+            }
+            micLine = (TargetDataLine) AudioSystem.getLine(info);
+            micLine.open(fmt);
+            micLine.start();
+            recording = true;
+            audioBuffer = new ByteArrayOutputStream();
+
+            // Style bouton rouge pulsant
+            Platform.runLater(() -> {
+                if (voiceBtn != null) {
+                    voiceBtn.setText("⏹ Stop");
+                    voiceBtn.getStyleClass().removeAll("chatVoiceBtn");
+                    voiceBtn.getStyleClass().add("chatVoiceBtnRecording");
+                }
+                setStatus("🎤 Enregistrement...", true);
+            });
+
+            // Capture audio dans un thread séparé
+            executor.submit(() -> {
+                byte[] buf = new byte[4096];
+                while (recording) {
+                    int n = micLine.read(buf, 0, buf.length);
+                    if (n > 0) audioBuffer.write(buf, 0, n);
+                }
+            });
+
+        } catch (Exception e) {
+            addBotMessage("❌ Impossible d'accéder au microphone : " + e.getMessage());
+        }
+    }
+
+    private void stopRecordingAndTranscribe() {
+        recording = false;
+        if (micLine != null) { micLine.stop(); micLine.close(); }
+
+        Platform.runLater(() -> {
+            if (voiceBtn != null) {
+                voiceBtn.setText("🎤");
+                voiceBtn.getStyleClass().removeAll("chatVoiceBtnRecording");
+                voiceBtn.getStyleClass().add("chatVoiceBtn");
+            }
+            setStatus("Transcription en cours...", true);
+        });
+
+        byte[] audioData = audioBuffer.toByteArray();
+
+        executor.submit(() -> {
+            try {
+                String transcription = transcribeWithGroqWhisper(audioData);
+                Platform.runLater(() -> {
+                    if (transcription != null && !transcription.isBlank()) {
+                        inputField.setText(transcription);
+                        setStatus("", false);
+                        // Envoyer automatiquement
+                        processUserMessage(transcription);
+                        inputField.clear();
+                    } else {
+                        addBotMessage("❌ Transcription vide. Réessayez en parlant plus clairement.");
+                        setStatus("", false);
+                    }
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    addBotMessage("❌ Erreur transcription : " + e.getMessage());
+                    setStatus("", false);
+                });
+            }
+        });
+    }
+
+    // ============================================================
+    //  GROQ WHISPER — transcription audio
+    // ============================================================
+    private String transcribeWithGroqWhisper(byte[] pcmData) throws Exception {
+        // Convertir PCM raw → WAV avec header
+        byte[] wavData = pcmToWav(pcmData, 16000, 16, 1);
+
+        // Construire multipart/form-data manuellement
+        String boundary = "----Boundary" + System.currentTimeMillis();
+        ByteArrayOutputStream body = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(body, true, StandardCharsets.UTF_8);
+
+        // Champ model
+        ps.print("--" + boundary + "\r\n");
+        ps.print("Content-Disposition: form-data; name=\"model\"\r\n\r\n");
+        ps.print(WHISPER_MODEL + "\r\n");
+
+        // Champ language
+        ps.print("--" + boundary + "\r\n");
+        ps.print("Content-Disposition: form-data; name=\"language\"\r\n\r\n");
+        ps.print("fr\r\n");
+
+        // Champ fichier audio
+        ps.print("--" + boundary + "\r\n");
+        ps.print("Content-Disposition: form-data; name=\"file\"; filename=\"audio.wav\"\r\n");
+        ps.print("Content-Type: audio/wav\r\n\r\n");
+        ps.flush();
+        body.write(wavData);
+        ps.print("\r\n--" + boundary + "--\r\n");
+        ps.flush();
+
+        URL url = new URL(GROQ_WHISPER);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Authorization", "Bearer " + GROQ_API_KEY);
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        conn.setDoOutput(true);
+        conn.setConnectTimeout(20000);
+        conn.setReadTimeout(30000);
+
+        try (OutputStream os = conn.getOutputStream()) {
+            body.writeTo(os);
+        }
+
+        int code = conn.getResponseCode();
+        Scanner sc = new Scanner(
+            code == 200 ? conn.getInputStream() : conn.getErrorStream(),
+            StandardCharsets.UTF_8
+        );
+        StringBuilder resp = new StringBuilder();
+        while (sc.hasNextLine()) resp.append(sc.nextLine());
+        sc.close();
+
+        if (code != 200) throw new Exception("Whisper HTTP " + code + ": " + resp);
+
+        // Extraire "text" du JSON : {"text":"..."}
+        String json = resp.toString();
+        int idx = json.indexOf("\"text\":");
+        if (idx < 0) return null;
+        int start = json.indexOf("\"", idx + 7) + 1;
+        int end   = json.indexOf("\"", start);
+        return end > start ? json.substring(start, end) : null;
+    }
+
+    /** Convertit des données PCM brutes en fichier WAV (avec header RIFF) */
+    private byte[] pcmToWav(byte[] pcm, int sampleRate, int bitsPerSample, int channels) throws IOException {
+        int byteRate    = sampleRate * channels * bitsPerSample / 8;
+        int blockAlign  = channels * bitsPerSample / 8;
+        int dataSize    = pcm.length;
+        int chunkSize   = 36 + dataSize;
+
+        ByteArrayOutputStream wav = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(wav);
+
+        // RIFF header
+        dos.writeBytes("RIFF");
+        writeIntLE(dos, chunkSize);
+        dos.writeBytes("WAVE");
+        // fmt chunk
+        dos.writeBytes("fmt ");
+        writeIntLE(dos, 16);
+        writeShortLE(dos, (short) 1);          // PCM
+        writeShortLE(dos, (short) channels);
+        writeIntLE(dos, sampleRate);
+        writeIntLE(dos, byteRate);
+        writeShortLE(dos, (short) blockAlign);
+        writeShortLE(dos, (short) bitsPerSample);
+        // data chunk
+        dos.writeBytes("data");
+        writeIntLE(dos, dataSize);
+        dos.write(pcm);
+        dos.flush();
+        return wav.toByteArray();
+    }
+
+    private void writeIntLE(DataOutputStream dos, int v) throws IOException {
+        dos.write(v & 0xFF); dos.write((v >> 8) & 0xFF);
+        dos.write((v >> 16) & 0xFF); dos.write((v >> 24) & 0xFF);
+    }
+
+    private void writeShortLE(DataOutputStream dos, short v) throws IOException {
+        dos.write(v & 0xFF); dos.write((v >> 8) & 0xFF);
+    }
+
+    // ============================================================
+    //  TTS — synthèse vocale via PowerShell SAPI (Windows)
+    // ============================================================
+    private void speakText(String text) {
+        // Nettoyer le texte pour la synthèse (enlever emojis et markdown)
+        String clean = text
+            .replaceAll("[^\\p{L}\\p{N}\\p{P}\\s]", " ")
+            .replace("**", "").replace("##", "").replace("• ", "")
+            .replaceAll("\\s+", " ").trim();
+
+        if (clean.length() > 300) clean = clean.substring(0, 300) + "...";
+
+        final String ttsText = clean;
+        executor.submit(() -> {
+            try {
+                String os = System.getProperty("os.name", "").toLowerCase();
+                if (os.contains("win")) {
+                    // Windows : PowerShell + SAPI (natif, aucune install)
+                    String ps = String.format(
+                        "Add-Type -AssemblyName System.Speech; " +
+                        "$s = New-Object System.Speech.Synthesis.SpeechSynthesizer; " +
+                        "$s.Rate = 1; $s.Speak('%s');",
+                        ttsText.replace("'", " ")
+                    );
+                    new ProcessBuilder("powershell", "-Command", ps)
+                        .redirectErrorStream(true).start().waitFor();
+                } else if (os.contains("mac")) {
+                    // macOS : commande say (natif)
+                    new ProcessBuilder("say", "-v", "Thomas", ttsText)
+                        .start().waitFor();
+                } else {
+                    // Linux : espeak (si installé)
+                    new ProcessBuilder("espeak", "-v", "fr", ttsText)
+                        .start().waitFor();
+                }
+            } catch (Exception ignored) {
+                // TTS silencieux si non disponible
+            }
+        });
+    }
+
+    // ============================================================
+    //  GROQ API — LLaMA
+    // ============================================================
     private String callGroqAPI(String userMessage) throws Exception {
-        String apiKey = getGroqApiKey();
         history.add(new String[]{"user", userMessage});
 
-        // Construire le tableau messages JSON avec system + historique + question
         StringBuilder msgs = new StringBuilder("[");
+        msgs.append("{\"role\":\"system\",\"content\":\"")
+            .append(escapeJson(buildSystemPrompt())).append("\"}");
 
-        // Message système avec toutes les données BDD
-        msgs.append("{\"role\":\"system\",\"content\":\"").append(escapeJson(buildSystemPrompt())).append("\"}");
-
-        // Historique (max 10 derniers échanges)
         int start = Math.max(0, history.size() - 10);
         for (int i = start; i < history.size(); i++) {
             msgs.append(",{\"role\":\"").append(history.get(i)[0])
@@ -123,18 +406,14 @@ public class ChatbotController {
         }
         msgs.append("]");
 
-        String body = "{"
-            + "\"model\":\"" + GROQ_MODEL + "\","
-            + "\"messages\":" + msgs + ","
-            + "\"max_tokens\":1024,"
-            + "\"temperature\":0.7"
-            + "}";
+        String body = "{\"model\":\"" + GROQ_MODEL + "\",\"messages\":" + msgs
+            + ",\"max_tokens\":1024,\"temperature\":0.7}";
 
         URL url = new URL(GROQ_URL);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("Authorization", "Bearer " + apiKey);
+        conn.setRequestProperty("Authorization", "Bearer " + GROQ_API_KEY);
         conn.setDoOutput(true);
         conn.setConnectTimeout(15000);
         conn.setReadTimeout(30000);
@@ -156,97 +435,234 @@ public class ChatbotController {
 
         String answer = extractGroqText(resp.toString());
         history.add(new String[]{"assistant", answer});
+
+        // Sauvegarder dans la session courante
+        currentSession.messages.add(new String[]{"user", userMessage});
+        currentSession.messages.add(new String[]{"bot", answer});
+
         return answer;
     }
 
-    private String getGroqApiKey() {
-        if (GROQ_API_KEY == null || GROQ_API_KEY.trim().isEmpty()) {
-            throw new IllegalStateException("Missing GROQ_API_KEY environment variable");
+    // ============================================================
+    //  HISTORIQUE — sauvegarde/chargement JSON
+    // ============================================================
+    private void saveCurrentSession() {
+        try {
+            Files.createDirectories(HISTORY_DIR);
+            // Lire l'existant ou créer
+            List<String> lines = new ArrayList<>();
+            if (Files.exists(HISTORY_FILE)) {
+                lines = Files.readAllLines(HISTORY_FILE, StandardCharsets.UTF_8);
+            }
+
+            // Construire JSON de la session courante
+            String sessionJson = sessionToJson(currentSession);
+
+            // Remplacer ou ajouter
+            boolean found = false;
+            for (int i = 0; i < lines.size(); i++) {
+                if (lines.get(i).contains("\"id\":\"" + currentSession.id + "\"")) {
+                    lines.set(i, sessionJson);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) lines.add(0, sessionJson);
+
+            // Garder max 20 sessions
+            if (lines.size() > 20) lines = lines.subList(0, 20);
+
+            Files.write(HISTORY_FILE, lines, StandardCharsets.UTF_8);
+
+            // Mettre à jour la liste en mémoire
+            if (!found) sessions.add(0, currentSession);
+
+        } catch (Exception ignored) {}
+    }
+
+    private void loadHistoryFromDisk() {
+        try {
+            if (!Files.exists(HISTORY_FILE)) return;
+            List<String> lines = Files.readAllLines(HISTORY_FILE, StandardCharsets.UTF_8);
+            for (String line : lines) {
+                ChatSession s = jsonToSession(line);
+                if (s != null) sessions.add(s);
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private void refreshHistorySidebar() {
+        Platform.runLater(() -> {
+            if (historySidebar == null) return;
+            historySidebar.getChildren().clear();
+
+            // Titre section
+            Label titre = new Label("Historique");
+            titre.getStyleClass().add("historyTitle");
+            historySidebar.getChildren().add(titre);
+
+            if (sessions.isEmpty()) {
+                Label empty = new Label("Aucune conversation");
+                empty.getStyleClass().add("historyEmpty");
+                historySidebar.getChildren().add(empty);
+                return;
+            }
+
+            for (ChatSession s : sessions) {
+                VBox card = new VBox(3);
+                card.getStyleClass().add("historyCard");
+                if (currentSession != null && s.id.equals(currentSession.id))
+                    card.getStyleClass().add("historyCardActive");
+
+                Label titleLbl = new Label(s.title);
+                titleLbl.getStyleClass().add("historyCardTitle");
+                titleLbl.setWrapText(true);
+                titleLbl.setMaxWidth(180);
+
+                Label dateLbl = new Label(s.date + " · " + s.messages.size()/2 + " msg");
+                dateLbl.getStyleClass().add("historyCardDate");
+
+                card.getChildren().addAll(titleLbl, dateLbl);
+
+                // Clic → recharger la session
+                final ChatSession session = s;
+                card.setOnMouseClicked(e -> loadSession(session));
+
+                historySidebar.getChildren().add(card);
+            }
+        });
+    }
+
+    private void loadSession(ChatSession s) {
+        history.clear();
+        messagesBox.getChildren().clear();
+        currentSession = s;
+
+        for (String[] msg : s.messages) {
+            if ("user".equals(msg[0])) {
+                history.add(new String[]{"user", msg[1]});
+                addUserMessage(msg[1]);
+            } else {
+                history.add(new String[]{"assistant", msg[1]});
+                addBotMessage(msg[1]);
+            }
         }
-        return GROQ_API_KEY.trim();
+        refreshHistorySidebar();
     }
 
     // ============================================================
-    //  SYSTEM PROMPT AVEC DONNÉES BDD
+    //  JSON simplifié pour sessions
     // ============================================================
+    private String sessionToJson(ChatSession s) {
+        StringBuilder sb = new StringBuilder("{");
+        sb.append("\"id\":\"").append(escapeJson(s.id)).append("\",");
+        sb.append("\"title\":\"").append(escapeJson(s.title)).append("\",");
+        sb.append("\"date\":\"").append(escapeJson(s.date)).append("\",");
+        sb.append("\"messages\":[");
+        for (int i = 0; i < s.messages.size(); i++) {
+            if (i > 0) sb.append(",");
+            sb.append("{\"r\":\"").append(escapeJson(s.messages.get(i)[0]))
+              .append("\",\"c\":\"").append(escapeJson(s.messages.get(i)[1])).append("\"}");
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
 
+    private ChatSession jsonToSession(String json) {
+        try {
+            ChatSession s = new ChatSession();
+            s.id    = extractJsonField(json, "id");
+            s.title = extractJsonField(json, "title");
+            s.date  = extractJsonField(json, "date");
+            // Parser messages
+            int msgsStart = json.indexOf("\"messages\":[") + 12;
+            int msgsEnd   = json.lastIndexOf("]");
+            if (msgsStart > 12 && msgsEnd > msgsStart) {
+                String msgsStr = json.substring(msgsStart, msgsEnd);
+                String[] parts = msgsStr.split("\\},\\{");
+                for (String p : parts) {
+                    String r = extractJsonField(p, "r");
+                    String c = extractJsonField(p, "c");
+                    if (r != null && c != null) s.messages.add(new String[]{r, c});
+                }
+            }
+            return s.id != null ? s : null;
+        } catch (Exception e) { return null; }
+    }
+
+    private String extractJsonField(String json, String field) {
+        String key = "\"" + field + "\":\"";
+        int idx = json.indexOf(key);
+        if (idx < 0) return null;
+        int start = idx + key.length();
+        int end = start;
+        while (end < json.length()) {
+            if (json.charAt(end) == '"' && json.charAt(end-1) != '\\') break;
+            end++;
+        }
+        return json.substring(start, end)
+            .replace("\\n", "\n").replace("\\\"", "\"").replace("\\\\", "\\");
+    }
+
+    // ============================================================
+    //  SYSTEM PROMPT
+    // ============================================================
     private String buildSystemPrompt() {
         StringBuilder sb = new StringBuilder();
         sb.append("Tu es un assistant expert en voyages pour l'application Travel Guide. ");
         sb.append("Tu parles TOUJOURS en français. Tu es amical, concis et précis. ");
-        sb.append("Utilise des emojis pour rendre tes réponses vivantes. ");
-        sb.append("Quand on te demande un lieu, donne ses informations complètes. ");
-        sb.append("Quand on te demande des recommandations, propose les plus pertinents.\n\n");
-
-        sb.append("BASE DE DONNÉES DES LIEUX (").append(allLieux.size()).append(" lieux au total) :\n\n");
+        sb.append("Utilise des emojis. Quand on te demande un lieu, donne ses infos complètes.\n\n");
+        sb.append("BASE DE DONNÉES (").append(allLieux.size()).append(" lieux) :\n");
         for (Lieu l : allLieux) {
-            sb.append("NOM: ").append(s(l.getNom()))
-              .append(" | VILLE: ").append(s(l.getVille()))
-              .append(" | CATEGORIE: ").append(s(l.getCategorie()))
-              .append(" | ADRESSE: ").append(s(l.getAdresse()));
-            if (!s(l.getTelephone()).isBlank())
-                sb.append(" | TEL: ").append(l.getTelephone());
-            if (!s(l.getSiteWeb()).isBlank())
-                sb.append(" | WEB: ").append(l.getSiteWeb());
-            if (!s(l.getDescription()).isBlank())
-                sb.append(" | DESC: ").append(l.getDescription());
-            if (l.getBudgetMin() != null)
-                sb.append(" | BUDGET_MIN: ").append(l.getBudgetMin()).append("TND");
-            if (l.getBudgetMax() != null)
-                sb.append(" | BUDGET_MAX: ").append(l.getBudgetMax()).append("TND");
-            if (l.getHoraires() != null) {
+            sb.append("NOM:").append(s(l.getNom()))
+              .append("|VILLE:").append(s(l.getVille()))
+              .append("|CAT:").append(s(l.getCategorie()))
+              .append("|ADR:").append(s(l.getAdresse()));
+            if (!s(l.getTelephone()).isBlank()) sb.append("|TEL:").append(l.getTelephone());
+            if (!s(l.getSiteWeb()).isBlank())   sb.append("|WEB:").append(l.getSiteWeb());
+            if (!s(l.getDescription()).isBlank()) sb.append("|DESC:").append(l.getDescription());
+            if (l.getBudgetMin() != null) sb.append("|BMIN:").append(l.getBudgetMin());
+            if (l.getBudgetMax() != null) sb.append("|BMAX:").append(l.getBudgetMax());
+            if (l.getHoraires() != null)
                 l.getHoraires().stream().filter(LieuHoraire::isOuvert).forEach(h ->
-                    sb.append(" | ").append(h.getJour()).append(": ")
-                      .append(s(h.getHeureOuverture1())).append("-").append(s(h.getHeureFermeture1()))
-                );
-            }
+                    sb.append("|").append(h.getJour()).append(":")
+                      .append(s(h.getHeureOuverture1())).append("-").append(s(h.getHeureFermeture1())));
             sb.append("\n");
         }
         return sb.toString();
     }
 
     // ============================================================
-    //  EXTRACTION TEXTE RÉPONSE GROQ (format OpenAI)
+    //  EXTRACTION RÉPONSE GROQ
     // ============================================================
-
     private String extractGroqText(String json) {
         try {
-            // Format: {"choices":[{"message":{"content":"..."}}]}
-            int idx = json.indexOf("\"content\":");
-            if (idx < 0) return "Réponse inattendue : " + json.substring(0, Math.min(300, json.length()));
+            int idx   = json.indexOf("\"content\":");
+            if (idx < 0) return "Réponse inattendue.";
             int start = json.indexOf("\"", idx + 10) + 1;
-            int end = start;
-            // Trouver la fin en gérant les échappements
+            int end   = start;
             while (end < json.length()) {
                 char c = json.charAt(end);
-                if (c == '"' && json.charAt(end - 1) != '\\') break;
+                if (c == '"' && json.charAt(end-1) != '\\') break;
                 end++;
             }
-            if (start <= 0 || end <= start) return json;
             return json.substring(start, end)
-                .replace("\\n", "\n")
-                .replace("\\\"", "\"")
-                .replace("\\/", "/")
-                .replace("\\\\", "\\")
-                .replace("**", "")
-                .replace("## ", "")
-                .replace("* ", "• ");
-        } catch (Exception e) {
-            return "Erreur parsing : " + e.getMessage();
-        }
+                .replace("\\n", "\n").replace("\\\"", "\"")
+                .replace("\\/", "/").replace("\\\\", "\\")
+                .replace("**", "").replace("## ", "").replace("* ", "• ");
+        } catch (Exception e) { return "Erreur parsing : " + e.getMessage(); }
     }
 
     // ============================================================
     //  UI
     // ============================================================
-
     private void addUserMessage(String text) {
         HBox row = new HBox();
         row.setAlignment(Pos.CENTER_RIGHT);
-        row.setPadding(new Insets(4, 8, 4, 60));
+        row.setPadding(new Insets(3, 8, 3, 60));
         Label bubble = new Label(text);
         bubble.setWrapText(true);
-        bubble.setMaxWidth(400);
+        bubble.setMaxWidth(420);
         bubble.getStyleClass().add("chatBubbleUser");
         row.getChildren().add(bubble);
         messagesBox.getChildren().add(row);
@@ -256,14 +672,14 @@ public class ChatbotController {
     private void addBotMessage(String text) {
         HBox row = new HBox(10);
         row.setAlignment(Pos.TOP_LEFT);
-        row.setPadding(new Insets(4, 60, 4, 8));
-        Label avatar = new Label("🤖");
+        row.setPadding(new Insets(3, 60, 3, 8));
+        Label avatar = new Label("✦");
         avatar.getStyleClass().add("chatAvatar");
         avatar.setMinSize(34, 34);
         avatar.setMaxSize(34, 34);
         Label bubble = new Label(text);
         bubble.setWrapText(true);
-        bubble.setMaxWidth(500);
+        bubble.setMaxWidth(520);
         bubble.getStyleClass().add("chatBubbleBot");
         HBox.setHgrow(bubble, Priority.SOMETIMES);
         row.getChildren().addAll(avatar, bubble);
@@ -272,11 +688,13 @@ public class ChatbotController {
     }
 
     private void setStatus(String text, boolean visible) {
-        if (statusLabel != null) {
-            statusLabel.setText(text);
-            statusLabel.setVisible(visible);
-            statusLabel.setManaged(visible);
-        }
+        Platform.runLater(() -> {
+            if (statusLabel != null) {
+                statusLabel.setText(text);
+                statusLabel.setVisible(visible);
+                statusLabel.setManaged(visible);
+            }
+        });
     }
 
     private void scrollToBottom() {
@@ -285,16 +703,34 @@ public class ChatbotController {
 
     @FXML
     public void clearHistory() {
+        saveCurrentSession();
         history.clear();
         messagesBox.getChildren().clear();
-        addBotMessage("Conversation réinitialisée. Comment puis-je vous aider ? 😊");
+        currentSession = new ChatSession();
+        currentSession.id    = UUID.randomUUID().toString();
+        currentSession.date  = LocalDateTime.now().format(DT_FMT);
+        currentSession.title = "Nouvelle conversation";
+        addBotMessage("Conversation effacée. Comment puis-je vous aider ? 😊");
     }
 
+    // ============================================================
+    //  UTILS
+    // ============================================================
     private String escapeJson(String s) {
         if (s == null) return "";
-        return s.replace("\\", "\\\\").replace("\"", "\\\"")
-                .replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t");
+        return s.replace("\\","\\\\").replace("\"","\\\"")
+                .replace("\n","\\n").replace("\r","\\r").replace("\t","\\t");
     }
 
     private String s(String v) { return v == null ? "" : v; }
+
+    // ============================================================
+    //  MODÈLE SESSION
+    // ============================================================
+    static class ChatSession {
+        String id;
+        String title;
+        String date;
+        List<String[]> messages = new ArrayList<>();
+    }
 }

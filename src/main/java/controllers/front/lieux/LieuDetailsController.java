@@ -30,6 +30,7 @@ import models.lieux.LieuHoraire;
 import models.users.User;
 import services.lieux.EvaluationLieuService;
 import services.lieux.LieuService;
+import services.lieux.ModerationService;
 import utils.ui.ShellNavigator;
 
 import java.awt.Desktop;
@@ -86,6 +87,7 @@ public class LieuDetailsController {
 
     private final LieuService lieuService = new LieuService();
     private final EvaluationLieuService evalService = new EvaluationLieuService();
+    private final ModerationService moderationService = new ModerationService();
 
     private ShellNavigator navigator;
     private User currentUser;
@@ -736,6 +738,8 @@ public class LieuDetailsController {
             "-fx-text-fill: #dc2626; -fx-font-size: 12px;" +
             "-fx-font-weight: 800; -fx-padding: 2 0 0 2;"
         );
+        lblErrComment.setWrapText(true);
+        lblErrComment.setMaxWidth(400);
         lblErrComment.setVisible(false);
         lblErrComment.setManaged(false);
 
@@ -823,6 +827,17 @@ public class LieuDetailsController {
                     errMsg = "Commentaire trop court. Minimum " + MIN_CHARS + " caracteres requis (actuellement " + com.length() + ").";
                 } else if (com.length() > MAX_CHARS) {
                     errMsg = "Commentaire trop long. Maximum " + MAX_CHARS + " caracteres (actuellement " + com.length() + ").";
+                } else {
+                    // ── Modération bad words ──
+                    ModerationService.ModerationResult modResult = moderationService.analyze(com);
+
+                    if (modResult.isBlocked()) {
+                        errMsg = modResult.reason;
+                    } else if (modResult.isWarning()) {
+                        // Avertissement : on propose le texte censuré mais on bloque quand même
+                        errMsg = modResult.reason
+                            + "\n\nSuggestion : " + modResult.suggestion;
+                    }
                 }
 
                 if (!errMsg.isEmpty()) {
