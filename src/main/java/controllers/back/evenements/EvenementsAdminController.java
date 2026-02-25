@@ -1,20 +1,6 @@
 package controllers.back.evenements;
 
-// ══════════════════════════════════════════════════════════════════
-//  CORRECTIFS À APPLIQUER dans EvenementsAdminController.java
-//
-//  PROBLÈME 1 → résolu par fix_ticket_unique.sql (côté DB)
-//               "Duplicate entry for key 'uk_ticket_inscription'"
-//
-//  PROBLÈME 2 → résolu ici : paiement ne s'affiche pas immédiatement
-//
-//  Remplace UNIQUEMENT ces 3 méthodes dans ton controller existant :
-//    1. showPanelTickets()
-//    2. onGenererTicket()
-//    3. reloadTickets()           (supprime aussi dans btnDel)
-//  Et AJOUTE la nouvelle méthode refreshTicketsHeader()
-// ══════════════════════════════════════════════════════════════════
-
+import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -22,31 +8,52 @@ import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import models.evenements.Evenement;
 import models.evenements.Inscription;
 import models.evenements.Ticket;
+import models.lieux.Lieu;
+import models.users.User;
 import services.evenements.EvenementService;
 import services.evenements.InscriptionService;
 import services.evenements.TicketService;
+import utils.Mydb;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public class EvenementsAdminController {
 
     private static final DateTimeFormatter DATE_FMT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    private static final double CARD_MIN_W    = 300;
+    private static final double CARD_TARGET_W = 320;
 
     @FXML private VBox panelEvents;
     @FXML private VBox panelInscriptions;
@@ -72,6 +79,8 @@ public class EvenementsAdminController {
     private final EvenementService   evenementService   = new EvenementService();
     private final InscriptionService inscriptionService = new InscriptionService();
     private final TicketService      ticketService      = new TicketService();
+    private List<Lieu> allLieux = List.of();
+    private List<User> allUsers = List.of();
 
     private final ObservableList<Evenement> masterList   = FXCollections.observableArrayList();
     private final FilteredList<Evenement>  filteredList = new FilteredList<>(masterList, p -> true);
@@ -90,6 +99,8 @@ public class EvenementsAdminController {
         setupFilterCombo();
         setupSearchFilter();
         setupResponsiveTiles();
+        allLieux = loadAllLieux();
+        allUsers = loadAllUsers();
         loadData();
         showPanelEvents();
     }
@@ -130,11 +141,14 @@ public class EvenementsAdminController {
             double w = b.getWidth();
             if (lastViewportW > 0 && Math.abs(w - lastViewportW) < 0.5) return;
             lastViewportW = w;
-            cardsPane.setPrefTileWidth(Math.max(260, (w - 12 - 28) / 3.0));
+            double tileW = Math.max(CARD_MIN_W, (w - 12 - 28) / 3.0);
+            cardsPane.setPrefTileWidth(tileW);
         });
         Bounds b = cardsScroll.getViewportBounds();
-        if (b != null && b.getWidth() > 0)
-            cardsPane.setPrefTileWidth(Math.max(260, (b.getWidth() - 12 - 28) / 3.0));
+        if (b != null && b.getWidth() > 0) {
+            double tileW = Math.max(CARD_MIN_W, (b.getWidth() - 12 - 28) / 3.0);
+            cardsPane.setPrefTileWidth(tileW);
+        }
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -189,26 +203,59 @@ public class EvenementsAdminController {
         VBox card = new VBox(8);
         card.getStyleClass().add("lieu-card");
 
+        // ── Image avec statut chip overlay ──
+        ImageView cardIV = new ImageView();
+        cardIV.setFitWidth(CARD_TARGET_W - 24);
+        cardIV.setFitHeight(160);
+        cardIV.setPreserveRatio(false);
+        cardIV.setSmooth(true);
+        cardIV.setCache(true);
+        cardIV.setCacheHint(CacheHint.SPEED);
+        Rectangle clip = new Rectangle(CARD_TARGET_W - 24, 160);
+        clip.setArcWidth(18); clip.setArcHeight(18);
+        cardIV.setClip(clip);
+        cardIV.setImage(loadImageOrFallback(e.getImageUrl()));
+
+        // Bind image width to card width
+        card.widthProperty().addListener((obs, o, w) -> {
+            double iw = Math.max(200, w.doubleValue() - 24);
+            cardIV.setFitWidth(iw);
+            clip.setWidth(iw);
+        });
+
+        Label chipStatut = new Label(safeStr(e.getStatut()));
+        chipStatut.getStyleClass().addAll("statusChip",
+                "status-" + safeStr(e.getStatut()).toLowerCase());
+
+        StackPane imgWrap = new StackPane(cardIV, chipStatut);
+        imgWrap.getStyleClass().add("cardImageWrap");
+        StackPane.setAlignment(chipStatut, Pos.TOP_LEFT);
+        StackPane.setMargin(chipStatut, new Insets(8, 0, 0, 8));
+
         Label title = new Label(safeStr(e.getTitre()));
-        title.getStyleClass().add("card-title");
+        title.getStyleClass().add("cardTitle");
         title.setWrapText(true);
 
         Label meta = new Label(
-                "📅 " + formatLDT(e.getDateDebut()) + "  →  " + formatLDT(e.getDateFin())
-                        + "\n👥 " + e.getCapaciteMax() + " places   •   💰 " + e.getPrix() + " TND");
-        meta.getStyleClass().add("card-meta");
+                "📅 " + formatLDT(e.getDateDebut()) + "  →  " + formatLDT(e.getDateFin()));
+        meta.getStyleClass().add("cardMeta");
         meta.setWrapText(true);
 
-        HBox chips = new HBox(8);
-        Label chipStatut = new Label(safeStr(e.getStatut()));
-        chipStatut.getStyleClass().add("card-chip");
-        chipStatut.setStyle(chipStatutStyle(e.getStatut()));
-        Label chipType = new Label(safeStr(e.getType()));
-        chipType.getStyleClass().add("card-chip");
-        chips.getChildren().addAll(chipStatut, chipType);
+        Label details = new Label(
+                "👥 " + e.getCapaciteMax() + " places   •   💰 " + e.getPrix() + " TND"
+                + "   •   " + safeStr(e.getType()));
+        details.getStyleClass().add("cardLine");
+        details.setWrapText(true);
 
-        Label lieu = new Label("📍 " + (e.getLieuId() != null ? "Lieu #" + e.getLieuId() : "Sans lieu"));
-        lieu.getStyleClass().add("card-muted");
+        String lieuName = "Sans lieu";
+        if (e.getLieuId() != null) {
+            lieuName = allLieux.stream()
+                    .filter(l -> l.getId() == e.getLieuId())
+                    .map(Lieu::getNom)
+                    .findFirst().orElse("Lieu #" + e.getLieuId());
+        }
+        Label lieu = new Label("📍 " + lieuName);
+        lieu.getStyleClass().add("cardLine");
 
         Button btnEdit = new Button("Modifier");
         Button btnDel  = new Button("Supprimer");
@@ -228,7 +275,7 @@ public class EvenementsAdminController {
 
         HBox actions = new HBox(10, btnEdit, btnDel);
         actions.getStyleClass().add("card-actions");
-        card.getChildren().addAll(title, meta, chips, lieu, actions);
+        card.getChildren().addAll(imgWrap, title, meta, details, lieu, actions);
         card.setOnMouseClicked(ev -> { selectCard(card); showPanelInscriptions(e); });
         return card;
     }
@@ -251,41 +298,315 @@ public class EvenementsAdminController {
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setTitle(isEdit ? "Modifier Événement" : "Ajouter Événement");
 
-        TextField tfTitre     = new TextField(); tfTitre.setPromptText("Min. 3 caractères");
-        TextArea  taDesc      = new TextArea();  taDesc.setPromptText("Description (optionnelle)"); taDesc.setPrefRowCount(3);
-        
-        // Date Début avec DatePicker + temps
-        DatePicker dpDateDebut = new DatePicker(); dpDateDebut.setPrefWidth(150);
-        Spinner<Integer> spHeureDebut = new Spinner<>(0, 23, 10); spHeureDebut.setPrefWidth(60); spHeureDebut.setEditable(true);
-        Spinner<Integer> spMinuteDebut = new Spinner<>(0, 59, 0); spMinuteDebut.setPrefWidth(60); spMinuteDebut.setEditable(true);
-        HBox hbDateDebut = new HBox(10, dpDateDebut, new Label("Heure:"), spHeureDebut, new Label("Min:"), spMinuteDebut);
+        // ═══════════════════════════════════════
+        //  CHAMPS DU FORMULAIRE
+        // ═══════════════════════════════════════
+        TextField tfTitre = new TextField();
+        tfTitre.setPromptText("Titre de l'événement (3 à 100 caractères)");
+
+        TextArea taDesc = new TextArea();
+        taDesc.setPromptText("Description (max 500 caractères)");
+        taDesc.setPrefRowCount(3);
+        taDesc.setWrapText(true);
+
+        // Limites de saisie
+        tfTitre.textProperty().addListener((obs, o, n) -> { if (n.length() > 100) tfTitre.setText(o); });
+        taDesc.textProperty().addListener((obs, o, n) -> { if (n.length() > 500) taDesc.setText(o); });
+
+        // Date Début
+        DatePicker dpDateDebut = new DatePicker();
+        dpDateDebut.setPrefWidth(150);
+        dpDateDebut.setDayCellFactory(p -> new DateCell() {
+            @Override public void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) return;
+                setDisable(item.isBefore(LocalDate.now()));
+            }
+        });
+        Spinner<Integer> spHeureDebut = new Spinner<>(0, 23, 10);
+        spHeureDebut.setPrefWidth(110); spHeureDebut.setEditable(true);
+        Spinner<Integer> spMinuteDebut = new Spinner<>(0, 59, 0);
+        spMinuteDebut.setPrefWidth(110); spMinuteDebut.setEditable(true);
+        HBox hbDateDebut = new HBox(10, dpDateDebut, new Label("Heure"), spHeureDebut, new Label("Min"), spMinuteDebut);
         hbDateDebut.setAlignment(Pos.CENTER_LEFT);
-        
-        // Date Fin avec DatePicker + temps
-        DatePicker dpDateFin = new DatePicker(); dpDateFin.setPrefWidth(150);
-        Spinner<Integer> spHeureFin = new Spinner<>(0, 23, 18); spHeureFin.setPrefWidth(60); spHeureFin.setEditable(true);
-        Spinner<Integer> spMinuteFin = new Spinner<>(0, 59, 0); spMinuteFin.setPrefWidth(60); spMinuteFin.setEditable(true);
-        HBox hbDateFin = new HBox(10, dpDateFin, new Label("Heure:"), spHeureFin, new Label("Min:"), spMinuteFin);
+
+        // Date Fin
+        DatePicker dpDateFin = new DatePicker();
+        dpDateFin.setPrefWidth(150);
+        dpDateFin.setDayCellFactory(p -> new DateCell() {
+            @Override public void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) return;
+                setDisable(item.isBefore(LocalDate.now()));
+            }
+        });
+        Spinner<Integer> spHeureFin = new Spinner<>(0, 23, 18);
+        spHeureFin.setPrefWidth(110); spHeureFin.setEditable(true);
+        Spinner<Integer> spMinuteFin = new Spinner<>(0, 59, 0);
+        spMinuteFin.setPrefWidth(110); spMinuteFin.setEditable(true);
+        HBox hbDateFin = new HBox(10, dpDateFin, new Label("Heure"), spHeureFin, new Label("Min"), spMinuteFin);
         hbDateFin.setAlignment(Pos.CENTER_LEFT);
-        
-        TextField tfCapacite  = new TextField(); tfCapacite.setPromptText("Entier > 0");
-        TextField tfPrix      = new TextField(); tfPrix.setPromptText("Décimal ≥ 0  ex: 25.5");
+
+        TextField tfCapacite = new TextField();
+        tfCapacite.setPromptText("Entier entre 1 et 100 000");
+        TextField tfPrix = new TextField();
+        tfPrix.setPromptText("Prix en TND (ex: 25.50)");
+
         ComboBox<String> cbStatut = new ComboBox<>();
         cbStatut.setItems(FXCollections.observableArrayList("OUVERT", "FERME", "ANNULE"));
         cbStatut.setMaxWidth(Double.MAX_VALUE);
+
         ComboBox<String> cbType = new ComboBox<>();
         cbType.setItems(FXCollections.observableArrayList("PUBLIC", "PRIVE"));
         cbType.setMaxWidth(Double.MAX_VALUE);
-        TextField tfLieuId   = new TextField(); tfLieuId.setPromptText("ID lieu (optionnel)");
-        TextField tfImageUrl  = new TextField(); tfImageUrl.setPromptText("URL image (optionnel)");
-        Label lblErreur = new Label();
-        lblErreur.setStyle("-fx-text-fill:#dc2626;-fx-font-weight:bold;-fx-font-size:12px;");
-        lblErreur.setWrapText(true);
 
-        tfCapacite.textProperty().addListener((obs, o, n) -> { if (!n.matches("\\d*")) tfCapacite.setText(o); });
-        tfPrix.textProperty().addListener((obs, o, n)     -> { if (!n.matches("\\d*\\.?\\d*")) tfPrix.setText(o); });
-        tfLieuId.textProperty().addListener((obs, o, n)   -> { if (!n.matches("\\d*")) tfLieuId.setText(o); });
+        // ── Liste déroulante des lieux ──
+        allLieux = loadAllLieux();
+        ComboBox<Lieu> cbLieu = new ComboBox<>();
+        cbLieu.getItems().add(null);            // option "Sans lieu"
+        cbLieu.getItems().addAll(allLieux);
+        cbLieu.setMaxWidth(Double.MAX_VALUE);
+        cbLieu.setButtonCell(new ListCell<>() {
+            @Override protected void updateItem(Lieu item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(item == null ? "— Sans lieu —" : item.getNom() + " (" + item.getVille() + ")");
+            }
+        });
+        cbLieu.setCellFactory(lv -> new ListCell<>() {
+            @Override protected void updateItem(Lieu item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) { setText(null); return; }
+                setText(item == null ? "— Sans lieu —" : item.getNom() + " (" + item.getVille() + ")");
+            }
+        });
 
+        // ── Lieu activé uniquement si type = PRIVE ──
+        cbLieu.setDisable(true);  // désactivé par défaut (PUBLIC)
+        cbType.valueProperty().addListener((obs, oldVal, newVal) -> {
+            boolean prive = "PRIVE".equals(newVal);
+            cbLieu.setDisable(!prive);
+            if (!prive) {
+                cbLieu.getSelectionModel().select(null);  // reset → "Sans lieu"
+            }
+        });
+
+        // Numeric filters + max length
+        tfCapacite.textProperty().addListener((obs, o, n) -> {
+            if (!n.matches("\\d*")) tfCapacite.setText(o);
+            else if (n.length() > 6) tfCapacite.setText(o);
+        });
+        tfPrix.textProperty().addListener((obs, o, n) -> {
+            if (!n.matches("\\d*\\.?\\d*")) tfPrix.setText(o);
+            else if (n.length() > 10) tfPrix.setText(o);
+        });
+
+        // ═══════════════════════════════════════
+        //  IMAGE UPLOAD
+        // ═══════════════════════════════════════
+        ImageView imgPrev = new ImageView();
+        imgPrev.setFitWidth(420);
+        imgPrev.setFitHeight(200);
+        imgPrev.setPreserveRatio(false);
+        Rectangle clipForm = new Rectangle(420, 200);
+        clipForm.setArcWidth(24); clipForm.setArcHeight(24);
+        imgPrev.setClip(clipForm);
+
+        Label imgEmpty = new Label("Aucune image");
+        imgEmpty.getStyleClass().add("imageEmpty");
+
+        StackPane imgWrap = new StackPane(imgPrev, imgEmpty);
+        imgWrap.getStyleClass().add("imageWrap");
+        StackPane.setAlignment(imgEmpty, Pos.CENTER);
+
+        Label imgPath = new Label("");
+        imgPath.getStyleClass().add("hint");
+
+        Button btnPickImg = new Button("Uploader image");
+        btnPickImg.getStyleClass().add("btn-pill");
+
+        final String[] pickedPath = {null};
+        final String[] lastPreviewImagePath = {null};
+        final Image[] cachedPreviewImage = {null};
+
+        // ═══════════════════════════════════════
+        //  PREVIEW LIVE (colonne droite)
+        // ═══════════════════════════════════════
+        VBox previewCard = new VBox(10);
+        previewCard.getStyleClass().add("previewCard");
+        previewCard.setPrefWidth(380);
+        previewCard.setMinWidth(300);
+        previewCard.setMaxWidth(520);
+
+        StackPane previewImgWrap = new StackPane();
+        previewImgWrap.getStyleClass().add("previewImageWrap");
+
+        ImageView previewIV = new ImageView();
+        previewIV.setFitWidth(340);
+        previewIV.setFitHeight(180);
+        previewIV.setPreserveRatio(false);
+        previewIV.setSmooth(true);
+        previewIV.setCache(true);
+        previewIV.setCacheHint(CacheHint.SPEED);
+        Rectangle clipPrev = new Rectangle(340, 180);
+        clipPrev.setArcWidth(22); clipPrev.setArcHeight(22);
+        previewIV.setClip(clipPrev);
+
+        Label previewImgEmpty = new Label("Aucune image");
+        previewImgEmpty.getStyleClass().add("previewImageEmpty");
+        previewImgWrap.getChildren().addAll(previewIV, previewImgEmpty);
+
+        Label previewStatus = new Label("OUVERT");
+        previewStatus.getStyleClass().addAll("statusChip", "status-ouvert");
+        StackPane.setAlignment(previewStatus, Pos.TOP_LEFT);
+        StackPane.setMargin(previewStatus, new Insets(10, 0, 0, 10));
+        previewImgWrap.getChildren().add(previewStatus);
+
+        Label previewTitle = new Label("Titre de l'événement");
+        previewTitle.getStyleClass().add("previewTitle");
+        previewTitle.setWrapText(true);
+
+        Label previewMeta = new Label("📅 —  →  —");
+        previewMeta.getStyleClass().add("previewMeta");
+        previewMeta.setWrapText(true);
+
+        Label previewLine = new Label("👥 —   •   💰 —   •   Type");
+        previewLine.getStyleClass().add("previewLine");
+        previewLine.setWrapText(true);
+
+        Label previewLieu = new Label("📍 —");
+        previewLieu.getStyleClass().add("previewLine");
+        previewLieu.setWrapText(true);
+
+        Label previewDescTitle = new Label("Description");
+        previewDescTitle.getStyleClass().add("previewSectionTitle");
+
+        Label previewDesc = new Label("—");
+        previewDesc.getStyleClass().add("previewDesc");
+        previewDesc.setWrapText(true);
+
+        Label liveHint = new Label("");
+        liveHint.getStyleClass().add("liveHint");
+
+        previewCard.getChildren().addAll(
+                new Label("Aperçu en direct"),
+                previewImgWrap,
+                previewTitle,
+                previewMeta,
+                previewLine,
+                previewLieu,
+                previewDescTitle,
+                previewDesc,
+                liveHint
+        );
+        previewCard.getChildren().get(0).getStyleClass().add("previewHeader");
+
+        previewCard.widthProperty().addListener((obs, o, w) -> {
+            double ww = Math.max(280, w.doubleValue() - 24);
+            previewIV.setFitWidth(ww);
+            clipPrev.setWidth(ww);
+        });
+
+        Runnable applyPreviewImageIfChanged = () -> {
+            String p = pickedPath[0];
+            if (Objects.equals(p, lastPreviewImagePath[0])) return;
+            lastPreviewImagePath[0] = p;
+            cachedPreviewImage[0] = loadImageOrNull(p);
+            previewIV.setImage(cachedPreviewImage[0]);
+            boolean empty = (cachedPreviewImage[0] == null);
+            previewImgEmpty.setVisible(empty);
+            previewImgEmpty.setManaged(empty);
+        };
+
+        Runnable updatePreviewNow = () -> {
+            // Titre
+            String t = safeStr(tfTitre.getText()).trim();
+            previewTitle.setText(t.isEmpty() ? "Titre de l'événement" : t);
+
+            // Dates
+            LocalDateTime dtDebut = null, dtFin = null;
+            try {
+                if (dpDateDebut.getValue() != null)
+                    dtDebut = LocalDateTime.of(dpDateDebut.getValue(),
+                            LocalTime.of(spHeureDebut.getValue(), spMinuteDebut.getValue()));
+                if (dpDateFin.getValue() != null)
+                    dtFin = LocalDateTime.of(dpDateFin.getValue(),
+                            LocalTime.of(spHeureFin.getValue(), spMinuteFin.getValue()));
+            } catch (Exception ignored) {}
+
+            String when = (dtDebut == null ? "—" : DATE_FMT.format(dtDebut))
+                    + "  →  " + (dtFin == null ? "—" : DATE_FMT.format(dtFin));
+            previewMeta.setText("📅 " + when);
+
+            // Capacité, prix, type
+            String cap = safeStr(tfCapacite.getText()).trim();
+            String prix = safeStr(tfPrix.getText()).trim();
+            String type = safeStr(cbType.getValue());
+            previewLine.setText("👥 " + (cap.isEmpty() ? "—" : cap) + " places   •   💰 "
+                    + (prix.isEmpty() ? "—" : prix) + " TND   •   " + (type.isEmpty() ? "Type" : type));
+
+            // Lieu
+            Lieu selectedLieu = cbLieu.getValue();
+            previewLieu.setText("📍 " + (selectedLieu == null ? "Sans lieu" : selectedLieu.getNom()));
+
+            // Description
+            String desc = safeStr(taDesc.getText()).trim();
+            previewDesc.setText(desc.isEmpty() ? "—" : desc);
+
+            // Statut chip
+            String st = safeStr(cbStatut.getValue()).trim();
+            if (st.isEmpty()) st = "OUVERT";
+            previewStatus.setText(st);
+            previewStatus.getStyleClass().removeIf(c -> c.startsWith("status-"));
+            previewStatus.getStyleClass().add("status-" + st.toLowerCase());
+
+            // Image
+            applyPreviewImageIfChanged.run();
+
+            // Validation live
+            String validation = validateLive(tfTitre, dpDateDebut, spHeureDebut, spMinuteDebut,
+                    dpDateFin, spHeureFin, spMinuteFin, tfCapacite, tfPrix, cbStatut, cbType);
+            liveHint.setText(validation);
+            liveHint.setVisible(!validation.isEmpty());
+            liveHint.setManaged(!validation.isEmpty());
+        };
+
+        // Debounce preview updates
+        PauseTransition debounce = new PauseTransition(Duration.millis(120));
+        Runnable schedulePreview = () -> {
+            debounce.stop();
+            debounce.setOnFinished(ev -> updatePreviewNow.run());
+            debounce.playFromStart();
+        };
+
+        // Image picker action
+        btnPickImg.setOnAction(e -> {
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Choisir une image");
+            fc.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.webp", "*.gif")
+            );
+            File f = fc.showOpenDialog(dialog);
+            if (f == null) return;
+
+            try {
+                String saved = saveEventImage(f);
+                pickedPath[0] = saved;
+                imgPath.setText(new File(saved).getName());
+                Image im = loadImageOrNull(saved);
+                imgPrev.setImage(im);
+                boolean empty = (im == null);
+                imgEmpty.setVisible(empty);
+                imgEmpty.setManaged(empty);
+                applyPreviewImageIfChanged.run();
+                schedulePreview.run();
+            } catch (Exception ex) {
+                showError("Upload", "Impossible d'uploader l'image", safeStr(ex.getMessage()));
+            }
+        });
+
+        // ═══════════════════════════════════════
+        //  PREFILL si mode édition
+        // ═══════════════════════════════════════
         if (isEdit) {
             tfTitre.setText(safeStr(existing.getTitre()));
             taDesc.setText(safeStr(existing.getDescription()));
@@ -303,119 +624,441 @@ public class EvenementsAdminController {
             tfPrix.setText(String.valueOf(existing.getPrix()));
             cbStatut.getSelectionModel().select(safeStr(existing.getStatut()));
             cbType.getSelectionModel().select(safeStr(existing.getType()));
-            tfLieuId.setText(existing.getLieuId() != null ? String.valueOf(existing.getLieuId()) : "");
-            tfImageUrl.setText(safeStr(existing.getImageUrl()));
+            if (existing.getLieuId() != null) {
+                allLieux.stream().filter(l -> l.getId() == existing.getLieuId())
+                        .findFirst().ifPresent(l -> cbLieu.getSelectionModel().select(l));
+            } else {
+                cbLieu.getSelectionModel().select(null);
+            }
+
+            pickedPath[0] = existing.getImageUrl();
+            imgPath.setText(shortPath(safeStr(existing.getImageUrl())));
+            Image im = loadImageOrNull(existing.getImageUrl());
+            imgPrev.setImage(im);
+            boolean emptyImg = (im == null);
+            imgEmpty.setVisible(emptyImg);
+            imgEmpty.setManaged(emptyImg);
         } else {
             cbStatut.getSelectionModel().select("OUVERT");
             cbType.getSelectionModel().select("PUBLIC");
-            tfCapacite.setText("50"); tfPrix.setText("0");
-            // Initialiser les dates par défaut pour un nouvel événement
+            tfCapacite.setText("50");
+            tfPrix.setText("0");
             dpDateDebut.setValue(LocalDate.now());
             spHeureDebut.getValueFactory().setValue(10);
             spMinuteDebut.getValueFactory().setValue(0);
             dpDateFin.setValue(LocalDate.now());
             spHeureFin.getValueFactory().setValue(18);
             spMinuteFin.getValueFactory().setValue(0);
-       }
+        }
+
+        // ═══════════════════════════════════════
+        //  LISTENERS live preview
+        // ═══════════════════════════════════════
+        tfTitre.textProperty().addListener((a,b,c) -> schedulePreview.run());
+        taDesc.textProperty().addListener((a,b,c) -> schedulePreview.run());
+        dpDateDebut.valueProperty().addListener((a,b,c) -> schedulePreview.run());
+        spHeureDebut.valueProperty().addListener((a,b,c) -> schedulePreview.run());
+        spMinuteDebut.valueProperty().addListener((a,b,c) -> schedulePreview.run());
+        dpDateFin.valueProperty().addListener((a,b,c) -> schedulePreview.run());
+        spHeureFin.valueProperty().addListener((a,b,c) -> schedulePreview.run());
+        spMinuteFin.valueProperty().addListener((a,b,c) -> schedulePreview.run());
+        tfCapacite.textProperty().addListener((a,b,c) -> schedulePreview.run());
+        tfPrix.textProperty().addListener((a,b,c) -> schedulePreview.run());
+        cbStatut.valueProperty().addListener((a,b,c) -> schedulePreview.run());
+        cbType.valueProperty().addListener((a,b,c) -> schedulePreview.run());
+        cbLieu.valueProperty().addListener((a,b,c) -> schedulePreview.run());
+
+        // ═══════════════════════════════════════
+        //  LAYOUT — formulaire gauche
+        // ═══════════════════════════════════════
+        Label headline = new Label(isEdit ? "Modifier un événement" : "Créer un événement");
+        headline.getStyleClass().add("dialogTitle");
 
         GridPane grid = new GridPane();
-        grid.setHgap(12); grid.setVgap(10); grid.setPadding(new Insets(20));
-        int r = 0;
-        addRow(grid, r++, "Titre *",        tfTitre);
-        addRow(grid, r++, "Description",    taDesc);
-        addRow(grid, r++, "Date début *",   hbDateDebut);
-        addRow(grid, r++, "Date fin *",     hbDateFin);
-        addRow(grid, r++, "Capacité max *", tfCapacite);
-        addRow(grid, r++, "Prix (TND) *",   tfPrix);
-        addRow(grid, r++, "Statut *",       cbStatut);
-        addRow(grid, r++, "Type *",         cbType);
-        addRow(grid, r++, "ID Lieu",        tfLieuId);
-        addRow(grid, r++, "Image URL",      tfImageUrl);
-        grid.add(lblErreur, 0, r, 2, 1); r++;
+        grid.setHgap(12);
+        grid.setVgap(10);
+        ColumnConstraints c1 = new ColumnConstraints(); c1.setPercentWidth(38);
+        ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(62);
+        grid.getColumnConstraints().addAll(c1, c2);
 
-        Button btnSave = new Button("Enregistrer");
+        int r = 0;
+        grid.add(lab("Titre *"), 0, r);          grid.add(tfTitre, 1, r++);
+        grid.add(lab("Date début *"), 0, r);      grid.add(hbDateDebut, 1, r++);
+        grid.add(lab("Date fin *"), 0, r);        grid.add(hbDateFin, 1, r++);
+        grid.add(lab("Capacité max *"), 0, r);    grid.add(tfCapacite, 1, r++);
+        grid.add(lab("Prix (TND) *"), 0, r);      grid.add(tfPrix, 1, r++);
+        grid.add(lab("Statut *"), 0, r);          grid.add(cbStatut, 1, r++);
+        grid.add(lab("Type *"), 0, r);            grid.add(cbType, 1, r++);
+        grid.add(lab("Lieu"), 0, r);              grid.add(cbLieu, 1, r++);
+
+        // Image upload section
+        Button btnGenerateAI = new Button("\u2728 Générer par IA");
+        btnGenerateAI.getStyleClass().add("btn-pill");
+        btnGenerateAI.setStyle("-fx-background-color: linear-gradient(to right, #8a2be2, #6a11cb);"
+                + "-fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
+
+        ProgressIndicator aiSpinner = new ProgressIndicator();
+        aiSpinner.setPrefSize(18, 18);
+        aiSpinner.setMaxSize(18, 18);
+        aiSpinner.setVisible(false);
+        aiSpinner.setManaged(false);
+
+        Label aiStatusLabel = new Label("");
+        aiStatusLabel.setStyle("-fx-text-fill: #8a2be2; -fx-font-size: 11px;");
+        aiStatusLabel.setVisible(false);
+        aiStatusLabel.setManaged(false);
+
+        btnGenerateAI.setOnAction(e -> {
+            String desc = safeStr(taDesc.getText()).trim();
+            String titre = safeStr(tfTitre.getText()).trim();
+            if (desc.isEmpty() && titre.isEmpty()) {
+                showError("Génération IA", "Description manquante",
+                        "Veuillez saisir un titre ou une description pour générer l'image.");
+                return;
+            }
+
+            String searchText = desc.isEmpty() ? titre : desc;
+
+            btnGenerateAI.setText("\u23F3 Génération...");
+            btnGenerateAI.setDisable(true);
+            aiSpinner.setVisible(true);
+            aiSpinner.setManaged(true);
+            aiStatusLabel.setText("Connexion aux serveurs IA...");
+            aiStatusLabel.setVisible(true);
+            aiStatusLabel.setManaged(true);
+
+            java.util.concurrent.CompletableFuture.supplyAsync(() -> {
+                return downloadAIImage(searchText);
+            }).thenAccept(savedPath -> {
+                javafx.application.Platform.runLater(() -> {
+                    pickedPath[0] = savedPath;
+                    imgPath.setText(new java.io.File(savedPath).getName());
+                    Image im = loadImageOrNull(savedPath);
+                    imgPrev.setImage(im);
+                    boolean empty2 = (im == null);
+                    imgEmpty.setVisible(empty2);
+                    imgEmpty.setManaged(empty2);
+                    applyPreviewImageIfChanged.run();
+                    schedulePreview.run();
+
+                    btnGenerateAI.setText("\u2728 Générer par IA");
+                    btnGenerateAI.setDisable(false);
+                    aiSpinner.setVisible(false);
+                    aiSpinner.setManaged(false);
+                    aiStatusLabel.setText("\u2705 Image générée !");
+                    PauseTransition hideStatus = new PauseTransition(Duration.seconds(3));
+                    hideStatus.setOnFinished(ev -> { aiStatusLabel.setVisible(false); aiStatusLabel.setManaged(false); });
+                    hideStatus.play();
+                });
+            }).exceptionally(ex -> {
+                javafx.application.Platform.runLater(() -> {
+                    showError("Génération IA", "Échec de la génération",
+                            "Aucun serveur d'images n'a pu répondre.\n" + ex.getMessage());
+                    btnGenerateAI.setText("\u2728 Générer par IA");
+                    btnGenerateAI.setDisable(false);
+                    aiSpinner.setVisible(false);
+                    aiSpinner.setManaged(false);
+                    aiStatusLabel.setVisible(false);
+                    aiStatusLabel.setManaged(false);
+                });
+                return null;
+            });
+        });
+
+        HBox imgButtons = new HBox(10, btnPickImg, btnGenerateAI, aiSpinner, imgPath);
+        imgButtons.setAlignment(Pos.CENTER_LEFT);
+        VBox imgBox = new VBox(10, imgWrap, imgButtons, aiStatusLabel);
+
+        // Description section
+        VBox descBox = new VBox(8, lab("Description"), taDesc);
+
+        VBox formContent = new VBox(14, grid, imgBox, descBox);
+        formContent.setPadding(new Insets(0, 6, 6, 0));
+
+        ScrollPane formScroll = new ScrollPane(formContent);
+        formScroll.setFitToWidth(true);
+        formScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        formScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        formScroll.getStyleClass().add("editorScroll");
+
+        // ═══════════════════════════════════════
+        //  FOOTER
+        // ═══════════════════════════════════════
+        Button btnSave = new Button(isEdit ? "Enregistrer" : "Créer");
+        btnSave.getStyleClass().add("primaryBtn");
         Button btnCancel = new Button("Annuler");
-        btnSave.setStyle("-fx-background-color:#1e3a5f;-fx-text-fill:white;-fx-font-weight:bold;-fx-background-radius:8;-fx-padding:8 20;");
-        btnCancel.setStyle("-fx-background-radius:8;-fx-padding:8 16;");
-        HBox actionsBox = new HBox(10, btnSave, btnCancel);
-        actionsBox.setAlignment(Pos.CENTER_RIGHT);
-        grid.add(actionsBox, 0, r, 2, 1);
+        btnCancel.getStyleClass().add("ghostBtn");
+        HBox footer = new HBox(10, btnCancel, btnSave);
+        footer.setAlignment(Pos.CENTER_RIGHT);
         btnCancel.setOnAction(ev -> dialog.close());
 
         btnSave.setOnAction(ev -> {
-            lblErreur.setText("");
-            String titre = textOf(tfTitre);
-            if (titre.isEmpty())    { showFieldError(lblErreur, tfTitre,    "Le titre est obligatoire."); return; }
-            if (titre.length() < 3) { showFieldError(lblErreur, tfTitre,    "Titre : min 3 caractères."); return; }
-            
-            // Validation et récupération des dates
-            LocalDateTime dateDebut;
-            try {
-                if (dpDateDebut.getValue() == null) { showFieldError(lblErreur, null, "Sélectionnez une date de début."); return; }
-                int heure = spHeureDebut.getValue() != null ? spHeureDebut.getValue() : 0;
-                int minute = spMinuteDebut.getValue() != null ? spMinuteDebut.getValue() : 0;
-                dateDebut = LocalDateTime.of(dpDateDebut.getValue(), LocalTime.of(heure, minute));
-            } catch (Exception ex) { showFieldError(lblErreur, null, "Date début invalide."); return; }
-            
-            LocalDateTime dateFin;
-            try {
-                if (dpDateFin.getValue() == null) { showFieldError(lblErreur, null, "Sélectionnez une date de fin."); return; }
-                int heure = spHeureFin.getValue() != null ? spHeureFin.getValue() : 0;
-                int minute = spMinuteFin.getValue() != null ? spMinuteFin.getValue() : 0;
-                dateFin = LocalDateTime.of(dpDateFin.getValue(), LocalTime.of(heure, minute));
-            } catch (Exception ex) { showFieldError(lblErreur, null, "Date fin invalide."); return; }
-            
-            if (!dateFin.isAfter(dateDebut)) { showFieldError(lblErreur, null, "Date fin doit être après la date début."); return; }
-            int capacite;
-            try { capacite = Integer.parseInt(textOf(tfCapacite)); if (capacite <= 0) throw new NumberFormatException(); }
-            catch (NumberFormatException ex) { showFieldError(lblErreur, tfCapacite, "Capacité : entier > 0."); return; }
-            if (capacite > 100_000) { showFieldError(lblErreur, tfCapacite, "Capacité max 100 000."); return; }
-            double prix;
-            try { String s = textOf(tfPrix); prix = s.isEmpty() ? 0.0 : Double.parseDouble(s); if (prix < 0) throw new NumberFormatException(); }
-            catch (NumberFormatException ex) { showFieldError(lblErreur, tfPrix, "Prix : nombre ≥ 0"); return; }
-            if (cbStatut.getValue() == null) { lblErreur.setText("❌ Sélectionnez un statut."); return; }
-            if (cbType.getValue()   == null) { lblErreur.setText("❌ Sélectionnez un type.");   return; }
-            Integer lieuId = null;
-            String lieuStr = textOf(tfLieuId);
-            if (!lieuStr.isEmpty()) {
-                try { lieuId = Integer.parseInt(lieuStr); if (lieuId <= 0) throw new NumberFormatException(); }
-                catch (NumberFormatException ex) { showFieldError(lblErreur, tfLieuId, "ID Lieu : entier > 0 ou laisser vide."); return; }
+            String validation = validateLive(tfTitre, dpDateDebut, spHeureDebut, spMinuteDebut,
+                    dpDateFin, spHeureFin, spMinuteFin, tfCapacite, tfPrix, cbStatut, cbType);
+            if (!validation.isEmpty()) {
+                showError("Validation", "Formulaire incomplet", validation);
+                return;
             }
+
             try {
+                String titre = textOf(tfTitre);
+                LocalDateTime dateDebut = LocalDateTime.of(dpDateDebut.getValue(),
+                        LocalTime.of(spHeureDebut.getValue(), spMinuteDebut.getValue()));
+                LocalDateTime dateFin = LocalDateTime.of(dpDateFin.getValue(),
+                        LocalTime.of(spHeureFin.getValue(), spMinuteFin.getValue()));
+                int capacite = Integer.parseInt(textOf(tfCapacite));
+                double prix = textOf(tfPrix).isEmpty() ? 0.0 : Double.parseDouble(textOf(tfPrix));
+                Integer lieuId = cbLieu.getValue() != null ? cbLieu.getValue().getId() : null;
+
                 if (isEdit) {
-                    existing.setTitre(titre);        existing.setDescription(textOf(taDesc));
-                    existing.setDateDebut(dateDebut); existing.setDateFin(dateFin);
-                    existing.setCapaciteMax(capacite); existing.setPrix(prix);
-                    existing.setStatut(cbStatut.getValue()); existing.setType(cbType.getValue());
-                    existing.setLieuId(lieuId);      existing.setImageUrl(textOf(tfImageUrl));
+                    existing.setTitre(titre);
+                    existing.setDescription(textOf(taDesc));
+                    existing.setDateDebut(dateDebut);
+                    existing.setDateFin(dateFin);
+                    existing.setCapaciteMax(capacite);
+                    existing.setPrix(prix);
+                    existing.setStatut(cbStatut.getValue());
+                    existing.setType(cbType.getValue());
+                    existing.setLieuId(lieuId);
+                    existing.setImageUrl(pickedPath[0] != null ? pickedPath[0] : "");
                     evenementService.update(existing);
                 } else {
                     Evenement toAdd = new Evenement();
-                    toAdd.setTitre(titre);        toAdd.setDescription(textOf(taDesc));
-                    toAdd.setDateDebut(dateDebut); toAdd.setDateFin(dateFin);
-                    toAdd.setCapaciteMax(capacite); toAdd.setPrix(prix);
-                    toAdd.setStatut(cbStatut.getValue()); toAdd.setType(cbType.getValue());
-                    toAdd.setLieuId(lieuId);      toAdd.setImageUrl(textOf(tfImageUrl));
+                    toAdd.setTitre(titre);
+                    toAdd.setDescription(textOf(taDesc));
+                    toAdd.setDateDebut(dateDebut);
+                    toAdd.setDateFin(dateFin);
+                    toAdd.setCapaciteMax(capacite);
+                    toAdd.setPrix(prix);
+                    toAdd.setStatut(cbStatut.getValue());
+                    toAdd.setType(cbType.getValue());
+                    toAdd.setLieuId(lieuId);
+                    toAdd.setImageUrl(pickedPath[0] != null ? pickedPath[0] : "");
                     evenementService.add(toAdd);
                 }
-                loadData(); dialog.close();
-            } catch (IllegalArgumentException ex) { lblErreur.setText("❌ " + ex.getMessage()); }
-            catch (Exception ex) { showError("Erreur", "Enregistrement impossible", ex.getMessage()); }
+                loadData();
+                dialog.close();
+            } catch (IllegalArgumentException ex) {
+                showError("Erreur", "Données invalides", ex.getMessage());
+            } catch (Exception ex) {
+                showError("Erreur", "Enregistrement impossible", ex.getMessage());
+            }
         });
 
-        ScrollPane sp = new ScrollPane(grid);
-        sp.setFitToWidth(true); sp.setStyle("-fx-background-color:white;-fx-background:white;");
-        dialog.setScene(new Scene(sp, 580, 680));
-        dialog.centerOnScreen(); dialog.showAndWait();
+        // Initial preview
+        updatePreviewNow.run();
+        btnSave.setDisable(!liveHint.getText().isEmpty());
+        liveHint.textProperty().addListener((obs, o, n) -> btnSave.setDisable(n != null && !n.isEmpty()));
+
+        // ═══════════════════════════════════════
+        //  SHELL — SplitPane 2 colonnes
+        // ═══════════════════════════════════════
+        VBox shell = new VBox(12);
+        shell.setPadding(new Insets(16));
+        shell.getStyleClass().add("dialogRoot");
+
+        SplitPane split = new SplitPane(formScroll, previewCard);
+        split.setDividerPositions(0.62);
+        split.getStyleClass().add("editorSplit");
+        VBox.setVgrow(split, Priority.ALWAYS);
+
+        shell.getChildren().addAll(headline, split, footer);
+
+        Scene scene = new Scene(shell, 980, 820);
+        scene.getStylesheets().add(
+                getClass().getResource("/styles/back/evenements-admin.css").toExternalForm());
+        dialog.setScene(scene);
+        dialog.setResizable(true);
+        dialog.centerOnScreen();
+        dialog.showAndWait();
     }
 
-    private void showFieldError(Label lbl, Control field, String msg) {
-        lbl.setText("❌ " + msg); if (field != null) field.requestFocus();
+    // ── Validation live ─────────────────────────────────────────
+    private String validateLive(TextField tfTitre,
+                                DatePicker dpDateDebut, Spinner<Integer> spHD, Spinner<Integer> spMD,
+                                DatePicker dpDateFin, Spinner<Integer> spHF, Spinner<Integer> spMF,
+                                TextField tfCapacite, TextField tfPrix,
+                                ComboBox<String> cbStatut, ComboBox<String> cbType) {
+        // ── Titre ──
+        String titre = safeStr(tfTitre.getText()).trim();
+        if (titre.isEmpty()) return "Le titre est obligatoire";
+        if (titre.length() < 3) return "Titre trop court (min 3 caractères)";
+        if (titre.length() > 100) return "Titre trop long (max 100 caractères)";
+        if (!titre.matches("[\\p{L}\\p{N}\\s'\\-–—.,!?:()&/]+")) return "Titre : caractères spéciaux non autorisés";
+
+        // ── Dates ──
+        if (dpDateDebut.getValue() == null) return "Sélectionnez une date de début";
+        if (dpDateFin.getValue() == null) return "Sélectionnez une date de fin";
+
+        try {
+            LocalDateTime deb = LocalDateTime.of(dpDateDebut.getValue(), LocalTime.of(spHD.getValue(), spMD.getValue()));
+            LocalDateTime fin = LocalDateTime.of(dpDateFin.getValue(), LocalTime.of(spHF.getValue(), spMF.getValue()));
+            if (deb.isBefore(LocalDateTime.now().minusMinutes(5)))
+                return "La date de début ne peut pas être dans le passé";
+            if (!fin.isAfter(deb)) return "La date de fin doit être après la date de début";
+            if (fin.isAfter(deb.plusYears(2))) return "Durée max : 2 ans";
+        } catch (Exception ex) { return "Dates invalides"; }
+
+        // ── Capacité ──
+        String cap = safeStr(tfCapacite.getText()).trim();
+        if (cap.isEmpty()) return "La capacité est obligatoire";
+        try {
+            int c = Integer.parseInt(cap);
+            if (c <= 0) return "Capacité doit être > 0";
+            if (c > 100_000) return "Capacité max 100 000";
+        } catch (NumberFormatException ex) { return "Capacité invalide (entier attendu)"; }
+
+        // ── Prix ──
+        String prix = safeStr(tfPrix.getText()).trim();
+        if (prix.isEmpty()) return "Le prix est obligatoire (0 si gratuit)";
+        try {
+            double p = Double.parseDouble(prix);
+            if (p < 0) return "Le prix doit être ≥ 0";
+            if (p > 99_999) return "Prix max 99 999 TND";
+        } catch (NumberFormatException ex) { return "Prix invalide (nombre attendu)"; }
+
+        // ── Statut / Type ──
+        if (cbStatut.getValue() == null) return "Sélectionnez un statut";
+        if (cbType.getValue() == null) return "Sélectionnez un type";
+
+        return "";
     }
 
-    private void addRow(GridPane grid, int row, String labelText, Node control) {
-        Label lbl = new Label(labelText + " :"); lbl.setStyle("-fx-font-weight:bold;-fx-text-fill:#1e3a5f;");
-        grid.add(lbl, 0, row); grid.add(control, 1, row); GridPane.setHgrow(control, Priority.ALWAYS);
+    // ── Sauvegarde image événement ──────────────────────────────
+    private String saveEventImage(File source) throws IOException {
+        Path uploadDir = Path.of(System.getProperty("user.home"), "uploads", "evenements");
+        Files.createDirectories(uploadDir);
+        String ext = "";
+        String name = source.getName();
+        int dot = name.lastIndexOf('.');
+        if (dot >= 0) ext = name.substring(dot);
+        String destName = UUID.randomUUID().toString().substring(0, 8) + ext;
+        Path dest = uploadDir.resolve(destName);
+        Files.copy(source.toPath(), dest, StandardCopyOption.REPLACE_EXISTING);
+        return dest.toAbsolutePath().toString();
+    }
+
+    // ── Génération d'image IA (multi-API avec fallback) ────────
+    private String downloadAIImage(String description) {
+        // Extraire les mots-clés pertinents de la description
+        String keywords = extractKeywords(description);
+
+        // ── Tentative 1 : Pollinations.ai (IA pure, gratuit, sans clé) ──
+        try {
+            String prompt = java.net.URLEncoder.encode(description, "UTF-8");
+            String urlStr = "https://image.pollinations.ai/prompt/" + prompt + "?width=840&height=400&nologo=true";
+            String result = downloadImageFromUrl(urlStr, "ai_pollinations_");
+            if (result != null) return result;
+        } catch (Exception ignored) { }
+
+        // ── Tentative 2 : LoremFlickr (images Flickr par mots-clés, 100% gratuit) ──
+        try {
+            String encoded = java.net.URLEncoder.encode(keywords.replace(" ", ","), "UTF-8");
+            String urlStr = "https://loremflickr.com/840/400/" + encoded;
+            String result = downloadImageFromUrl(urlStr, "ai_flickr_");
+            if (result != null) return result;
+        } catch (Exception ignored) { }
+
+        // ── Tentative 3 : Picsum (image aléatoire de qualité, dernier recours) ──
+        try {
+            String urlStr = "https://picsum.photos/840/400";
+            String result = downloadImageFromUrl(urlStr, "ai_picsum_");
+            if (result != null) return result;
+        } catch (Exception ignored) { }
+
+        throw new RuntimeException("Tous les serveurs d'images sont indisponibles.");
+    }
+
+    private String downloadImageFromUrl(String urlStr, String prefix) {
+        try {
+            java.net.URL url = new java.net.URL(urlStr);
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setInstanceFollowRedirects(true);
+            conn.setConnectTimeout(15_000);
+            conn.setReadTimeout(30_000);
+            conn.setRequestProperty("User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+
+            int code = conn.getResponseCode();
+
+            // Handle manual redirect (302/301)
+            if (code == 301 || code == 302) {
+                String location = conn.getHeaderField("Location");
+                if (location != null) {
+                    conn.disconnect();
+                    url = new java.net.URL(location);
+                    conn = (java.net.HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setConnectTimeout(15_000);
+                    conn.setReadTimeout(30_000);
+                    conn.setRequestProperty("User-Agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+                    code = conn.getResponseCode();
+                }
+            }
+
+            if (code == 200) {
+                String contentType = conn.getContentType();
+                if (contentType != null && contentType.startsWith("image")) {
+                    java.io.InputStream in = conn.getInputStream();
+                    Path uploadDir = Path.of(System.getProperty("user.home"), "uploads", "evenements");
+                    Files.createDirectories(uploadDir);
+                    String ext = ".jpg";
+                    if (contentType.contains("png")) ext = ".png";
+                    else if (contentType.contains("webp")) ext = ".webp";
+                    String destName = prefix + UUID.randomUUID().toString().substring(0, 8) + ext;
+                    Path dest = uploadDir.resolve(destName);
+                    Files.copy(in, dest, StandardCopyOption.REPLACE_EXISTING);
+                    in.close();
+                    conn.disconnect();
+
+                    // Vérifier que le fichier n'est pas trop petit (< 5 Ko = probablement une erreur)
+                    if (Files.size(dest) < 5_000) {
+                        Files.deleteIfExists(dest);
+                        return null;
+                    }
+                    return dest.toAbsolutePath().toString();
+                }
+            }
+            conn.disconnect();
+        } catch (Exception e) {
+            // silently fail, will try next API
+        }
+        return null;
+    }
+
+    private String extractKeywords(String description) {
+        // Supprimer les mots courants français pour garder les termes importants
+        String[] stopWords = {"le", "la", "les", "un", "une", "des", "de", "du", "et",
+                "en", "au", "aux", "ce", "cette", "ces", "mon", "ton", "son", "nous",
+                "vous", "ils", "elle", "elles", "est", "sont", "sera", "pour", "par",
+                "avec", "dans", "sur", "qui", "que", "quoi", "dont", "ou", "mais",
+                "donc", "car", "ni", "plus", "moins", "très", "bien", "aussi", "tout",
+                "tous", "toute", "toutes", "faire", "fait", "être", "avoir", "a",
+                "il", "je", "tu", "nous", "pas", "ne", "se", "sa", "ses"};
+        java.util.Set<String> stops = new java.util.HashSet<>(java.util.Arrays.asList(stopWords));
+
+        String cleaned = description.toLowerCase()
+                .replaceAll("[^a-zàâäéèêëïîôùûüÿçœæ\\s]", " ")
+                .replaceAll("\\s+", " ").trim();
+
+        StringBuilder keywords = new StringBuilder();
+        int count = 0;
+        for (String word : cleaned.split(" ")) {
+            if (word.length() >= 3 && !stops.contains(word) && count < 5) {
+                if (keywords.length() > 0) keywords.append(",");
+                keywords.append(word);
+                count++;
+            }
+        }
+        return keywords.length() > 0 ? keywords.toString() : "event";
+    }
+
+    private Label lab(String text) {
+        Label l = new Label(text);
+        l.getStyleClass().add("formLabel");
+        return l;
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -445,10 +1088,10 @@ public class EvenementsAdminController {
      */
     private void showPanelTickets(Inscription ins) {
         this.currentInscription = ins;
-        breadcrumbInscription.setText("Inscription #" + ins.getId() + " — User #" + ins.getUserId());
+        String userName = resolveUserName(ins.getUserId());
+        breadcrumbInscription.setText("Inscription #" + ins.getId() + " — " + userName);
         ticketInscInfo.setText("Inscription #" + ins.getId()
-                + "  •  User #" + ins.getUserId() + "  •  " + safeStr(ins.getStatut()));
-        // ✅ On affiche le paiement initial depuis l'objet
+                + "  •  " + userName + "  •  " + safeStr(ins.getStatut()));
         ticketEventInfo.setText("Événement : " + (currentEvent != null ? currentEvent.getTitre() : "?")
                 + "   •   Paiement : " + safeStr(ins.getPaiement()) + " TND");
         showPanel(panelTickets); reloadTickets();
@@ -475,18 +1118,43 @@ public class EvenementsAdminController {
     }
 
     private Node buildInscriptionRow(Inscription ins) {
-        VBox row = new VBox(8);
+        VBox row = new VBox(10);
         row.getStyleClass().add("lieu-card");
-        int nbTickets = ticketService.countByInscriptionId(ins.getId());
-        Label title = new Label("👤 User #" + ins.getUserId()
-                + "   •   Statut : " + safeStr(ins.getStatut())
-                + "   •   🎫 " + nbTickets + " ticket(s)");
+        row.setPadding(new Insets(14, 18, 14, 18));
+
+        // --- Header : user name + id ---
+        String userName = resolveUserName(ins.getUserId());
+        Label title = new Label(userName);
         title.getStyleClass().add("card-title");
+        title.setStyle("-fx-font-size:15px;");
+        Label idBadge = new Label("#" + ins.getUserId());
+        idBadge.setStyle("-fx-background-color:rgba(15,42,68,0.08);-fx-text-fill:#0f2a44;"
+                + "-fx-padding:2 8;-fx-background-radius:6;-fx-font-size:11px;-fx-font-weight:700;");
+
+        // --- Status chip ---
+        String statut = safeStr(ins.getStatut());
+        Label statusChip = new Label(statut);
+        statusChip.getStyleClass().add("statusChip");
+        switch (statut.toUpperCase()) {
+            case "CONFIRMEE" -> statusChip.getStyleClass().add("status-confirmee");
+            case "ANNULEE"   -> statusChip.getStyleClass().add("status-annulee");
+            default          -> statusChip.getStyleClass().add("status-en-attente");
+        }
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox header = new HBox(8, title, idBadge, spacer, statusChip);
+        header.setAlignment(Pos.CENTER_LEFT);
+
+        // --- Meta line ---
+        int nbTickets = ticketService.countByInscriptionId(ins.getId());
         String dateStr = ins.getDateCreation() != null
                 ? ins.getDateCreation().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "—";
-        Label sub = new Label("💰 Paiement : " + safeStr(ins.getPaiement()) + " TND"
-                + "   •   Créé le : " + dateStr);
-        sub.getStyleClass().add("card-muted");
+        Label meta = new Label("🎫  " + nbTickets + " ticket(s)   •   💰 " + safeStr(ins.getPaiement())
+                + " TND   •   📅 " + dateStr);
+        meta.getStyleClass().add("card-muted");
+
+        // --- Actions ---
         Button btnConfirm = new Button("✔ Confirmer");
         Button btnAnnuler = new Button("✖ Annuler");
         Button btnTickets = new Button("🎫 Tickets →");
@@ -505,28 +1173,88 @@ public class EvenementsAdminController {
         });
         HBox actions = new HBox(10, btnConfirm, btnAnnuler, btnTickets, btnDel);
         actions.getStyleClass().add("card-actions");
-        row.getChildren().addAll(title, sub, actions);
+
+        row.getChildren().addAll(header, meta, actions);
         return row;
     }
 
     @FXML
     public void onAjouterInscription() {
         if (currentEvent == null) { showWarning("Aucun événement sélectionné."); return; }
-        TextInputDialog d = new TextInputDialog();
-        d.setTitle("Ajouter inscription");
-        d.setHeaderText("Événement : " + currentEvent.getTitre()
+        allUsers = loadAllUsers();
+
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Ajouter une inscription");
+
+        VBox root = new VBox(18);
+        root.getStyleClass().add("dialogRoot");
+        root.setPadding(new Insets(28, 32, 24, 32));
+        root.setMaxWidth(460);
+
+        Label titleLbl = new Label("Nouvelle inscription");
+        titleLbl.getStyleClass().add("dialogTitle");
+
+        Label eventInfo = new Label("Événement : " + currentEvent.getTitre()
                 + "\nPrix par ticket : " + currentEvent.getPrix() + " TND");
-        d.setContentText("User ID (entier > 0) :");
-        d.showAndWait().ifPresent(val -> {
-            int userId;
-            try { userId = Integer.parseInt(val.trim()); if (userId <= 0) throw new NumberFormatException(); }
-            catch (NumberFormatException ex) { showWarning("User ID invalide."); return; }
+        eventInfo.setStyle("-fx-text-fill:#475569;-fx-font-size:13px;");
+        eventInfo.setWrapText(true);
+
+        Label userLabel = new Label("Utilisateur");
+        userLabel.setStyle("-fx-font-weight:700;-fx-text-fill:#0f2a44;-fx-font-size:13px;");
+
+        ComboBox<User> cbUser = new ComboBox<>();
+        cbUser.getItems().addAll(allUsers);
+        cbUser.setMaxWidth(Double.MAX_VALUE);
+        cbUser.setPromptText("— Sélectionner un utilisateur —");
+        cbUser.setCellFactory(lv -> new ListCell<>() {
+            @Override protected void updateItem(User u, boolean empty) {
+                super.updateItem(u, empty);
+                setText(empty || u == null ? null : u.getNom() + " " + u.getPrenom() + "  (" + u.getEmail() + ")  #" + u.getId());
+            }
+        });
+        cbUser.setButtonCell(new ListCell<>() {
+            @Override protected void updateItem(User u, boolean empty) {
+                super.updateItem(u, empty);
+                setText(empty || u == null ? null : u.getNom() + " " + u.getPrenom() + "  #" + u.getId());
+            }
+        });
+
+        Label errLbl = new Label();
+        errLbl.setStyle("-fx-text-fill:#dc2626;-fx-font-size:12px;");
+        errLbl.setVisible(false);
+        errLbl.setManaged(false);
+
+        Button btnOk = new Button("Ajouter");
+        btnOk.getStyleClass().add("primaryBtn");
+        Button btnCancel = new Button("Annuler");
+        btnCancel.getStyleClass().add("ghostBtn");
+        HBox btns = new HBox(12, btnCancel, btnOk);
+        btns.setAlignment(Pos.CENTER_RIGHT);
+
+        btnCancel.setOnAction(e -> dialog.close());
+        btnOk.setOnAction(e -> {
+            User sel = cbUser.getValue();
+            if (sel == null) {
+                errLbl.setText("⚠ Veuillez sélectionner un utilisateur.");
+                errLbl.setVisible(true); errLbl.setManaged(true);
+                return;
+            }
             try {
-                inscriptionService.addInscription(currentEvent.getId(), userId, 0.0f);
+                inscriptionService.addInscription(currentEvent.getId(), sel.getId(), 0.0f);
                 reloadInscriptions(); refreshPlacesInfo(); updateKpis(masterList);
+                dialog.close();
             } catch (IllegalStateException ex) { showWarning(ex.getMessage()); }
             catch (Exception ex) { showError("Erreur", "Inscription impossible", ex.getMessage()); }
         });
+
+        root.getChildren().addAll(titleLbl, eventInfo, userLabel, cbUser, errLbl, btns);
+
+        Scene sc = new Scene(root);
+        sc.getStylesheets().add(Objects.requireNonNull(
+                getClass().getResource("/styles/back/evenements-admin.css")).toExternalForm());
+        dialog.setScene(sc);
+        dialog.showAndWait();
     }
 
     private void refreshPlacesInfo() {
@@ -689,14 +1417,34 @@ public class EvenementsAdminController {
         return tf == null ? "" : Optional.ofNullable(tf.getText()).orElse("").trim();
     }
 
-    private String chipStatutStyle(String statut) {
-        if (statut == null) return "";
-        return switch (statut.toUpperCase()) {
-            case "OUVERT" -> "-fx-background-color:rgba(34,197,94,0.18);-fx-text-fill:#15803d;";
-            case "FERME"  -> "-fx-background-color:rgba(251,146,60,0.18);-fx-text-fill:#c2410c;";
-            case "ANNULE" -> "-fx-background-color:rgba(220,38,38,0.18);-fx-text-fill:#b91c1c;";
-            default       -> "";
-        };
+    // ── Image helpers ──────────────────────────────────────────
+    private Image loadImageOrFallback(String path) {
+        Image img = loadImageOrNull(path);
+        if (img != null) return img;
+        try { return new Image(getClass().getResourceAsStream("/images/demo/hero/hero.jpg")); }
+        catch (Exception ignored) { return null; }
+    }
+
+    private Image loadImageOrNull(String path) {
+        if (path == null || path.isBlank()) return null;
+        try {
+            File f = new File(path);
+            if (f.exists()) return new Image(f.toURI().toString(), true);
+        } catch (Exception ignored) {}
+        try {
+            if (path.startsWith("http")) return new Image(path, true);
+            var res = getClass().getResourceAsStream(path.startsWith("/") ? path : "/" + path);
+            if (res != null) return new Image(res);
+        } catch (Exception ignored) {}
+        return null;
+    }
+
+    private String shortPath(String path) {
+        if (path == null || path.isBlank()) return "";
+        int i = path.lastIndexOf('/');
+        int j = path.lastIndexOf('\\');
+        int sep = Math.max(i, j);
+        return sep >= 0 ? path.substring(sep + 1) : path;
     }
 
     private boolean confirmDelete(String message) {
@@ -715,5 +1463,63 @@ public class EvenementsAdminController {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title); alert.setHeaderText(header); alert.setContentText(details);
         alert.showAndWait();
+    }
+
+    // ── Chargement des lieux directement depuis la BDD ──────────
+    private String resolveUserName(int userId) {
+        return allUsers.stream()
+                .filter(u -> u.getId() == userId)
+                .findFirst()
+                .map(u -> u.getNom() + " " + u.getPrenom())
+                .orElse("User #" + userId);
+    }
+
+    private List<User> loadAllUsers() {
+        List<User> users = new java.util.ArrayList<>();
+        String sql = "SELECT id, nom, prenom, email, role FROM user ORDER BY nom, prenom";
+        try {
+            Connection cnx = Mydb.getInstance().getConnection();
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                User u = new User();
+                u.setId(rs.getInt("id"));
+                u.setNom(rs.getString("nom"));
+                u.setPrenom(rs.getString("prenom"));
+                u.setEmail(rs.getString("email"));
+                u.setRole(rs.getString("role"));
+                users.add(u);
+            }
+            rs.close(); ps.close();
+        } catch (Exception e) {
+            System.err.println("loadAllUsers error: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    private List<Lieu> loadAllLieux() {
+        List<Lieu> lieux = new java.util.ArrayList<>();
+        String sql = "SELECT id, nom, ville, adresse, categorie, type FROM lieu ORDER BY nom";
+        try {
+            Connection cnx = Mydb.getInstance().getConnection();
+            PreparedStatement ps = cnx.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Lieu l = new Lieu();
+                l.setId(rs.getInt("id"));
+                l.setNom(rs.getString("nom"));
+                l.setVille(rs.getString("ville"));
+                l.setAdresse(rs.getString("adresse"));
+                l.setCategorie(rs.getString("categorie"));
+                l.setType(rs.getString("type"));
+                lieux.add(l);
+            }
+            rs.close(); ps.close();
+        } catch (Exception e) {
+            System.err.println("loadAllLieux error: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return lieux;
     }
 }
