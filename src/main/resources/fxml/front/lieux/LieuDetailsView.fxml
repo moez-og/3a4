@@ -25,6 +25,7 @@
     <HBox alignment="CENTER_LEFT" spacing="12">
         <Button text="← Retour" onAction="#goBack" styleClass="backLinkBtn"/>
         <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="favoriBtn" text="♡  Ajouter aux favoris" onAction="#toggleFavori"/>
         <Button text="⤴  Partager" onAction="#openShare" styleClass="shareBtn"/>
         <Button text="Ouvrir Maps" onAction="#openMaps" styleClass="primaryBtn"/>
     </HBox>

@@ -28,7 +28,9 @@ import models.lieux.EvaluationLieu;
 import models.lieux.Lieu;
 import models.lieux.LieuHoraire;
 import models.users.User;
+import services.lieux.AvisSuggestionService;
 import services.lieux.EvaluationLieuService;
+import services.lieux.FavoriLieuService;
 import services.lieux.LieuService;
 import services.lieux.ModerationService;
 import utils.ui.ShellNavigator;
@@ -85,9 +87,14 @@ public class LieuDetailsController {
     @FXML private Label badgeOuvert;
     @FXML private Label badgeFerme;
 
+    // ====== FAVORI ======
+    @FXML private Button favoriBtn;
+
     private final LieuService lieuService = new LieuService();
     private final EvaluationLieuService evalService = new EvaluationLieuService();
     private final ModerationService moderationService = new ModerationService();
+    private final AvisSuggestionService suggestionService = new AvisSuggestionService();
+    private final FavoriLieuService favoriService = new FavoriLieuService();
 
     private ShellNavigator navigator;
     private User currentUser;
@@ -124,11 +131,31 @@ public class LieuDetailsController {
         if (navigator != null) navigator.navigate(FrontDashboardController.ROUTE_LIEUX);
     }
 
-
-
-    /* ======================= PARTAGE ======================= */
-
     @FXML
+    public void toggleFavori() {
+        if (currentUser == null || current == null) return;
+        boolean nowFavori = favoriService.toggle(currentUser.getId(), current.getId());
+        updateFavoriBtn(nowFavori);
+    }
+
+    private void updateFavoriBtn(boolean isFavori) {
+        if (favoriBtn == null) return;
+        if (isFavori) {
+            favoriBtn.setText("♥  Favori");
+            favoriBtn.setStyle(
+                "-fx-background-color: #ef4444; -fx-text-fill: white;" +
+                "-fx-background-radius: 10; -fx-font-weight: 900; -fx-cursor: hand; -fx-padding: 8 18;"
+            );
+        } else {
+            favoriBtn.setText("♡  Ajouter aux favoris");
+            favoriBtn.setStyle(
+                "-fx-background-color: white; -fx-text-fill: #ef4444;" +
+                "-fx-border-color: #ef4444; -fx-border-width: 2; -fx-border-radius: 10;" +
+                "-fx-background-radius: 10; -fx-font-weight: 900; -fx-cursor: hand; -fx-padding: 8 18;"
+            );
+        }
+    }
+
     public void openShare() {
         if (current == null) return;
 
@@ -360,6 +387,12 @@ public class LieuDetailsController {
         if (telephone != null) telephone.setText(lineOrEmpty("☎ ", current.getTelephone()));
         if (siteWeb != null) siteWeb.setText(lineOrEmpty("🌐 ", current.getSiteWeb()));
         if (instagram != null) instagram.setText(lineOrEmpty("📸 ", current.getInstagram()));
+
+        // Bouton favori : état initial
+        if (favoriBtn != null && currentUser != null) {
+            boolean isFavori = favoriService.isFavori(currentUser.getId(), current.getId());
+            updateFavoriBtn(isFavori);
+        }
     }
 
     private String formatBudget(Double min, Double max) {
@@ -780,6 +813,74 @@ public class LieuDetailsController {
         // Layout commentaire avec compteur + erreur
         VBox commentBox = new VBox(4, area, lblCounter, lblErrComment);
 
+        // ── Chips de suggestions ────────────────────────────────
+        Label lblSuggTitle = new Label("💡 Suggestions — cliquez pour remplir :");
+        lblSuggTitle.setStyle(
+            "-fx-font-size: 11px; -fx-font-weight: 800;" +
+            "-fx-text-fill: rgba(22,58,92,0.65); -fx-padding: 6 0 2 0;"
+        );
+
+        FlowPane chipsPane = new FlowPane();
+        chipsPane.setHgap(8);
+        chipsPane.setVgap(6);
+        chipsPane.setPrefWrapLength(400);
+
+        String categorieLieu = (current != null && current.getCategorie() != null)
+            ? current.getCategorie() : "";
+
+        // Méthode locale pour rafraîchir les chips selon la note courante
+        Runnable refreshChips = () -> {
+            chipsPane.getChildren().clear();
+            int note = selectedNote.get();
+            List<String> suggestions = suggestionService.getSuggestions(note, categorieLieu);
+            for (String suggestion : suggestions) {
+                // Texte court affiché sur le chip (50 premiers caractères + …)
+                String chipLabel = suggestion.length() > 52
+                    ? suggestion.substring(0, 50) + "…"
+                    : suggestion;
+
+                Button chip = new Button(chipLabel);
+                chip.setWrapText(false);
+                chip.setStyle(
+                    "-fx-background-color: #f0f4ff;" +
+                    "-fx-border-color: #c7d2fe;" +
+                    "-fx-border-radius: 999; -fx-background-radius: 999;" +
+                    "-fx-text-fill: #3730a3; -fx-font-size: 11px; -fx-font-weight: 700;" +
+                    "-fx-padding: 4 12; -fx-cursor: hand;"
+                );
+                chip.setOnMouseEntered(e -> chip.setStyle(
+                    "-fx-background-color: #4f46e5;" +
+                    "-fx-border-color: #4f46e5;" +
+                    "-fx-border-radius: 999; -fx-background-radius: 999;" +
+                    "-fx-text-fill: white; -fx-font-size: 11px; -fx-font-weight: 700;" +
+                    "-fx-padding: 4 12; -fx-cursor: hand;"
+                ));
+                chip.setOnMouseExited(e -> chip.setStyle(
+                    "-fx-background-color: #f0f4ff;" +
+                    "-fx-border-color: #c7d2fe;" +
+                    "-fx-border-radius: 999; -fx-background-radius: 999;" +
+                    "-fx-text-fill: #3730a3; -fx-font-size: 11px; -fx-font-weight: 700;" +
+                    "-fx-padding: 4 12; -fx-cursor: hand;"
+                ));
+                // Clic → remplissage automatique du TextArea
+                chip.setOnAction(e -> {
+                    area.setText(suggestion);
+                    area.positionCaret(suggestion.length());
+                    area.requestFocus();
+                });
+                chipsPane.getChildren().add(chip);
+            }
+        };
+
+        // Initialiser les chips avec la note par défaut
+        refreshChips.run();
+
+        // Mettre à jour les chips quand la note change
+        selectedNote.addListener((obs, oldNote, newNote) -> refreshChips.run());
+
+        VBox suggestionsBox = new VBox(0, lblSuggTitle, chipsPane);
+        suggestionsBox.setStyle("-fx-padding: 0 0 4 0;");
+
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -805,7 +906,7 @@ public class LieuDetailsController {
             "-fx-font-size: 11px; -fx-text-fill: rgba(22,58,92,0.55); -fx-padding: 4 0 0 0;"
         );
 
-        VBox content = new VBox(10, grid, lblHintGlobal);
+        VBox content = new VBox(10, grid, suggestionsBox, lblHintGlobal);
         content.setPadding(new Insets(4));
         dialog.getDialogPane().setContent(content);
 

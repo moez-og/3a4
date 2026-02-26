@@ -138,6 +138,7 @@
 
             <Label text="Actions rapides" styleClass="drawerSectionTitle"/>
             <Button text="＋ Nouveau (Sortie/Offre/Événement)" onAction="#newAction" styleClass="drawerBtnPrimary"/>
+            <Button text="♥ Mes lieux favoris" onAction="#showMesFavoris" styleClass="drawerBtn"/>
             <Button text="📌 Mes activités" onAction="#showMyActivity" styleClass="drawerBtn"/>
 
             <Region VBox.vgrow="ALWAYS"/>

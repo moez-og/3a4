@@ -41,6 +41,7 @@ public class FrontDashboardController implements ShellNavigator {
     public static final String ROUTE_HELP = "help";
     public static final String ROUTE_CHATBOT = "chatbot";
     public static final String ROUTE_PROFIL = "profil";
+    public static final String ROUTE_FAVORIS = "favoris";
 
     public static final String ROUTE_LIEU_DETAILS_PREFIX = "lieu-details:";
     public static final String ROUTE_EVENEMENT_DETAILS_PREFIX = "evenement-details:";
@@ -205,6 +206,7 @@ public class FrontDashboardController implements ShellNavigator {
             case ROUTE_HELP -> showHelp();
             case ROUTE_PROFIL -> showProfil();
             case ROUTE_CHATBOT -> showChatbot();
+            case ROUTE_FAVORIS -> showMesFavoris();
             default -> info("Navigation", "Route inconnue: " + route);
         }
     }
@@ -361,6 +363,13 @@ public class FrontDashboardController implements ShellNavigator {
     @FXML public void showSecurity() { info("Sécurité", "Brancher: mot de passe / 2FA / sessions."); }
     @FXML public void showSettings() { info("Paramètres", "Brancher: préférences, langue, notifications."); }
     @FXML public void showMyActivity() { info("Activités", "Brancher: historique, favoris, participations."); }
+
+    @FXML
+    public void showMesFavoris() {
+        closeAccount();
+        setHeader("Mes favoris", "Vos lieux enregistrés");
+        ensureLoadedAndShow(ROUTE_FAVORIS, "/fxml/front/lieux/MesFavorisView.fxml");
+    }
 
     @FXML
     public void logout() {

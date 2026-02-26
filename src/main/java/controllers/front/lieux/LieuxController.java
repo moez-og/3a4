@@ -1,6 +1,8 @@
 package controllers.front.lieux;
 
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -13,7 +15,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import models.lieux.Lieu;
+import models.users.User;
 import controllers.front.shell.FrontDashboardController;
+import services.lieux.FavoriLieuService;
 import services.lieux.LieuService;
 import utils.ui.FrontOfferContext;
 import utils.ui.ShellNavigator;
@@ -37,8 +41,10 @@ public class LieuxController {
     @FXML private Label stateLabel;
 
     private final LieuService lieuService = new LieuService();
+    private final FavoriLieuService favoriService = new FavoriLieuService();
 
     private ShellNavigator navigator;
+    private User currentUser;
 
     private List<Lieu> all = new ArrayList<>();
     private String selectedVille = null;
@@ -50,6 +56,15 @@ public class LieuxController {
 
     public void setNavigator(ShellNavigator navigator) {
         this.navigator = navigator;
+    }
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+        // Reconstruire les cartes maintenant que l'utilisateur est connu
+        // (les cœurs favoris nécessitent currentUser pour être affichés)
+        if (cardsPane != null) {
+            applyFilters();
+        }
     }
 
     @FXML
@@ -259,6 +274,64 @@ public class LieuxController {
 
         iv.setImage(loadImageOrFallback(l.getImageUrl()));
         imgWrap.getChildren().add(iv);
+
+        // Bouton favori — design cercle blanc avec cœur
+        if (currentUser != null) {
+            boolean[] isFav = { favoriService.isFavori(currentUser.getId(), l.getId()) };
+
+            // Style helpers
+            java.util.function.Supplier<String> activeStyle = () ->
+                "-fx-background-color: white;" +
+                "-fx-background-radius: 999;" +
+                "-fx-border-radius: 999;" +
+                "-fx-min-width: 38; -fx-max-width: 38;" +
+                "-fx-min-height: 38; -fx-max-height: 38;" +
+                "-fx-padding: 0;" +
+                "-fx-cursor: hand;" +
+                "-fx-font-size: 17px;" +
+                "-fx-text-fill: #e11d48;" +
+                "-fx-alignment: center;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 8, 0, 0, 2);";
+
+            java.util.function.Supplier<String> inactiveStyle = () ->
+                "-fx-background-color: white;" +
+                "-fx-background-radius: 999;" +
+                "-fx-border-radius: 999;" +
+                "-fx-min-width: 38; -fx-max-width: 38;" +
+                "-fx-min-height: 38; -fx-max-height: 38;" +
+                "-fx-padding: 0;" +
+                "-fx-cursor: hand;" +
+                "-fx-font-size: 17px;" +
+                "-fx-text-fill: #e11d48;" +
+                "-fx-alignment: center;" +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 8, 0, 0, 2);";
+
+            // Utilise ♡ (outline) ou ♥ (plein) selon l'état
+            Button heart = new Button(isFav[0] ? "♥" : "♡");
+            heart.setStyle(isFav[0] ? activeStyle.get() : inactiveStyle.get());
+
+            // Hover : légère mise en avant
+            heart.setOnMouseEntered(e -> heart.setStyle(
+                (isFav[0] ? activeStyle.get() : inactiveStyle.get())
+                    .replace("rgba(0,0,0,0.18)", "rgba(0,0,0,0.30)")
+                    .replace("rgba(0,0,0,0.22)", "rgba(0,0,0,0.32)")
+                    + "-fx-scale-x: 1.12; -fx-scale-y: 1.12;"
+            ));
+            heart.setOnMouseExited(e ->
+                heart.setStyle(isFav[0] ? activeStyle.get() : inactiveStyle.get())
+            );
+
+            heart.setOnAction(e -> {
+                isFav[0] = favoriService.toggle(currentUser.getId(), l.getId());
+                heart.setText(isFav[0] ? "♥" : "♡");
+                heart.setStyle(isFav[0] ? activeStyle.get() : inactiveStyle.get());
+            });
+
+            heart.addEventFilter(MouseEvent.MOUSE_CLICKED, ev -> ev.consume());
+            StackPane.setAlignment(heart, Pos.TOP_RIGHT);
+            StackPane.setMargin(heart, new Insets(10));
+            imgWrap.getChildren().add(heart);
+        }
 
         Label name = new Label(safe(l.getNom()));
         name.getStyleClass().add("cardTitle");
