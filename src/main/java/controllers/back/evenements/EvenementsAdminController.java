@@ -39,14 +39,19 @@ import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class EvenementsAdminController {
 
@@ -77,6 +82,12 @@ public class EvenementsAdminController {
     @FXML private Label ticketEventInfo;   // ← affiche le paiement
     @FXML private VBox  ticketsBox;
 
+    // Calendar panel
+    @FXML private VBox panelCalendar;
+    @FXML private Label calMonthLabel;
+    @FXML private VBox calendarContainer;
+    @FXML private Button btnCalendar;
+
     private final EvenementService   evenementService   = new EvenementService();
     private final InscriptionService inscriptionService = new InscriptionService();
     private final TicketService      ticketService      = new TicketService();
@@ -92,12 +103,32 @@ public class EvenementsAdminController {
     private Node        selectedCard       = null;
     private double      lastViewportW      = -1;
 
+    // Calendar state
+    private YearMonth calCurrentMonth = YearMonth.now();
+    private static final Locale LOCALE_FR = Locale.FRENCH;
+
     // ═══════════════════════════════════════════════════════════
     //  INITIALISATION
     // ═══════════════════════════════════════════════════════════
 
     @FXML
     public void initialize() {
+        // Load additional calendar stylesheet
+        if (panelCalendar != null && panelCalendar.getScene() != null) {
+            panelCalendar.getScene().getStylesheets().add(
+                    getClass().getResource("/styles/back/evenements-admin.css").toExternalForm());
+        }
+        // Defer stylesheet loading if scene not ready yet
+        if (panelCalendar != null) {
+            panelCalendar.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null) {
+                    String css = getClass().getResource("/styles/back/evenements-admin.css").toExternalForm();
+                    if (!newScene.getStylesheets().contains(css)) {
+                        newScene.getStylesheets().add(css);
+                    }
+                }
+            });
+        }
         setupFilterCombo();
         setupSearchFilter();
         setupResponsiveTiles();
@@ -1128,7 +1159,7 @@ public class EvenementsAdminController {
     // ═══════════════════════════════════════════════════════════
 
     private void showPanel(VBox toShow) {
-        for (VBox p : new VBox[]{panelEvents, panelInscriptions, panelTickets}) {
+        for (VBox p : new VBox[]{panelEvents, panelInscriptions, panelTickets, panelCalendar}) {
             boolean show = (p == toShow); p.setVisible(show); p.setManaged(show);
         }
     }
@@ -1457,6 +1488,405 @@ public class EvenementsAdminController {
         int nbTickets  = ticketService.countByInscriptionId(ins.getId());
         float paiement = (float)(currentEvent.getPrix() * nbTickets);
         inscriptionService.updatePaiementFloat(ins.getId(), paiement);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  CALENDRIER — Vue mensuelle des événements
+    // ═══════════════════════════════════════════════════════════
+
+    @FXML
+    public void onToggleCalendar() {
+        calCurrentMonth = YearMonth.now();
+        renderCalendar();
+        showPanel(panelCalendar);
+    }
+
+    @FXML
+    public void onRetourFromCalendar() {
+        showPanelEvents();
+    }
+
+    @FXML
+    public void onPrevMonth() {
+        calCurrentMonth = calCurrentMonth.minusMonths(1);
+        renderCalendar();
+    }
+
+    @FXML
+    public void onNextMonth() {
+        calCurrentMonth = calCurrentMonth.plusMonths(1);
+        renderCalendar();
+    }
+
+    @FXML
+    public void onCalendarToday() {
+        calCurrentMonth = YearMonth.now();
+        renderCalendar();
+    }
+
+    private void renderCalendar() {
+        if (calendarContainer == null) return;
+        calendarContainer.getChildren().clear();
+
+        // Color palette for events (cycle through)
+        String[] colorNames = {"blue", "red", "yellow", "green", "purple", "orange"};
+
+        // Update month label
+        String monthName = calCurrentMonth.getMonth().getDisplayName(TextStyle.FULL, LOCALE_FR);
+        monthName = monthName.substring(0, 1).toUpperCase() + monthName.substring(1);
+        calMonthLabel.setText(monthName + " " + calCurrentMonth.getYear());
+
+        // ── Header row (Monday → Sunday) ──
+        GridPane header = new GridPane();
+        header.getStyleClass().add("cal-header");
+        for (int i = 0; i < 7; i++) {
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(100.0 / 7);
+            cc.setHgrow(Priority.ALWAYS);
+            header.getColumnConstraints().add(cc);
+        }
+        String[] dayNames = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "SUNDAY"};
+        for (int i = 0; i < 7; i++) {
+            Label dayLabel = new Label(dayNames[i]);
+            dayLabel.getStyleClass().add(i == 6 ? "cal-day-header-sunday" : "cal-day-header");
+            dayLabel.setMaxWidth(Double.MAX_VALUE);
+            dayLabel.setAlignment(Pos.CENTER);
+            header.add(dayLabel, i, 0);
+        }
+        calendarContainer.getChildren().add(header);
+
+        // ── Build grid ──
+        GridPane grid = new GridPane();
+        grid.getStyleClass().add("cal-grid");
+        grid.setHgap(0);
+        grid.setVgap(0);
+        for (int i = 0; i < 7; i++) {
+            ColumnConstraints cc = new ColumnConstraints();
+            cc.setPercentWidth(100.0 / 7);
+            cc.setHgrow(Priority.ALWAYS);
+            grid.getColumnConstraints().add(cc);
+        }
+
+        // Determine first day of month and offset
+        LocalDate firstOfMonth = calCurrentMonth.atDay(1);
+        int dayOfWeekOffset = firstOfMonth.getDayOfWeek().getValue() - 1; // Monday=0
+        int daysInMonth = calCurrentMonth.lengthOfMonth();
+        LocalDate today = LocalDate.now();
+
+        // Collect events for this month
+        LocalDateTime monthStart = calCurrentMonth.atDay(1).atStartOfDay();
+        LocalDateTime monthEnd = calCurrentMonth.atEndOfMonth().atTime(23, 59, 59);
+        List<Evenement> monthEvents = masterList.stream()
+                .filter(e -> {
+                    if (e.getDateDebut() == null) return false;
+                    LocalDateTime d = e.getDateDebut();
+                    LocalDateTime fin = e.getDateFin() != null ? e.getDateFin() : d;
+                    return !(fin.isBefore(monthStart) || d.isAfter(monthEnd));
+                })
+                .collect(Collectors.toList());
+
+        // Assign stable color to each event (by id)
+        java.util.Map<Integer, String> eventColorMap = new java.util.HashMap<>();
+        int colorIdx = 0;
+        for (Evenement ev : monthEvents) {
+            if (!eventColorMap.containsKey(ev.getId())) {
+                eventColorMap.put(ev.getId(), colorNames[colorIdx % colorNames.length]);
+                colorIdx++;
+            }
+        }
+
+        int totalCells = dayOfWeekOffset + daysInMonth;
+        int rows = (int) Math.ceil(totalCells / 7.0);
+        // Fill trailing cells
+        int trailingDays = rows * 7 - totalCells;
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < 7; col++) {
+                int cellIndex = row * 7 + col;
+                int dayNumber = cellIndex - dayOfWeekOffset + 1;
+
+                VBox cell = new VBox(1);
+                cell.getStyleClass().add("cal-cell");
+                cell.setMinHeight(110);
+                cell.setPrefHeight(120);
+                cell.setPadding(new Insets(0));
+                if (col == 0) cell.getStyleClass().add("cal-cell-first-col");
+                if (col == 6) cell.getStyleClass().add("cal-sunday-cell");
+
+                boolean isCurrentMonth = dayNumber >= 1 && dayNumber <= daysInMonth;
+                // Compute actual date for trailing/leading cells
+                LocalDate cellDate;
+                int displayDay;
+                if (dayNumber < 1) {
+                    // Previous month
+                    YearMonth prevMonth = calCurrentMonth.minusMonths(1);
+                    displayDay = prevMonth.lengthOfMonth() + dayNumber;
+                    cellDate = prevMonth.atDay(displayDay);
+                    cell.getStyleClass().add("cal-empty");
+                } else if (dayNumber > daysInMonth) {
+                    // Next month
+                    displayDay = dayNumber - daysInMonth;
+                    cellDate = calCurrentMonth.plusMonths(1).atDay(displayDay);
+                    cell.getStyleClass().add("cal-empty");
+                } else {
+                    displayDay = dayNumber;
+                    cellDate = calCurrentMonth.atDay(dayNumber);
+                }
+
+                // ── Day number row (dots + number) ──
+                HBox dayRow = new HBox();
+                dayRow.setAlignment(Pos.CENTER_RIGHT);
+                dayRow.setPadding(new Insets(4, 0, 2, 0));
+
+                // Find events for this day
+                final LocalDate fCellDate = cellDate;
+                List<Evenement> dayEvents = monthEvents.stream()
+                        .filter(e -> {
+                            LocalDate evStart = e.getDateDebut().toLocalDate();
+                            LocalDate evEnd = e.getDateFin() != null ? e.getDateFin().toLocalDate() : evStart;
+                            return !fCellDate.isBefore(evStart) && !fCellDate.isAfter(evEnd);
+                        })
+                        .collect(Collectors.toList());
+
+                // Colored dots
+                HBox dotsBox = new HBox(3);
+                dotsBox.setAlignment(Pos.CENTER_LEFT);
+                dotsBox.setPadding(new Insets(0, 0, 0, 6));
+                for (int dIdx = 0; dIdx < Math.min(dayEvents.size(), 5); dIdx++) {
+                    String evColor = eventColorMap.getOrDefault(dayEvents.get(dIdx).getId(), "blue");
+                    Region dot = new Region();
+                    dot.getStyleClass().addAll("cal-dot", "cal-dot-" + evColor);
+                    dotsBox.getChildren().add(dot);
+                }
+                HBox.setHgrow(dotsBox, Priority.ALWAYS);
+
+                // Day number
+                if (isCurrentMonth && cellDate.equals(today)) {
+                    // Today — blue circle
+                    Label todayLabel = new Label(String.valueOf(displayDay));
+                    todayLabel.getStyleClass().add("cal-today-badge");
+                    dayRow.getChildren().addAll(dotsBox, todayLabel);
+                    cell.getStyleClass().add("cal-today-cell");
+                } else {
+                    Label numLabel = new Label(String.valueOf(displayDay));
+                    numLabel.getStyleClass().add(isCurrentMonth ? "cal-day-number" : "cal-day-number-muted");
+                    dayRow.getChildren().addAll(dotsBox, numLabel);
+                }
+                cell.getChildren().add(dayRow);
+
+                // ── Event bars ──
+                if (isCurrentMonth) {
+                    VBox eventsBox = new VBox(2);
+                    eventsBox.setPadding(new Insets(2, 4, 4, 4));
+
+                    int maxVisible = 3;
+                    for (int idx = 0; idx < Math.min(dayEvents.size(), maxVisible); idx++) {
+                        Evenement ev = dayEvents.get(idx);
+                        String color = eventColorMap.getOrDefault(ev.getId(), "blue");
+
+                        // Build event bar: [dot] [title] [count]
+                        HBox bar = new HBox(4);
+                        bar.getStyleClass().addAll("cal-event-bar", "cal-bar-" + color);
+                        bar.setAlignment(Pos.CENTER_LEFT);
+                        bar.setMaxWidth(Double.MAX_VALUE);
+                        HBox.setHgrow(bar, Priority.ALWAYS);
+
+                        // Colored dot
+                        Region barDot = new Region();
+                        barDot.getStyleClass().addAll("cal-bar-dot", "cal-dot-" + color);
+                        barDot.setMinSize(8, 8);
+                        barDot.setMaxSize(8, 8);
+
+                        // Title
+                        Label titleLbl = new Label(truncate(safeStr(ev.getTitre()), 14));
+                        titleLbl.setStyle("-fx-font-size:11px;-fx-font-weight:700;");
+                        HBox.setHgrow(titleLbl, Priority.ALWAYS);
+
+                        // Inscription count
+                        int nbInsc = 0;
+                        try { nbInsc = inscriptionService.countByEvent(ev.getId()); } catch (Exception ignored) {}
+                        Label countLbl = new Label(String.valueOf(nbInsc));
+                        countLbl.getStyleClass().addAll("cal-bar-count", "cal-bar-count-" + color);
+
+                        bar.getChildren().addAll(barDot, titleLbl, countLbl);
+
+                        // Tooltip
+                        String tooltipText = "📌 " + safeStr(ev.getTitre())
+                                + "\n📅 " + formatLDT(ev.getDateDebut()) + " → " + formatLDT(ev.getDateFin())
+                                + "\n📍 " + resolveLieuName(ev.getLieuId())
+                                + "\n👥 " + ev.getCapaciteMax() + " places  •  " + nbInsc + " inscrit(s)"
+                                + "\n💰 " + ev.getPrix() + " TND"
+                                + "\n⚡ " + safeStr(ev.getStatut()) + "  •  " + safeStr(ev.getType());
+                        Tooltip tp = new Tooltip(tooltipText);
+                        tp.setShowDelay(Duration.millis(150));
+                        tp.setStyle("-fx-font-size:12px;-fx-font-family:'Segoe UI';-fx-background-radius:8;");
+                        Tooltip.install(bar, tp);
+
+                        // Click → inscriptions panel
+                        final Evenement clickEv = ev;
+                        bar.setOnMouseClicked(me -> {
+                            me.consume();
+                            showPanelInscriptions(clickEv);
+                        });
+
+                        eventsBox.getChildren().add(bar);
+                    }
+
+                    if (dayEvents.size() > maxVisible) {
+                        Label more = new Label("+" + (dayEvents.size() - maxVisible) + " autres");
+                        more.getStyleClass().add("cal-more-label");
+                        final List<Evenement> allDayEvents = dayEvents;
+                        more.setOnMouseClicked(me -> {
+                            me.consume();
+                            showDayEventsPopup(fCellDate, allDayEvents);
+                        });
+                        eventsBox.getChildren().add(more);
+                    }
+
+                    cell.getChildren().add(eventsBox);
+                    VBox.setVgrow(eventsBox, Priority.ALWAYS);
+
+                    // Click on cell area → popup
+                    if (!dayEvents.isEmpty()) {
+                        final List<Evenement> allDayEvents = dayEvents;
+                        cell.setOnMouseClicked(me -> {
+                            if (me.getTarget() == cell || me.getTarget() instanceof Region) {
+                                showDayEventsPopup(fCellDate, allDayEvents);
+                            }
+                        });
+                    }
+                }
+
+                grid.add(cell, col, row);
+            }
+        }
+
+        calendarContainer.getChildren().add(grid);
+    }
+
+    /** Popup showing all events for a specific day */
+    private void showDayEventsPopup(LocalDate date, List<Evenement> events) {
+        Stage popup = new Stage();
+        popup.initModality(Modality.APPLICATION_MODAL);
+        popup.setTitle("Événements du " + date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+
+        VBox root = new VBox(12);
+        root.getStyleClass().add("dialogRoot");
+        root.setPadding(new Insets(20, 24, 16, 24));
+        root.setMaxWidth(560);
+
+        Label title = new Label("📅 " + date.format(DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy", LOCALE_FR)));
+        title.getStyleClass().add("dialogTitle");
+        title.setStyle("-fx-font-size:18px;");
+
+        Label countLbl = new Label(events.size() + " événement(s)");
+        countLbl.getStyleClass().add("card-muted");
+
+        VBox eventsList = new VBox(10);
+        for (Evenement ev : events) {
+            VBox card = new VBox(6);
+            card.getStyleClass().add("lieu-card");
+            card.setPadding(new Insets(12, 14, 12, 14));
+
+            // Status chip
+            Label statusChip = new Label(safeStr(ev.getStatut()));
+            statusChip.getStyleClass().addAll("statusChip",
+                    "status-" + safeStr(ev.getStatut()).toLowerCase());
+
+            Label evTitle = new Label(safeStr(ev.getTitre()));
+            evTitle.getStyleClass().add("card-title");
+            evTitle.setWrapText(true);
+
+            HBox titleRow = new HBox(10, evTitle, new Region(), statusChip);
+            titleRow.setAlignment(Pos.CENTER_LEFT);
+            HBox.setHgrow(titleRow.getChildren().get(1), Priority.ALWAYS);
+
+            Label evTime = new Label("🕐 " + formatLDT(ev.getDateDebut()) + " → " + formatLDT(ev.getDateFin()));
+            evTime.getStyleClass().add("card-muted");
+
+            Label evDetails = new Label("📍 " + resolveLieuName(ev.getLieuId())
+                    + "   •   👥 " + ev.getCapaciteMax() + " places"
+                    + "   •   💰 " + ev.getPrix() + " TND"
+                    + "   •   " + safeStr(ev.getType()));
+            evDetails.getStyleClass().add("cardLine");
+            evDetails.setWrapText(true);
+
+            // Description preview
+            String desc = safeStr(ev.getDescription());
+            if (!desc.isEmpty()) {
+                Label descLabel = new Label(truncate(desc, 120));
+                descLabel.getStyleClass().add("card-muted");
+                descLabel.setWrapText(true);
+                descLabel.setStyle("-fx-font-style:italic;");
+                card.getChildren().addAll(titleRow, evTime, evDetails, descLabel);
+            } else {
+                card.getChildren().addAll(titleRow, evTime, evDetails);
+            }
+
+            // Inscriptions count
+            try {
+                int nbInsc = inscriptionService.countByEvent(ev.getId());
+                Label inscLabel = new Label("📝 " + nbInsc + " inscription(s)");
+                inscLabel.getStyleClass().add("card-muted");
+                card.getChildren().add(inscLabel);
+            } catch (Exception ignored) {}
+
+            // Button to open inscriptions panel
+            Button btnOpen = new Button("Voir inscriptions →");
+            btnOpen.getStyleClass().add("card-btn");
+            btnOpen.setOnAction(e -> {
+                popup.close();
+                showPanelInscriptions(ev);
+            });
+
+            Button btnEdit = new Button("Modifier");
+            btnEdit.getStyleClass().add("card-btn");
+            btnEdit.setOnAction(e -> {
+                popup.close();
+                openEditor(ev);
+            });
+
+            HBox actions = new HBox(10, btnOpen, btnEdit);
+            actions.getStyleClass().add("card-actions");
+            card.getChildren().add(actions);
+
+            eventsList.getChildren().add(card);
+        }
+
+        ScrollPane sp = new ScrollPane(eventsList);
+        sp.setFitToWidth(true);
+        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        sp.setMaxHeight(400);
+        sp.getStyleClass().add("cards-scroll");
+
+        Button btnClose = new Button("Fermer");
+        btnClose.getStyleClass().add("ghostBtn");
+        btnClose.setOnAction(e -> popup.close());
+        HBox footer = new HBox(btnClose);
+        footer.setAlignment(Pos.CENTER_RIGHT);
+
+        root.getChildren().addAll(title, countLbl, sp, footer);
+
+        Scene sc = new Scene(root, 540, 500);
+        sc.getStylesheets().add(Objects.requireNonNull(
+                getClass().getResource("/styles/back/evenements-admin.css")).toExternalForm());
+        popup.setScene(sc);
+        popup.setResizable(true);
+        popup.centerOnScreen();
+        popup.showAndWait();
+    }
+
+    private String resolveLieuName(Integer lieuId) {
+        if (lieuId == null) return "Sans lieu";
+        return allLieux.stream()
+                .filter(l -> l.getId() == lieuId)
+                .map(Lieu::getNom)
+                .findFirst().orElse("Lieu #" + lieuId);
+    }
+
+    private String truncate(String s, int maxLen) {
+        if (s == null) return "";
+        return s.length() <= maxLen ? s : s.substring(0, maxLen - 1) + "…";
     }
 
     // ═══════════════════════════════════════════════════════════

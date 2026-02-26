@@ -49,43 +49,60 @@
                 <Region HBox.hgrow="ALWAYS"/>
                 <Button text="✓ Mes inscriptions" onAction="#showMesInscriptions" styleClass="evGhostBtn"/>
                 <Button text="Tous" onAction="#showAll" styleClass="evGhostBtnActive"/>
+                <Button fx:id="btnToggleCalendar" text="📅 Calendrier" onAction="#onToggleCalendar" styleClass="evCalToggleBtn"/>
             </HBox>
 
-            <!-- ═══════ FILTRE TYPE (PRIVE/PUBLIC) ═══════ -->
-            <VBox spacing="8" styleClass="evSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Type" styleClass="evSectionTitle"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Tous" onAction="#selectAllTypes" styleClass="evChip evChipMuted"/>
-                </HBox>
-                <!-- Les boutons sont construits dynamiquement dans buildTypeChips() -->
-                <HBox fx:id="typesChips" spacing="10" styleClass="evChipsRow"/>
+            <!-- ═══════ SECTION CARTES (par défaut) ═══════ -->
+            <VBox fx:id="cardsSection" spacing="10">
+
+                <!-- ═══════ FILTRE TYPE (PRIVE/PUBLIC) ═══════ -->
+                <VBox spacing="8" styleClass="evSection">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Type" styleClass="evSectionTitle"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Tous" onAction="#selectAllTypes" styleClass="evChip evChipMuted"/>
+                    </HBox>
+                    <HBox fx:id="typesChips" spacing="10" styleClass="evChipsRow"/>
+                </VBox>
+
+                <!-- ═══════ FILTRE STATUT ═══════ -->
+                <VBox spacing="8" styleClass="evSection">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Statut" styleClass="evSectionTitle"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button text="Tous" onAction="#selectAllStatuts" styleClass="evChip evChipMuted"/>
+                    </HBox>
+                    <HBox fx:id="statutsChips" spacing="10" styleClass="evChipsRow"/>
+                </VBox>
+
+                <!-- ═══════ RÉSULTATS ═══════ -->
+                <VBox spacing="10" styleClass="evSection">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Résultats" styleClass="evSectionTitle"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="stateLabel" text="" visible="false" managed="false"
+                               styleClass="evStateLabel"/>
+                    </HBox>
+
+                    <FlowPane fx:id="cardsPane"
+                              hgap="14" vgap="14"
+                              prefWrapLength="1100"
+                              styleClass="evCardsPane"/>
+                </VBox>
             </VBox>
 
-            <!-- ═══════ FILTRE STATUT ═══════ -->
-            <VBox spacing="8" styleClass="evSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Statut" styleClass="evSectionTitle"/>
+            <!-- ═══════ SECTION CALENDRIER (cachée par défaut) ═══════ -->
+            <VBox fx:id="calendarSection" spacing="12" visible="false" managed="false" styleClass="evCalSection">
+                <HBox spacing="12" alignment="CENTER_LEFT" styleClass="evCalNavBar">
+                    <Button text="← Retour" onAction="#onRetourFromCalendar" styleClass="evCalNavBtn"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Tous" onAction="#selectAllStatuts" styleClass="evChip evChipMuted"/>
-                </HBox>
-                <!-- Les boutons sont construits dynamiquement dans buildStatutChips() -->
-                <HBox fx:id="statutsChips" spacing="10" styleClass="evChipsRow"/>
-            </VBox>
-
-            <!-- ═══════ RÉSULTATS ═══════ -->
-            <VBox spacing="10" styleClass="evSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Résultats" styleClass="evSectionTitle"/>
+                    <Button text="◀" onAction="#onPrevMonth" styleClass="evCalNavBtn"/>
+                    <Label fx:id="calMonthLabel" text="" styleClass="evCalMonthTitle"/>
+                    <Button text="▶" onAction="#onNextMonth" styleClass="evCalNavBtn"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="stateLabel" text="" visible="false" managed="false"
-                           styleClass="evStateLabel"/>
+                    <Button text="Aujourd'hui" onAction="#onCalendarToday" styleClass="evCalTodayBtn"/>
                 </HBox>
-
-                <FlowPane fx:id="cardsPane"
-                          hgap="14" vgap="14"
-                          prefWrapLength="1100"
-                          styleClass="evCardsPane"/>
+                <VBox fx:id="calendarContainer" styleClass="evCalContainer"/>
             </VBox>
 
         </VBox>

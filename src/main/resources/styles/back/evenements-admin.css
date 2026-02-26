@@ -383,3 +383,233 @@
     -fx-background-color: rgba(15,23,42,0.03);
     -fx-border-color: rgba(15,23,42,0.06);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CALENDRIER — Vue mensuelle professionnelle
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Container */
+.cal-container {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(0,0,0,0.08);
+    -fx-padding: 0;
+}
+
+/* Month title */
+.cal-month-title {
+    -fx-text-fill: #1e293b;
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 16;
+}
+
+/* Nav buttons (arrows) */
+.cal-nav-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+    -fx-background-radius: 8;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+    -fx-min-width: 32;
+    -fx-min-height: 32;
+    -fx-border-color: rgba(0,0,0,0.08);
+    -fx-border-radius: 8;
+}
+.cal-nav-btn:hover {
+    -fx-background-color: rgba(0,0,0,0.04);
+    -fx-text-fill: #1e293b;
+}
+
+/* Header row (Monday, Tuesday, ...) */
+.cal-header {
+    -fx-background-color: #f8fafc;
+    -fx-padding: 12 0;
+    -fx-border-color: transparent transparent rgba(0,0,0,0.06) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.cal-day-header {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 4 0;
+}
+/* Sunday header in red */
+.cal-day-header-sunday {
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 4 0;
+}
+
+/* Grid */
+.cal-grid {
+    -fx-background-color: white;
+    -fx-padding: 0;
+}
+
+/* Day cell — clean flat design */
+.cal-cell {
+    -fx-background-color: white;
+    -fx-border-color: rgba(0,0,0,0.05);
+    -fx-border-width: 0 0 1 1;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+}
+.cal-cell:hover {
+    -fx-background-color: #f8fafc;
+}
+
+/* First column cells — no left border */
+.cal-cell-first-col {
+    -fx-border-width: 0 0 1 0;
+}
+
+/* Empty cells (outside current month) */
+.cal-empty {
+    -fx-background-color: #fafbfc;
+    -fx-cursor: default;
+    -fx-border-color: rgba(0,0,0,0.03);
+}
+.cal-empty:hover {
+    -fx-background-color: #fafbfc;
+}
+
+/* Day number — top right, small, clean */
+.cal-day-number {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #94a3b8;
+    -fx-padding: 6 10 0 0;
+}
+
+/* Today — blue circle */
+.cal-today-badge {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-max-width: 28;
+    -fx-max-height: 28;
+    -fx-alignment: center;
+}
+
+/* Outside-month day numbers */
+.cal-day-number-muted {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #d1d5db;
+    -fx-padding: 6 10 0 0;
+}
+
+/* ── Event dots row (top of cell) ── */
+.cal-dots-row {
+    -fx-padding: 4 6 0 6;
+    -fx-spacing: 3;
+}
+.cal-dot {
+    -fx-min-width: 6;
+    -fx-min-height: 6;
+    -fx-max-width: 6;
+    -fx-max-height: 6;
+    -fx-background-radius: 999;
+}
+.cal-dot-blue   { -fx-background-color: #3b82f6; }
+.cal-dot-red    { -fx-background-color: #ef4444; }
+.cal-dot-yellow { -fx-background-color: #eab308; }
+.cal-dot-green  { -fx-background-color: #22c55e; }
+.cal-dot-purple { -fx-background-color: #8b5cf6; }
+.cal-dot-orange { -fx-background-color: #f97316; }
+
+/* ── Event bars (wide pastel pills) ── */
+.cal-event-bar {
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 4 8;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-max-height: 24;
+    -fx-min-height: 22;
+    -fx-pref-height: 23;
+}
+.cal-event-bar:hover {
+    -fx-opacity: 0.88;
+}
+
+/* Color variants — soft pastel backgrounds with darker text */
+.cal-bar-blue {
+    -fx-background-color: rgba(59,130,246,0.15);
+    -fx-text-fill: #1d4ed8;
+}
+.cal-bar-red {
+    -fx-background-color: rgba(239,68,68,0.13);
+    -fx-text-fill: #dc2626;
+}
+.cal-bar-yellow {
+    -fx-background-color: rgba(234,179,8,0.15);
+    -fx-text-fill: #a16207;
+}
+.cal-bar-green {
+    -fx-background-color: rgba(34,197,94,0.14);
+    -fx-text-fill: #15803d;
+}
+.cal-bar-purple {
+    -fx-background-color: rgba(139,92,246,0.13);
+    -fx-text-fill: #7c3aed;
+}
+.cal-bar-orange {
+    -fx-background-color: rgba(249,115,22,0.13);
+    -fx-text-fill: #c2410c;
+}
+
+/* Event icon dot in bar */
+.cal-bar-dot {
+    -fx-min-width: 8;
+    -fx-min-height: 8;
+    -fx-max-width: 8;
+    -fx-max-height: 8;
+    -fx-background-radius: 999;
+}
+
+/* Event count in bar */
+.cal-bar-count {
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-padding: 0 0 0 4;
+}
+.cal-bar-count-blue   { -fx-text-fill: #3b82f6; }
+.cal-bar-count-red    { -fx-text-fill: #ef4444; }
+.cal-bar-count-yellow { -fx-text-fill: #a16207; }
+.cal-bar-count-green  { -fx-text-fill: #15803d; }
+.cal-bar-count-purple { -fx-text-fill: #7c3aed; }
+.cal-bar-count-orange { -fx-text-fill: #c2410c; }
+
+/* "+X more" label */
+.cal-more-label {
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #64748b;
+    -fx-padding: 2 8;
+    -fx-cursor: hand;
+}
+.cal-more-label:hover {
+    -fx-text-fill: #3b82f6;
+    -fx-underline: true;
+}
+
+/* Today left accent bar */
+.cal-today-cell {
+    -fx-border-color: #3b82f6 rgba(0,0,0,0.05) rgba(0,0,0,0.05) rgba(0,0,0,0.05);
+    -fx-border-width: 2 0 1 1;
+}
+
+/* Sunday column cells */
+.cal-sunday-cell {
+    -fx-background-color: rgba(239,68,68,0.02);
+}

@@ -514,3 +514,215 @@
     -fx-background-color: rgba(15,23,42,0.03);
     -fx-border-color: rgba(15,23,42,0.06);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CALENDRIER FRONT — Cohérent avec le style événements front
+   ═══════════════════════════════════════════════════════════════ */
+
+.evCalSection { -fx-padding: 0; }
+
+.evCalNavBar {
+    -fx-background-color: rgba(255,255,255,0.90);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 14;
+    -fx-padding: 10 16;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.06), 10, 0.12, 0, 3);
+}
+
+.evCalNavBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 10;
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+.evCalNavBtn:hover {
+    -fx-background-color: rgba(15,23,42,0.10);
+}
+
+.evCalMonthTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 12;
+}
+
+.evCalTodayBtn {
+    -fx-background-color: linear-gradient(to right, #0b2550, #1a4a7a);
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+.evCalTodayBtn:hover {
+    -fx-background-color: linear-gradient(to right, #163a5c, #245f9e);
+}
+
+.evCalToggleBtn {
+    -fx-background-color: rgba(11,37,80,0.10);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(11,37,80,0.20);
+    -fx-border-radius: 12;
+    -fx-text-fill: #0b2550;
+    -fx-font-weight: 900;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+.evCalToggleBtn:hover {
+    -fx-background-color: rgba(11,37,80,0.16);
+}
+
+.evCalContainer {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 14, 0.18, 0, 5);
+}
+
+/* ── Calendar Header (Lun, Mar, ...) ── */
+.cal-header {
+    -fx-background-color: rgba(248,250,252,0.95);
+    -fx-padding: 12 0;
+    -fx-border-color: transparent transparent rgba(15,23,42,0.06) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.cal-day-header {
+    -fx-text-fill: rgba(22,58,92,0.55);
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 4 0;
+}
+.cal-day-header-sunday {
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 4 0;
+}
+
+/* ── Calendar Grid ── */
+.cal-grid {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* ── Day Cell ── */
+.cal-cell {
+    -fx-background-color: white;
+    -fx-border-color: rgba(15,23,42,0.05);
+    -fx-border-width: 0 0 1 1;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+}
+.cal-cell:hover {
+    -fx-background-color: rgba(248,250,252,0.95);
+}
+.cal-cell-first-col {
+    -fx-border-width: 0 0 1 0;
+}
+.cal-empty {
+    -fx-background-color: rgba(248,250,252,0.6);
+    -fx-cursor: default;
+    -fx-border-color: rgba(15,23,42,0.03);
+}
+.cal-empty:hover {
+    -fx-background-color: rgba(248,250,252,0.6);
+}
+
+/* ── Day Number ── */
+.cal-day-number {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: rgba(22,58,92,0.55);
+    -fx-padding: 6 10 0 0;
+}
+.cal-today-badge {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-max-width: 28;
+    -fx-max-height: 28;
+    -fx-alignment: center;
+}
+.cal-day-number-muted {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: rgba(15,23,42,0.22);
+    -fx-padding: 6 10 0 0;
+}
+
+/* ── Colored Dots ── */
+.cal-dot {
+    -fx-min-width: 6;
+    -fx-min-height: 6;
+    -fx-max-width: 6;
+    -fx-max-height: 6;
+    -fx-background-radius: 999;
+}
+.cal-dot-blue   { -fx-background-color: #3b82f6; }
+.cal-dot-red    { -fx-background-color: #ef4444; }
+.cal-dot-yellow { -fx-background-color: #eab308; }
+.cal-dot-green  { -fx-background-color: #22c55e; }
+.cal-dot-purple { -fx-background-color: #8b5cf6; }
+.cal-dot-orange { -fx-background-color: #f97316; }
+
+/* ── Event Bars (pastel pills) ── */
+.cal-event-bar {
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-padding: 3 6;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+    -fx-max-height: 22;
+    -fx-min-height: 20;
+    -fx-pref-height: 21;
+}
+.cal-event-bar:hover {
+    -fx-opacity: 0.85;
+}
+.cal-bar-blue   { -fx-background-color: rgba(59,130,246,0.14); }
+.cal-bar-red    { -fx-background-color: rgba(239,68,68,0.12); }
+.cal-bar-yellow { -fx-background-color: rgba(234,179,8,0.14); }
+.cal-bar-green  { -fx-background-color: rgba(34,197,94,0.13); }
+.cal-bar-purple { -fx-background-color: rgba(139,92,246,0.12); }
+.cal-bar-orange { -fx-background-color: rgba(249,115,22,0.12); }
+
+/* ── Bar Dot ── */
+.cal-bar-dot {
+    -fx-min-width: 8;
+    -fx-min-height: 8;
+    -fx-max-width: 8;
+    -fx-max-height: 8;
+    -fx-background-radius: 999;
+}
+
+/* ── "+X autres" label ── */
+.cal-more-label {
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-text-fill: rgba(22,58,92,0.55);
+    -fx-padding: 2 6;
+    -fx-cursor: hand;
+}
+.cal-more-label:hover {
+    -fx-text-fill: #3b82f6;
+    -fx-underline: true;
+}
+
+/* ── Today Cell Accent ── */
+.cal-today-cell {
+    -fx-border-color: #3b82f6 rgba(15,23,42,0.05) rgba(15,23,42,0.05) rgba(15,23,42,0.05);
+    -fx-border-width: 2 0 1 1;
+}
+
+/* ── Sunday Column ── */
+.cal-sunday-cell {
+    -fx-background-color: rgba(239,68,68,0.02);
+}
