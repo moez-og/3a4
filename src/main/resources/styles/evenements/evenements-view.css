@@ -80,6 +80,30 @@
     -fx-padding: 4 0 2 0;
 }
 
+/* ═══════ FILTERS BAR (single line) ═══════ */
+.evFiltersBar {
+    -fx-background-color: rgba(255,255,255,0.80);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 14;
+    -fx-padding: 10 18 10 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0.1, 0, 2);
+}
+.evFilterLabel {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 12.5;
+    -fx-font-weight: 900;
+    -fx-padding: 0 4 0 0;
+}
+.evFilterSep {
+    -fx-min-width: 1;
+    -fx-pref-width: 1;
+    -fx-min-height: 24;
+    -fx-background-color: rgba(15,23,42,0.12);
+    -fx-background-radius: 1;
+    -fx-padding: 0 6 0 6;
+}
+
 /* ═══════ CHIPS ═══════ */
 .evChipsScroll { -fx-background-color: transparent; }
 .evChipsScroll > .viewport { -fx-background-color: transparent; }
@@ -211,6 +235,76 @@
     -fx-cursor: hand;
 }
 .evGhostBtn:hover { -fx-background-color: rgba(15,23,42,0.09); }
+
+/* ── Tag « Non inscrit » (gris) ── */
+.evNonInscritTag {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 10;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « En attente » (orange) ── */
+.evAttenteTag {
+    -fx-background-color: rgba(245,158,11,0.14);
+    -fx-background-radius: 10;
+    -fx-text-fill: #b45309;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « En attente de paiement » (bleu) ── */
+.evAPayerTag {
+    -fx-background-color: rgba(59,130,246,0.14);
+    -fx-background-radius: 10;
+    -fx-text-fill: #1d4ed8;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « Payé » (vert) ── */
+.evPayeTag {
+    -fx-background-color: rgba(22,163,74,0.14);
+    -fx-background-radius: 10;
+    -fx-text-fill: #15803d;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « Inscrit » (vert clair) ── */
+.evInscritTag {
+    -fx-background-color: rgba(22,163,74,0.10);
+    -fx-background-radius: 10;
+    -fx-text-fill: #16a34a;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « Annulé » (rouge) ── */
+.evAnnuleTag {
+    -fx-background-color: rgba(239,68,68,0.12);
+    -fx-background-radius: 10;
+    -fx-text-fill: #b91c1c;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « Complet / Fermé » (gris foncé) ── */
+.evCompletTag {
+    -fx-background-color: rgba(15,23,42,0.10);
+    -fx-background-radius: 10;
+    -fx-text-fill: #475569;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
 
 .evGhostBtnActive {
     -fx-background-color: rgba(11,37,80,0.10);

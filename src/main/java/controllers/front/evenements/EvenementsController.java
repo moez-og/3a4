@@ -12,9 +12,11 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import models.evenements.Evenement;
+import models.evenements.Inscription;
 import models.users.User;
 import services.evenements.EvenementService;
 import services.evenements.InscriptionService;
+import services.evenements.PaiementService;
 import services.evenements.WeatherService;
 import utils.ui.ShellNavigator;
 
@@ -64,6 +66,7 @@ public class EvenementsController {
     // ====== SERVICES ======
     private final EvenementService evenementService     = new EvenementService();
     private final InscriptionService inscriptionService = new InscriptionService();
+    private final PaiementService paiementService       = new PaiementService();
     private final WeatherService weatherService         = new WeatherService();
 
     // ====== ÉTAT ======
@@ -92,6 +95,7 @@ public class EvenementsController {
     public void setCurrentUser(User u) {
         this.currentUser = u;
         refreshStats();
+        applyFilters();
     }
 
     // ====== INIT ======
@@ -351,36 +355,25 @@ public class EvenementsController {
             weatherAdvice.getStyleClass().add("evAdviceNeutral");
         }
 
-        // ── BOUTONS ──
-        HBox actions = new HBox(10);
-        actions.setPadding(new javafx.geometry.Insets(0, 14, 4, 14));
-
-        Button details = new Button("Voir détails");
-        details.getStyleClass().add("evPrimaryBtn");
-        details.setOnAction(e -> openDetailsPage(ev));
-
-        // Inscription rapide
-        boolean inscrit = false;
+        // ── BADGE ÉTAT INSCRIPTION ──
+        Inscription userInscription = null;
         if (currentUser != null) {
-            try { inscrit = inscriptionService.existsForUser(ev.getId(), currentUser.getId()); }
-            catch (Exception ignored) {}
+            try {
+                userInscription = inscriptionService.getByEventId(ev.getId()).stream()
+                        .filter(i -> i.getUserId() == currentUser.getId())
+                        .findFirst().orElse(null);
+            } catch (Exception e) {
+                System.err.println("Erreur chargement inscription pour event " + ev.getId() + ": " + e.getMessage());
+            }
         }
-        final boolean[] inscritRef = {inscrit};
-        final int[] inscritsRef    = {inscrits};
 
-        Button inscBtn = new Button(inscrit ? "✓ Inscrit" : "S'inscrire");
-        inscBtn.getStyleClass().add(inscrit ? "evInscritBtn" : "evGhostBtn");
+        Label etatLabel = new Label();
+        applyInscriptionState(etatLabel, userInscription, ev);
+        etatLabel.setPadding(new javafx.geometry.Insets(0, 14, 8, 14));
 
-        boolean complet = restantes <= 0;
-        boolean annule  = "ANNULE".equalsIgnoreCase(ev.getStatut());
-        boolean ferme   = "FERME".equalsIgnoreCase(ev.getStatut());
-        if ((complet || annule || ferme) && !inscrit) inscBtn.setDisable(true);
-
-        inscBtn.setOnAction(e -> handleToggleInscription(ev, inscBtn, inscritRef, places, inscritsRef));
-
-        actions.getChildren().addAll(details, inscBtn);
-        card.getChildren().addAll(imgWrap, titre, typeTxt, dates, prixLabel, places, weatherAdvice, actions);
-        card.setOnMouseClicked(e -> { if (e.getClickCount() >= 2) openDetailsPage(ev); });
+        card.getChildren().addAll(imgWrap, titre, typeTxt, dates, prixLabel, places, weatherAdvice, etatLabel);
+        card.setCursor(javafx.scene.Cursor.HAND);
+        card.setOnMouseClicked(e -> openDetailsPage(ev));
         return card;
     }
 
@@ -427,6 +420,75 @@ public class EvenementsController {
         if (lbl == null) return;
         int restantes = Math.max(0, max - inscrits);
         lbl.setText("👥 " + inscrits + "/" + max + "  ·  " + restantes + " place(s) restante(s)");
+    }
+
+    // ====== ÉTAT D'INSCRIPTION SUR LA CARTE ======
+
+    /**
+     * Applique le texte et le style du bouton selon l'état réel de l'inscription.
+     *
+     *  - null (pas d'inscription)        → "S'inscrire"       (evGhostBtn)
+     *  - EN_ATTENTE                       → "⏳ En attente"    (evAttenteBtn)
+     *  - CONFIRMEE + NON_PAYE            → "💳 À payer"       (evAPayerBtn)
+     *  - CONFIRMEE + PAYE                → "✅ Payé"          (evPayeTag)
+     *  - ANNULEE                          → "❌ Annulé"        (evAnnuleTag)
+     */
+    private void applyInscriptionState(Label lbl, Inscription insc, Evenement ev) {
+        lbl.getStyleClass().removeAll("evNonInscritTag", "evInscritTag", "evAttenteTag",
+                "evAPayerTag", "evPayeTag", "evAnnuleTag", "evCompletTag");
+
+        if (insc == null) {
+            boolean complet = false;
+            try { complet = inscriptionService.countByEvent(ev.getId()) >= ev.getCapaciteMax(); } catch (Exception ignored) {}
+            boolean annule = "ANNULE".equalsIgnoreCase(ev.getStatut());
+            boolean ferme  = "FERME".equalsIgnoreCase(ev.getStatut());
+
+            if (complet) {
+                lbl.setText("🚫 Complet");
+                lbl.getStyleClass().add("evCompletTag");
+            } else if (annule) {
+                lbl.setText("❌ Annulé");
+                lbl.getStyleClass().add("evAnnuleTag");
+            } else if (ferme) {
+                lbl.setText("🔒 Fermé");
+                lbl.getStyleClass().add("evCompletTag");
+            } else {
+                lbl.setText("Non inscrit");
+                lbl.getStyleClass().add("evNonInscritTag");
+            }
+            return;
+        }
+
+        String statut = safe(insc.getStatut()).toUpperCase();
+        String paiement = safe(insc.getPaiement()).toUpperCase();
+
+        boolean paid = false;
+        try { paid = paiementService.isPaid(insc.getId()); } catch (Exception ignored) {}
+        if (paid) paiement = "PAYE";
+
+        switch (statut) {
+            case "EN_ATTENTE" -> {
+                lbl.setText("⏳ En attente");
+                lbl.getStyleClass().add("evAttenteTag");
+            }
+            case "CONFIRMEE" -> {
+                if ("PAYE".equals(paiement)) {
+                    lbl.setText("✅ Payé");
+                    lbl.getStyleClass().add("evPayeTag");
+                } else {
+                    lbl.setText("💳 En attente de paiement");
+                    lbl.getStyleClass().add("evAPayerTag");
+                }
+            }
+            case "ANNULEE" -> {
+                lbl.setText("❌ Annulé");
+                lbl.getStyleClass().add("evAnnuleTag");
+            }
+            default -> {
+                lbl.setText("✓ Inscrit");
+                lbl.getStyleClass().add("evInscritTag");
+            }
+        }
     }
 
     // ====== NAVIGATION ======
@@ -827,17 +889,28 @@ public class EvenementsController {
 
     private Image loadImageOrFallback(String raw) {
         String path = safe(raw).trim();
-        try {
-            if (!path.isEmpty()) {
+        if (!path.isEmpty()) {
+            // 1) URL distante (http/https) ou URI file:
+            try {
                 if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
                     return new Image(path, true);
                 }
-                if (path.startsWith("/")) {
-                    URL u = getClass().getResource(path);
-                    if (u != null) return new Image(u.toExternalForm(), true);
-                }
-            }
-        } catch (Exception ignored) {}
+            } catch (Exception ignored) {}
+
+            // 2) Chemin de fichier local (ex: C:\Users\...\image.jpg)
+            try {
+                java.io.File f = new java.io.File(path);
+                if (f.exists()) return new Image(f.toURI().toString(), true);
+            } catch (Exception ignored) {}
+
+            // 3) Ressource classpath (ex: /images/evenements/xxx.jpg)
+            try {
+                String resPath = path.startsWith("/") ? path : "/" + path;
+                URL u = getClass().getResource(resPath);
+                if (u != null) return new Image(u.toExternalForm(), true);
+            } catch (Exception ignored) {}
+        }
+        // Fallback
         URL fallback = getClass().getResource("/images/demo/hero/hero.jpg");
         return fallback == null ? null : new Image(fallback.toExternalForm(), true);
     }

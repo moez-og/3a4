@@ -216,42 +216,205 @@ public class EvenementDetailsController {
 
     private Optional<Integer> showTicketDialog(int maxTickets) {
         Dialog<Integer> dialog = new Dialog<>();
-        dialog.setTitle("Nombre de tickets");
-        dialog.setHeaderText("Combien de tickets souhaites-tu ?");
+        dialog.setTitle("Réservation de tickets");
 
-        // Spinner 1..maxTickets
-        int cap = Math.min(maxTickets, 10); // max 10 tickets par personne
+        // ── DialogPane styling ──
+        DialogPane pane = dialog.getDialogPane();
+        pane.setStyle(
+            "-fx-background-color: linear-gradient(to bottom, #eef3ff, #f7f9fc);" +
+            "-fx-background-radius: 18;" +
+            "-fx-font-family: 'Segoe UI';"
+        );
+        pane.setHeaderText(null);
+        pane.setGraphic(null);
+
+        // ── Spinner 1..max ──
+        int cap = Math.min(maxTickets, 10);
         Spinner<Integer> spinner = new Spinner<>(1, cap, 1);
         spinner.setEditable(false);
-        spinner.setPrefWidth(120);
+        spinner.setPrefWidth(130);
+        spinner.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 12;" +
+            "-fx-border-color: rgba(15,23,42,0.12);" +
+            "-fx-border-radius: 12;" +
+            "-fx-font-size: 14;" +
+            "-fx-font-weight: 900;"
+        );
 
-        // Prix dynamique
+        // ── Header banner ──
+        Label headerIcon = new Label("🎟");
+        headerIcon.setStyle("-fx-font-size: 28;");
+
+        Label headerTitle = new Label("Réservation");
+        headerTitle.setStyle(
+            "-fx-text-fill: white;" +
+            "-fx-font-size: 20;" +
+            "-fx-font-weight: 900;"
+        );
+
+        Label headerSub = new Label("Choisis le nombre de tickets");
+        headerSub.setStyle(
+            "-fx-text-fill: rgba(255,255,255,0.80);" +
+            "-fx-font-size: 12;" +
+            "-fx-font-weight: 700;"
+        );
+
+        VBox headerText = new VBox(2, headerTitle, headerSub);
+        headerText.setAlignment(Pos.CENTER_LEFT);
+
+        HBox headerRow = new HBox(12, headerIcon, headerText);
+        headerRow.setAlignment(Pos.CENTER_LEFT);
+        headerRow.setPadding(new Insets(18, 22, 18, 22));
+        headerRow.setStyle(
+            "-fx-background-color: linear-gradient(to right, #0b2550, #1a4a7a);" +
+            "-fx-background-radius: 14;"
+        );
+
+        // ── Event info card ──
+        Label eventLabel = new Label("📌  " + safe(current.getTitre()));
+        eventLabel.setStyle(
+            "-fx-font-weight: 900;" +
+            "-fx-font-size: 14;" +
+            "-fx-text-fill: #0f2a44;"
+        );
+        eventLabel.setWrapText(true);
+
+        Label prixUnit = new Label("💰  Prix unitaire : " +
+                String.format(Locale.FRENCH, "%.2f", current.getPrix()) + " TND");
+        prixUnit.setStyle(
+            "-fx-font-size: 12.5;" +
+            "-fx-text-fill: rgba(15,42,68,0.70);" +
+            "-fx-font-weight: 800;"
+        );
+
+        Label placesInfo = new Label("👥  " + maxTickets + " place(s) disponible(s)");
+        placesInfo.setStyle(
+            "-fx-font-size: 12;" +
+            "-fx-text-fill: rgba(15,42,68,0.60);" +
+            "-fx-font-weight: 700;"
+        );
+
+        VBox infoCard = new VBox(8, eventLabel, prixUnit, placesInfo);
+        infoCard.setPadding(new Insets(14, 18, 14, 18));
+        infoCard.setStyle(
+            "-fx-background-color: white;" +
+            "-fx-background-radius: 14;" +
+            "-fx-border-color: rgba(15,23,42,0.08);" +
+            "-fx-border-radius: 14;" +
+            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0.1, 0, 3);"
+        );
+
+        // ── Spinner row ──
+        Label ticketLabel = new Label("Nombre de tickets");
+        ticketLabel.setStyle(
+            "-fx-font-size: 13;" +
+            "-fx-font-weight: 900;" +
+            "-fx-text-fill: #163a5c;"
+        );
+
+        // ── Boutons – / + custom ──
+        Button btnMinus = new Button("−");
+        btnMinus.setStyle(
+            "-fx-background-color: rgba(15,23,42,0.08);" +
+            "-fx-background-radius: 10;" +
+            "-fx-font-size: 16;" +
+            "-fx-font-weight: 900;" +
+            "-fx-text-fill: #163a5c;" +
+            "-fx-padding: 6 14;" +
+            "-fx-cursor: hand;"
+        );
+        btnMinus.setOnAction(e -> spinner.decrement());
+
+        Button btnPlus = new Button("+");
+        btnPlus.setStyle(
+            "-fx-background-color: rgba(15,23,42,0.08);" +
+            "-fx-background-radius: 10;" +
+            "-fx-font-size: 16;" +
+            "-fx-font-weight: 900;" +
+            "-fx-text-fill: #163a5c;" +
+            "-fx-padding: 6 14;" +
+            "-fx-cursor: hand;"
+        );
+        btnPlus.setOnAction(e -> spinner.increment());
+
+        Label spinnerValue = new Label("1");
+        spinnerValue.setStyle(
+            "-fx-font-size: 22;" +
+            "-fx-font-weight: 900;" +
+            "-fx-text-fill: #0b2550;" +
+            "-fx-min-width: 50;" +
+            "-fx-alignment: center;"
+        );
+        spinnerValue.setAlignment(Pos.CENTER);
+        spinner.valueProperty().addListener((obs, old, nv) -> spinnerValue.setText(String.valueOf(nv)));
+
+        HBox counterRow = new HBox(14, btnMinus, spinnerValue, btnPlus);
+        counterRow.setAlignment(Pos.CENTER);
+        counterRow.setPadding(new Insets(10, 0, 6, 0));
+
+        // Hide the actual spinner (use it as data source only)
+        spinner.setVisible(false);
+        spinner.setManaged(false);
+
+        // ── Prix dynamique ──
         Label prixDynLabel = new Label();
         updatePrixDynLabel(prixDynLabel, 1);
         spinner.valueProperty().addListener((obs, old, nv) -> updatePrixDynLabel(prixDynLabel, nv));
 
-        VBox content = new VBox(12);
-        content.setPadding(new Insets(10));
+        // ── Separator ──
+        Region separator = new Region();
+        separator.setPrefHeight(1);
+        separator.setStyle("-fx-background-color: rgba(15,23,42,0.08);");
+
+        // ── Assemble content ──
+        VBox content = new VBox(14);
+        content.setPadding(new Insets(18, 22, 14, 22));
         content.setAlignment(Pos.CENTER_LEFT);
+        content.getChildren().addAll(
+            headerRow,
+            infoCard,
+            ticketLabel,
+            counterRow,
+            separator,
+            prixDynLabel
+        );
 
-        Label eventLabel = new Label("Événement : " + safe(current.getTitre()));
-        eventLabel.setStyle("-fx-font-weight: 900; -fx-font-size: 13;");
+        pane.setContent(content);
+        pane.setPrefWidth(420);
 
-        Label prixUnit = new Label("Prix unitaire : " +
-                String.format(Locale.FRENCH, "%.2f", current.getPrix()) + " TND");
-        prixUnit.setStyle("-fx-font-size: 12; -fx-text-fill: #555;");
+        // ── Buttons ──
+        ButtonType confirmer = new ButtonType("✓ Confirmer", ButtonBar.ButtonData.OK_DONE);
+        ButtonType annuler   = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
+        pane.getButtonTypes().addAll(confirmer, annuler);
 
-        HBox spinnerRow = new HBox(10);
-        spinnerRow.setAlignment(Pos.CENTER_LEFT);
-        spinnerRow.getChildren().addAll(new Label("Tickets :"), spinner);
-
-        content.getChildren().addAll(eventLabel, prixUnit, spinnerRow, prixDynLabel);
-
-        dialog.getDialogPane().setContent(content);
-
-        ButtonType confirmer = new ButtonType("Confirmer", ButtonBar.ButtonData.OK_DONE);
-        ButtonType annuler = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
-        dialog.getDialogPane().getButtonTypes().addAll(confirmer, annuler);
+        // Style buttons after they exist
+        javafx.application.Platform.runLater(() -> {
+            Button okBtn = (Button) pane.lookupButton(confirmer);
+            if (okBtn != null) {
+                okBtn.setStyle(
+                    "-fx-background-color: linear-gradient(to right, #0b2550, #1a4a7a);" +
+                    "-fx-background-radius: 12;" +
+                    "-fx-text-fill: white;" +
+                    "-fx-font-weight: 900;" +
+                    "-fx-font-size: 13;" +
+                    "-fx-padding: 10 22;" +
+                    "-fx-cursor: hand;"
+                );
+            }
+            Button cancelBtn = (Button) pane.lookupButton(annuler);
+            if (cancelBtn != null) {
+                cancelBtn.setStyle(
+                    "-fx-background-color: rgba(15,23,42,0.06);" +
+                    "-fx-background-radius: 12;" +
+                    "-fx-text-fill: #173a57;" +
+                    "-fx-font-weight: 900;" +
+                    "-fx-font-size: 13;" +
+                    "-fx-padding: 10 22;" +
+                    "-fx-cursor: hand;"
+                );
+            }
+        });
 
         dialog.setResultConverter(bt -> bt == confirmer ? spinner.getValue() : null);
 
@@ -260,9 +423,16 @@ public class EvenementDetailsController {
 
     private void updatePrixDynLabel(Label label, int nbTickets) {
         double total = current.getPrix() * nbTickets;
-        label.setText("Total : " + String.format(Locale.FRENCH, "%.2f", total) + " TND"
-                + " (" + nbTickets + " ticket" + (nbTickets > 1 ? "s" : "") + ")");
-        label.setStyle("-fx-font-weight: 900; -fx-font-size: 14; -fx-text-fill: #d97706;");
+        label.setText("💳  Total : " + String.format(Locale.FRENCH, "%.2f", total) + " TND"
+                + "  (" + nbTickets + " ticket" + (nbTickets > 1 ? "s" : "") + ")");
+        label.setStyle(
+            "-fx-font-weight: 900;" +
+            "-fx-font-size: 15;" +
+            "-fx-text-fill: #d97706;" +
+            "-fx-padding: 8 16;" +
+            "-fx-background-color: rgba(212,175,55,0.12);" +
+            "-fx-background-radius: 10;"
+        );
     }
 
     // ── CHARGEMENT ÉVÉNEMENT ──
@@ -681,17 +851,28 @@ public class EvenementDetailsController {
 
     private Image loadImageOrFallback(String raw) {
         String path = safe(raw).trim();
-        try {
-            if (!path.isEmpty()) {
+        if (!path.isEmpty()) {
+            // 1) URL distante (http/https) ou URI file:
+            try {
                 if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("file:")) {
                     return new Image(path, true);
                 }
-                if (path.startsWith("/")) {
-                    URL u = getClass().getResource(path);
-                    if (u != null) return new Image(u.toExternalForm(), true);
-                }
-            }
-        } catch (Exception ignored) {}
+            } catch (Exception ignored) {}
+
+            // 2) Chemin de fichier local (ex: C:\Users\...\image.jpg)
+            try {
+                java.io.File f = new java.io.File(path);
+                if (f.exists()) return new Image(f.toURI().toString(), true);
+            } catch (Exception ignored) {}
+
+            // 3) Ressource classpath (ex: /images/evenements/xxx.jpg)
+            try {
+                String resPath = path.startsWith("/") ? path : "/" + path;
+                URL u = getClass().getResource(resPath);
+                if (u != null) return new Image(u.toExternalForm(), true);
+            } catch (Exception ignored) {}
+        }
+        // Fallback
         URL fallback = getClass().getResource("/images/demo/hero/hero.jpg");
         return fallback == null ? null : new Image(fallback.toExternalForm(), true);
     }

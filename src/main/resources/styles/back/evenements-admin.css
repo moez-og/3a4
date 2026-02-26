@@ -92,7 +92,7 @@
     -fx-padding: 0;
 }
 .cards-scroll .viewport { -fx-background-color: transparent; }
-.cards-pane { -fx-padding: 6; }
+.cards-pane { -fx-padding: 8; }
 
 /* Scrollbar discrète (même technique Lieux) */
 .cards-scroll .scroll-bar:vertical        { -fx-opacity: 0.0; }

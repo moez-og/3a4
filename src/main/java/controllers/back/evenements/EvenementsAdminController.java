@@ -174,12 +174,12 @@ public class EvenementsAdminController {
             double w = b.getWidth();
             if (lastViewportW > 0 && Math.abs(w - lastViewportW) < 0.5) return;
             lastViewportW = w;
-            double tileW = Math.max(CARD_MIN_W, (w - 12 - 28) / 3.0);
+            double tileW = Math.max(CARD_MIN_W, (w - 16 - 36) / 3.0);
             cardsPane.setPrefTileWidth(tileW);
         });
         Bounds b = cardsScroll.getViewportBounds();
         if (b != null && b.getWidth() > 0) {
-            double tileW = Math.max(CARD_MIN_W, (b.getWidth() - 12 - 28) / 3.0);
+            double tileW = Math.max(CARD_MIN_W, (b.getWidth() - 16 - 36) / 3.0);
             cardsPane.setPrefTileWidth(tileW);
         }
     }

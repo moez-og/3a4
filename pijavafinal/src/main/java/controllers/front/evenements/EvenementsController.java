@@ -67,6 +67,7 @@ public class EvenementsController {
     public void setCurrentUser(User u) {
         this.currentUser = u;
         refreshStats();
+        applyFilters();
     }
 
     // ====== INIT ======

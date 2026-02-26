@@ -99,7 +99,7 @@
                         styleClass="cards-scroll">
                 <content>
                     <TilePane fx:id="cardsPane"
-                              hgap="14" vgap="14"
+                              hgap="18" vgap="18"
                               prefColumns="3"
                               tileAlignment="TOP_LEFT"
                               styleClass="cards-pane"/>

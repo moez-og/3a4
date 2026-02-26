@@ -55,25 +55,18 @@
             <!-- ═══════ SECTION CARTES (par défaut) ═══════ -->
             <VBox fx:id="cardsSection" spacing="10">
 
-                <!-- ═══════ FILTRE TYPE (PRIVE/PUBLIC) ═══════ -->
-                <VBox spacing="8" styleClass="evSection">
-                    <HBox alignment="CENTER_LEFT">
-                        <Label text="Type" styleClass="evSectionTitle"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Tous" onAction="#selectAllTypes" styleClass="evChip evChipMuted"/>
-                    </HBox>
-                    <HBox fx:id="typesChips" spacing="10" styleClass="evChipsRow"/>
-                </VBox>
+                <!-- ═══════ FILTRES TYPE + STATUT (ligne unique) ═══════ -->
+                <HBox spacing="14" alignment="CENTER_LEFT" styleClass="evFiltersBar">
+                    <Label text="Type" styleClass="evFilterLabel"/>
+                    <HBox fx:id="typesChips" spacing="8" alignment="CENTER_LEFT" styleClass="evChipsRow"/>
+                    <Button text="Tous" onAction="#selectAllTypes" styleClass="evChip evChipMuted"/>
 
-                <!-- ═══════ FILTRE STATUT ═══════ -->
-                <VBox spacing="8" styleClass="evSection">
-                    <HBox alignment="CENTER_LEFT">
-                        <Label text="Statut" styleClass="evSectionTitle"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Button text="Tous" onAction="#selectAllStatuts" styleClass="evChip evChipMuted"/>
-                    </HBox>
-                    <HBox fx:id="statutsChips" spacing="10" styleClass="evChipsRow"/>
-                </VBox>
+                    <Region styleClass="evFilterSep"/>
+
+                    <Label text="Statut" styleClass="evFilterLabel"/>
+                    <HBox fx:id="statutsChips" spacing="8" alignment="CENTER_LEFT" styleClass="evChipsRow"/>
+                    <Button text="Tous" onAction="#selectAllStatuts" styleClass="evChip evChipMuted"/>
+                </HBox>
 
                 <!-- ═══════ RÉSULTATS ═══════ -->
                 <VBox spacing="10" styleClass="evSection">
