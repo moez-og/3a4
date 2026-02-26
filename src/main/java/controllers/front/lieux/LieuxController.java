@@ -33,6 +33,7 @@ public class LieuxController {
 
     @FXML private HBox villesChips;
     @FXML private HBox categoriesChips;
+    @FXML private HBox budgetChips;
 
     @FXML private TextField searchField;
     @FXML private FlowPane cardsPane;
@@ -49,6 +50,7 @@ public class LieuxController {
     private List<Lieu> all = new ArrayList<>();
     private String selectedVille = null;
     private String selectedCategorie = null;
+    private String selectedBudget = null;  // "gratuit" | "low" | "mid" | "high"
 
     // Pour retrouver un chip rapidement (preset)
     private final Map<String, Button> villeBtnByKey = new HashMap<>();
@@ -133,6 +135,7 @@ public class LieuxController {
 
             buildVilleChips(lieuService.getDistinctVilles());
             buildCategorieChips(lieuService.getDistinctCategories());
+            buildBudgetChips();
 
             applyFilters();
 
@@ -152,9 +155,11 @@ public class LieuxController {
     public void resetFilters() {
         selectedVille = null;
         selectedCategorie = null;
+        selectedBudget = null;
 
         villesChips.getChildren().forEach(n -> n.getStyleClass().remove("chipSelected"));
         categoriesChips.getChildren().forEach(n -> n.getStyleClass().remove("chipSelected"));
+        if (budgetChips != null) budgetChips.getChildren().forEach(n -> n.getStyleClass().remove("chipSelected"));
 
         if (searchField != null) searchField.setText("");
         applyFilters();
@@ -174,7 +179,42 @@ public class LieuxController {
         applyFilters();
     }
 
+    @FXML
+    public void selectAllBudgets() {
+        selectedBudget = null;
+        if (budgetChips != null) budgetChips.getChildren().forEach(n -> n.getStyleClass().remove("chipSelected"));
+        applyFilters();
+    }
+
     /* ===================== CHIPS ===================== */
+
+    private void buildBudgetChips() {
+        if (budgetChips == null) return;
+        budgetChips.getChildren().clear();
+
+        // Tranches fixes
+        String[][] tranches = {
+            { "gratuit",  "🆓  Gratuit",     "= 0 TND"       },
+            { "low",      "💚  Petit budget", "< 20 TND"      },
+            { "mid",      "🟡  Moyen",        "20 – 80 TND"   },
+            { "high",     "🔴  Premium",      "> 80 TND"      }
+        };
+
+        for (String[] t : tranches) {
+            String key   = t[0];
+            String label = t[1];
+            String hint  = t[2];
+
+            Button btn = new Button(label + "  " + hint);
+            btn.getStyleClass().addAll("chip");
+            btn.setOnAction(e -> {
+                selectedBudget = key;
+                markSelected(budgetChips, btn);
+                applyFilters();
+            });
+            budgetChips.getChildren().add(btn);
+        }
+    }
 
     private void buildVilleChips(List<String> villes) {
         villesChips.getChildren().clear();
@@ -225,6 +265,19 @@ public class LieuxController {
             if (selectedVille != null && !selectedVille.equalsIgnoreCase(safe(l.getVille()))) continue;
             if (selectedCategorie != null && !selectedCategorie.equalsIgnoreCase(safe(l.getCategorie()))) continue;
 
+            // Filtre budget
+            if (selectedBudget != null) {
+                double budget = budgetMoyen(l);
+                boolean pass = switch (selectedBudget) {
+                    case "gratuit" -> budget == 0;
+                    case "low"     -> budget > 0 && budget < 20;
+                    case "mid"     -> budget >= 20 && budget <= 80;
+                    case "high"    -> budget > 80;
+                    default        -> true;
+                };
+                if (!pass) continue;
+            }
+
             if (!q.isEmpty()) {
                 String blob = (safe(l.getNom()) + " " + safe(l.getVille()) + " " + safe(l.getCategorie()) + " " + safe(l.getAdresse()))
                         .toLowerCase(Locale.ROOT);
@@ -235,6 +288,16 @@ public class LieuxController {
         }
 
         renderCards(filtered);
+    }
+
+    /** Calcule un budget moyen depuis budgetMin/Max du lieu */
+    private double budgetMoyen(Lieu l) {
+        Double min = l.getBudgetMin();
+        Double max = l.getBudgetMax();
+        if (min == null && max == null) return 0;
+        if (min != null && max != null) return (min + max) / 2.0;
+        if (min != null) return min;
+        return max;
     }
 
     private void renderCards(List<Lieu> lieux) {

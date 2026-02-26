@@ -286,3 +286,216 @@
     -fx-font-size: 11px;
     -fx-font-weight: 900;
 }
+
+/* ── Nouvelles sections détail ── */
+.detailsSectionTitle {
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #163a5c;
+}
+
+.budgetBadge {
+    -fx-background-color: rgba(212,175,55,0.15);
+    -fx-border-color: rgba(212,175,55,0.45);
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-text-fill: #9a6c00;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-padding: 4 14 4 14;
+}
+
+/* Bouton lien site web */
+.linkBtn {
+    -fx-background-color: rgba(22,58,92,0.07);
+    -fx-background-radius: 10;
+    -fx-border-color: rgba(22,58,92,0.18);
+    -fx-border-radius: 10;
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-padding: 7 14;
+    -fx-cursor: hand;
+}
+.linkBtn:hover {
+    -fx-background-color: rgba(22,58,92,0.13);
+    -fx-border-color: rgba(22,58,92,0.32);
+}
+
+/* Bouton Instagram */
+.instagramBtn {
+    -fx-background-color: linear-gradient(to right, #f58529, #dd2a7b, #8134af);
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-padding: 7 14;
+    -fx-cursor: hand;
+}
+.instagramBtn:hover {
+    -fx-opacity: 0.88;
+}
+
+/* ══════════════════════════════════════════
+   NOUVEAU LAYOUT : 2 colonnes + galerie
+══════════════════════════════════════════ */
+
+/* Top bar */
+.topBar {
+    -fx-padding: 0 0 10 0;
+}
+
+/* Breadcrumb */
+.breadcrumbLabel {
+    -fx-text-fill: rgba(22,58,92,0.55);
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+}
+
+/* Bouton favori */
+.favoriBtn {
+    -fx-background-color: white;
+    -fx-border-color: rgba(22,58,92,0.20);
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+.favoriBtn:hover {
+    -fx-border-color: #e11d48;
+    -fx-text-fill: #e11d48;
+}
+
+/* Colonne gauche (galerie) */
+.galerieCol {
+    -fx-min-width: 460;
+    -fx-pref-width: 600;
+}
+
+/* Colonne droite (infos) */
+.infoCol {
+    -fx-min-width: 260;
+    -fx-pref-width: 320;
+    -fx-max-width: 340;
+}
+
+/* Wrap galerie */
+.galerieWrap {
+    -fx-background-color: rgba(15,23,42,0.04);
+    -fx-background-radius: 20;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 20;
+}
+
+/* Image principale */
+.detailsHeroImg {
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+}
+
+/* Boutons navigation galerie */
+.galleryNavBtn {
+    -fx-background-color: rgba(15,23,42,0.55);
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-min-width: 42; -fx-max-width: 42;
+    -fx-min-height: 42; -fx-max-height: 42;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.28), 8, 0, 0, 2);
+}
+.galleryNavBtn:hover {
+    -fx-background-color: rgba(15,23,42,0.80);
+}
+.galleryNavLeft  { -fx-translate-x:  10; }
+.galleryNavRight { -fx-translate-x: -10; }
+
+/* Compteur images */
+.imageCounter {
+    -fx-background-color: rgba(15,23,42,0.55);
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 4 10;
+    -fx-translate-x: 10;
+    -fx-translate-y: 10;
+}
+
+/* Bande miniatures */
+.thumbScroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-max-height: 66;
+}
+.thumbScroll .viewport { -fx-background-color: transparent; }
+.thumbsRow { -fx-padding: 2 2 2 2; }
+
+.thumbImg {
+    -fx-cursor: hand;
+    -fx-opacity: 0.65;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 4, 0, 0, 1);
+}
+.thumbImg:hover { -fx-opacity: 0.90; }
+.thumbActive    { -fx-opacity: 1.0;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.55), 8, 0.3, 0, 2); }
+
+/* Accent de section (barre verticale rouge/dorée) */
+.sectionAccent {
+    -fx-text-fill: #d4af37;
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 2 0 0;
+}
+
+/* Bloc info (colonne droite) */
+.infoBlock {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 14;
+    -fx-padding: 12 14;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.08), 12, 0.15, 0, 4);
+}
+
+.infoValue {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 800;
+    -fx-wrap-text: true;
+}
+
+/* Bandeau statut ouvert/fermé */
+.statutBannerOuvert {
+    -fx-background-color: rgba(220,252,231,0.95);
+    -fx-border-color: rgba(22,163,74,0.35);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10 14;
+    -fx-border-width: 1;
+}
+.statutBannerFerme {
+    -fx-background-color: rgba(254,226,226,0.95);
+    -fx-border-color: rgba(220,38,38,0.30);
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 10 14;
+    -fx-border-width: 1;
+}
+.statutBannerTxt {
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #163a5c;
+}
+
+/* Boutons pleine largeur colonne droite */
+.fullWidthBtn {
+    -fx-max-width: Infinity;
+    -fx-pref-width: 300;
+}
+

@@ -29,17 +29,12 @@
             <HBox spacing="14" alignment="CENTER_LEFT" styleClass="lieuxHero">
                 <VBox spacing="4">
                     <Label text="Explorer les lieux" styleClass="lieuxTitle"/>
-                    <Label text="Filtre par ville / catégorie + recherche rapide"
-                           styleClass="lieuxSubtitle"/>
+                    <Label text="Filtre par ville / catégorie + recherche rapide" styleClass="lieuxSubtitle"/>
                 </VBox>
-
                 <Region HBox.hgrow="ALWAYS"/>
-
                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="lieuxSearchBox">
                     <Label text="🔎" styleClass="lieuxSearchIcon"/>
-                    <TextField fx:id="searchField"
-                               promptText="Ex: Marsa, café, musée…"
-                               styleClass="lieuxSearchField"/>
+                    <TextField fx:id="searchField" promptText="Ex: Marsa, café, musée…" styleClass="lieuxSearchField"/>
                     <Button text="Réinitialiser" onAction="#resetFilters" styleClass="lieuxGhostBtn"/>
                 </HBox>
             </HBox>
@@ -49,13 +44,10 @@
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Villes" styleClass="lieuxSectionTitle"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Tous" onAction="#selectAllVilles" styleClass="chip chipMuted"/>
+                    <Button text="Tous" onAction="#selectAllVilles" styleClass="resetChipBtn"/>
                 </HBox>
-
                 <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" styleClass="chipsScroll">
-                    <content>
-                        <HBox fx:id="villesChips" spacing="10" styleClass="chipsRow"/>
-                    </content>
+                    <content><HBox fx:id="villesChips" spacing="10" styleClass="chipsRow"/></content>
                 </ScrollPane>
             </VBox>
 
@@ -64,34 +56,32 @@
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Catégories" styleClass="lieuxSectionTitle"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Toutes" onAction="#selectAllCategories" styleClass="chip chipMuted"/>
+                    <Button text="Toutes" onAction="#selectAllCategories" styleClass="resetChipBtn"/>
                 </HBox>
-
                 <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" styleClass="chipsScroll">
-                    <content>
-                        <HBox fx:id="categoriesChips" spacing="10" styleClass="chipsRow"/>
-                    </content>
+                    <content><HBox fx:id="categoriesChips" spacing="10" styleClass="chipsRow"/></content>
                 </ScrollPane>
             </VBox>
 
-            <!-- LIST -->
+            <!-- BUDGET -->
+            <VBox spacing="8" styleClass="lieuxSection">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="💰  Budget" styleClass="lieuxSectionTitle"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Tous" onAction="#selectAllBudgets" styleClass="resetChipBtn"/>
+                </HBox>
+                <HBox fx:id="budgetChips" spacing="10" styleClass="chipsRow"/>
+            </VBox>
+
+            <!-- RÉSULTATS -->
             <VBox spacing="10" styleClass="lieuxSection">
                 <HBox alignment="CENTER_LEFT">
                     <Label text="Résultats" styleClass="lieuxSectionTitle"/>
                     <Region HBox.hgrow="ALWAYS"/>
                     <Label fx:id="countLabel" text="" styleClass="countLabel"/>
                 </HBox>
-
-                <FlowPane fx:id="cardsPane"
-                          hgap="14" vgap="14"
-                          prefWrapLength="1100"
-                          styleClass="cardsPane"/>
-
-                <Label fx:id="stateLabel"
-                       text=""
-                       visible="false"
-                       managed="false"
-                       styleClass="stateLabel"/>
+                <FlowPane fx:id="cardsPane" hgap="14" vgap="14" prefWrapLength="1100" styleClass="cardsPane"/>
+                <Label fx:id="stateLabel" text="" visible="false" managed="false" styleClass="stateLabel"/>
             </VBox>
         </VBox>
     </content>

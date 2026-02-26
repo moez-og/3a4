@@ -69,7 +69,7 @@
             </StackPane>
 
             <VBox spacing="2">
-                <Label text="AI Travel Guide" styleClass="chatHeaderTitle"/>
+                <Label text=" FIN TOKHREJ AI Guide" styleClass="chatHeaderTitle"/>
                 <HBox spacing="5" alignment="CENTER_LEFT">
                     <Label text="●" style="-fx-text-fill:#22c55e; -fx-font-size:8px;"/>
                     <Label text="En ligne · Groq LLaMA 3 + Whisper" styleClass="chatHeaderSub"/>

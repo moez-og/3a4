@@ -8,89 +8,170 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/21"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="controllers.front.lieux.LieuDetailsController"
-      spacing="14"
+      spacing="0"
       styleClass="lieuDetailsRoot"
       stylesheets="@/styles/lieux/lieux-details.css,@/styles/lieux/share-dialog.css">
 
     <padding>
-        <Insets top="14" right="14" bottom="18" left="14"/>
+        <Insets top="14" right="16" bottom="18" left="16"/>
     </padding>
 
-    <!-- Top row -->
-    <HBox alignment="CENTER_LEFT" spacing="12">
+    <!-- ══ TOP BAR ══ -->
+    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="topBar">
         <Button text="← Retour" onAction="#goBack" styleClass="backLinkBtn"/>
+        <Label fx:id="breadcrumb" text="" styleClass="breadcrumbLabel"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button fx:id="favoriBtn" text="♡  Ajouter aux favoris" onAction="#toggleFavori"/>
+        <Button fx:id="favoriBtn" text="♡  Favoris" onAction="#toggleFavori" styleClass="favoriBtn"/>
         <Button text="⤴  Partager" onAction="#openShare" styleClass="shareBtn"/>
-        <Button text="Ouvrir Maps" onAction="#openMaps" styleClass="primaryBtn"/>
+        <Button text="🗺  Maps" onAction="#openMaps" styleClass="primaryBtn"/>
     </HBox>
 
-    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="detailsScroll">
+    <!-- ══ MAIN SCROLL ══ -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                styleClass="detailsScroll" VBox.vgrow="ALWAYS">
         <content>
-            <VBox spacing="14">
+            <VBox spacing="16">
+                <padding><Insets top="14" bottom="14"/></padding>
 
-                <ImageView fx:id="image"
-                           fitWidth="980" fitHeight="340"
-                           preserveRatio="false"
-                           styleClass="detailsHeroImg"/>
-
-                <VBox spacing="10" styleClass="detailsCard">
-                    <Label fx:id="name" text="Nom du lieu" styleClass="detailsTitle"/>
-
-                    <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label fx:id="categorie" text="Categorie" styleClass="badge"/>
-                        <Label fx:id="type" text="PUBLIC" styleClass="badgeMuted"/>
+                <!-- ══ TITRE + BADGES (pleine largeur) ══ -->
+                <VBox spacing="8" styleClass="detailsCard">
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label fx:id="name" text="Nom du lieu" styleClass="detailsTitle"/>
                         <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="budget" text="" styleClass="detailsHint"/>
+                        <Label fx:id="badgeOuvert" text="● OUVERT" styleClass="badgeOuvert" visible="false" managed="false"/>
+                        <Label fx:id="badgeFerme"  text="● FERMÉ"  styleClass="badgeFerme"  visible="false" managed="false"/>
                     </HBox>
-
-                    <Label fx:id="ville" text="Ville" styleClass="detailsLine"/>
-                    <Label fx:id="adresse" text="Adresse" styleClass="detailsLine"/>
-                    <Label fx:id="coords" text="Coordonnées" styleClass="detailsHint"/>
-
-                    <Label fx:id="description" text="" wrapText="true" styleClass="detailsDesc"/>
-
-                    <HBox spacing="14" alignment="CENTER_LEFT">
-                        <Label fx:id="telephone" text="" styleClass="detailsMini"/>
-                        <Label fx:id="siteWeb" text="" styleClass="detailsMini"/>
-                        <Label fx:id="instagram" text="" styleClass="detailsMini"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label fx:id="categorie" text="" styleClass="badge"/>
+                        <Label fx:id="type"      text="" styleClass="badgeMuted"/>
+                        <Label fx:id="budgetBadge" text="" styleClass="budgetBadge"/>
                     </HBox>
                 </VBox>
 
-                <!-- HORAIRES -->
-                <VBox fx:id="horaireCard" spacing="10" styleClass="detailsCard">
-                    <HBox alignment="CENTER_LEFT" spacing="10">
-                        <Label text="🕐  Horaires d'ouverture" styleClass="avisTitle"/>
-                        <Region HBox.hgrow="ALWAYS"/>
-                        <Label fx:id="badgeOuvert" text="OUVERT" styleClass="badgeOuvert"
-                               visible="false" managed="false"/>
-                        <Label fx:id="badgeFerme"  text="FERMÉ"  styleClass="badgeFerme"
-                               visible="false" managed="false"/>
-                    </HBox>
-                    <VBox fx:id="horairesList" spacing="6"/>
-                    <Label fx:id="horairesEmpty" text="Aucun horaire renseigné."
-                           styleClass="detailsHint" visible="false" managed="false"/>
-                </VBox>
+                <!-- ══ DEUX COLONNES : galerie gauche | infos droite ══ -->
+                <HBox spacing="16" alignment="TOP_LEFT">
 
-                <!-- AVIS -->
+                    <!-- ── COLONNE GAUCHE : galerie ── -->
+                    <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="galerieCol">
+
+                        <!-- Galerie avec flèches -->
+                        <StackPane fx:id="galeriePane" styleClass="galerieWrap">
+                            <ImageView fx:id="image"
+                                       fitWidth="640" fitHeight="400"
+                                       preserveRatio="false"
+                                       styleClass="detailsHeroImg"/>
+                            <!-- Flèche gauche -->
+                            <Button fx:id="prevBtn" text="‹" onAction="#prevImage"
+                                    styleClass="galleryNavBtn galleryNavLeft"
+                                    StackPane.alignment="CENTER_LEFT"/>
+                            <!-- Flèche droite -->
+                            <Button fx:id="nextBtn" text="›" onAction="#nextImage"
+                                    styleClass="galleryNavBtn galleryNavRight"
+                                    StackPane.alignment="CENTER_RIGHT"/>
+                            <!-- Compteur -->
+                            <Label fx:id="imageCounter" text="1 / 1"
+                                   styleClass="imageCounter"
+                                   StackPane.alignment="TOP_LEFT"/>
+                        </StackPane>
+
+                        <!-- Miniatures -->
+                        <ScrollPane hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                                    fitToHeight="true" styleClass="thumbScroll">
+                            <content>
+                                <HBox fx:id="thumbsRow" spacing="8" styleClass="thumbsRow"/>
+                            </content>
+                        </ScrollPane>
+
+                        <!-- Description -->
+                        <VBox fx:id="descriptionCard" spacing="8" styleClass="detailsCard">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label text="|" styleClass="sectionAccent"/>
+                                <Label text="À propos" styleClass="detailsSectionTitle"/>
+                            </HBox>
+                            <Label fx:id="description" text="" wrapText="true" styleClass="detailsDesc"/>
+                        </VBox>
+
+                        <!-- Horaires -->
+                        <VBox fx:id="horaireCard" spacing="10" styleClass="detailsCard">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label text="|" styleClass="sectionAccent"/>
+                                <Label text="🕐  Horaires d'ouverture" styleClass="detailsSectionTitle"/>
+                            </HBox>
+                            <VBox fx:id="horairesList" spacing="4"/>
+                            <Label fx:id="horairesEmpty" text="Aucun horaire renseigné."
+                                   styleClass="detailsHint" visible="false" managed="false"/>
+                        </VBox>
+
+                    </VBox>
+
+                    <!-- ── COLONNE DROITE : infos ── -->
+                    <VBox spacing="12" styleClass="infoCol">
+
+                        <!-- Statut ouverture (bandeau jaune) -->
+                        <HBox fx:id="statutBannerBox" styleClass="statutBanner" visible="false" managed="false">
+                            <Label fx:id="statutBannerLabel" text="" styleClass="statutBannerTxt" wrapText="true" HBox.hgrow="ALWAYS"/>
+                        </HBox>
+
+                        <!-- Budget -->
+                        <VBox fx:id="budgetCard" spacing="6" styleClass="infoBlock">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label text="|" styleClass="sectionAccent"/>
+                                <Label text="💰  Budget moyen" styleClass="detailsSectionTitle"/>
+                            </HBox>
+                            <Label fx:id="budget" text="" styleClass="infoValue"/>
+                        </VBox>
+
+                        <!-- Adresse -->
+                        <VBox spacing="6" styleClass="infoBlock">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label text="|" styleClass="sectionAccent"/>
+                                <Label text="📍  Adresse" styleClass="detailsSectionTitle"/>
+                            </HBox>
+                            <Label fx:id="adresse" text="" styleClass="infoValue" wrapText="true"/>
+                            <Label fx:id="ville"   text="" styleClass="detailsHint"/>
+                            <Label fx:id="coords"  text="" styleClass="detailsHint"/>
+                        </VBox>
+
+                        <!-- Contact -->
+                        <VBox fx:id="contactCard" spacing="8" styleClass="infoBlock">
+                            <HBox alignment="CENTER_LEFT" spacing="8">
+                                <Label text="|" styleClass="sectionAccent"/>
+                                <Label text="📞  Contact" styleClass="detailsSectionTitle"/>
+                            </HBox>
+                            <Label fx:id="telephone" text="" styleClass="infoValue" visible="false" managed="false"/>
+                            <Button fx:id="siteWebBtn"   text="" onAction="#openSiteWeb"   styleClass="linkBtn"      visible="false" managed="false"/>
+                            <Button fx:id="instagramBtn" text="" onAction="#openInstagram" styleClass="instagramBtn" visible="false" managed="false"/>
+                        </VBox>
+
+                        <!-- Actions -->
+                        <VBox spacing="8" styleClass="infoBlock">
+                            <Button text="🗺  Ouvrir sur Maps"      onAction="#openMaps"    styleClass="primaryBtn fullWidthBtn"/>
+                            <Button text="⤴  Partager ce lieu"      onAction="#openShare"   styleClass="shareBtn  fullWidthBtn"/>
+                        </VBox>
+
+                    </VBox>
+                </HBox>
+
+                <!-- ══ AVIS (pleine largeur) ══ -->
                 <VBox spacing="12" styleClass="avisCard">
                     <HBox spacing="10" alignment="CENTER_LEFT">
-                        <Label fx:id="avisTitle" text="Avis des visiteurs / 0" styleClass="avisTitle"/>
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="|" styleClass="sectionAccent"/>
+                            <Label fx:id="avisTitle" text="Avis des visiteurs / 0" styleClass="avisTitle"/>
+                        </HBox>
                         <Region HBox.hgrow="ALWAYS"/>
                         <Label fx:id="avisAvg" text="—" styleClass="avisAvg"/>
-                        <Button text="+ Ajouter avis" onAction="#openAddAvis" styleClass="primaryBtn"/>
+                        <Button text="+ Ajouter un avis" onAction="#openAddAvis" styleClass="primaryBtn"/>
                     </HBox>
-
-                    <TextField fx:id="avisSearchField" promptText="Recherchez les avis" styleClass="avisSearch"/>
-
-                    <Label fx:id="avisEmpty" text="Aucun avis pour le moment." styleClass="detailsHint"
-                           visible="false" managed="false"/>
-
+                    <TextField fx:id="avisSearchField" promptText="Rechercher dans les avis…" styleClass="avisSearch"/>
+                    <Label fx:id="avisEmpty" text="Aucun avis pour le moment."
+                           styleClass="detailsHint" visible="false" managed="false"/>
                     <VBox fx:id="avisList" spacing="10"/>
                 </VBox>
 

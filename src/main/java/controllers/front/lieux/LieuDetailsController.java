@@ -47,6 +47,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
+import javafx.scene.shape.Rectangle;
+import javafx.animation.FadeTransition;
+import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -55,9 +58,16 @@ public class LieuDetailsController {
 
     private static final PseudoClass PC_ON = PseudoClass.getPseudoClass("on");
 
-    // ====== LIEU INFOS ======
+    // ====== GALERIE ======
     @FXML private ImageView image;
+    @FXML private StackPane galeriePane;
+    @FXML private Button    prevBtn;
+    @FXML private Button    nextBtn;
+    @FXML private Label     imageCounter;
+    @FXML private HBox      thumbsRow;
 
+    // ====== LIEU INFOS ======
+    @FXML private Label breadcrumb;
     @FXML private Label name;
     @FXML private Label categorie;
     @FXML private Label type;
@@ -66,19 +76,27 @@ public class LieuDetailsController {
     @FXML private Label adresse;
     @FXML private Label coords;
 
-    @FXML private Label description;
-    @FXML private Label budget;
+    @FXML private Label  description;
+    @FXML private Label  budget;
+    @FXML private Label  budgetBadge;
+    @FXML private Button siteWebBtn;
+    @FXML private Button instagramBtn;
+    @FXML private Label  telephone;
 
-    @FXML private Label telephone;
-    @FXML private Label siteWeb;
-    @FXML private Label instagram;
+    @FXML private VBox descriptionCard;
+    @FXML private VBox contactCard;
+    @FXML private VBox budgetCard;
+
+    // ====== STATUT BANDEAU ======
+    @FXML private HBox  statutBannerBox;
+    @FXML private Label statutBannerLabel;
 
     // ====== AVIS (FXML) ======
-    @FXML private Label avisTitle;
-    @FXML private Label avisAvg;
+    @FXML private Label     avisTitle;
+    @FXML private Label     avisAvg;
     @FXML private TextField avisSearchField;
-    @FXML private VBox avisList;
-    @FXML private Label avisEmpty;
+    @FXML private VBox      avisList;
+    @FXML private Label     avisEmpty;
 
     // ====== HORAIRES (FXML) ======
     @FXML private VBox  horaireCard;
@@ -89,6 +107,10 @@ public class LieuDetailsController {
 
     // ====== FAVORI ======
     @FXML private Button favoriBtn;
+
+    // ====== GALERIE STATE ======
+    private List<javafx.scene.image.Image> galleryImages = new ArrayList<>();
+    private int currentImageIndex = 0;
 
     private final LieuService lieuService = new LieuService();
     private final EvaluationLieuService evalService = new EvaluationLieuService();
@@ -129,6 +151,121 @@ public class LieuDetailsController {
     @FXML
     public void goBack() {
         if (navigator != null) navigator.navigate(FrontDashboardController.ROUTE_LIEUX);
+    }
+
+    /* ===================== GALERIE ===================== */
+
+    @FXML
+    public void prevImage() {
+        if (galleryImages.isEmpty()) return;
+        currentImageIndex = (currentImageIndex - 1 + galleryImages.size()) % galleryImages.size();
+        showImage(currentImageIndex);
+    }
+
+    @FXML
+    public void nextImage() {
+        if (galleryImages.isEmpty()) return;
+        currentImageIndex = (currentImageIndex + 1) % galleryImages.size();
+        showImage(currentImageIndex);
+    }
+
+    private void showImage(int idx) {
+        if (image == null || galleryImages.isEmpty()) return;
+
+        // Fade transition
+        FadeTransition ft = new FadeTransition(Duration.millis(180), image);
+        ft.setFromValue(0.4);
+        ft.setToValue(1.0);
+        image.setImage(galleryImages.get(idx));
+        ft.play();
+
+        // Compteur
+        if (imageCounter != null)
+            imageCounter.setText((idx + 1) + " / " + galleryImages.size());
+
+        // Miniature active
+        if (thumbsRow != null) {
+            thumbsRow.getChildren().forEach(n -> n.getStyleClass().remove("thumbActive"));
+            if (idx < thumbsRow.getChildren().size())
+                thumbsRow.getChildren().get(idx).getStyleClass().add("thumbActive");
+        }
+
+        // Afficher/masquer flèches
+        boolean multiple = galleryImages.size() > 1;
+        if (prevBtn != null) { prevBtn.setVisible(multiple); prevBtn.setManaged(multiple); }
+        if (nextBtn != null) { nextBtn.setVisible(multiple); nextBtn.setManaged(multiple); }
+    }
+
+    private void buildGallery(Lieu l) {
+        galleryImages.clear();
+
+        // Collecter toutes les images : imagesPaths d'abord, puis imageUrl en fallback
+        List<String> paths = new ArrayList<>(l.getImagesPaths());
+        if (paths.isEmpty() && l.getImageUrl() != null && !l.getImageUrl().isBlank())
+            paths.add(l.getImageUrl());
+
+        for (String p : paths) {
+            javafx.scene.image.Image img = loadImageOrFallback(p);
+            if (img != null) galleryImages.add(img);
+        }
+
+        if (galleryImages.isEmpty()) {
+            javafx.scene.image.Image fb = loadImageOrFallback(null);
+            if (fb != null) galleryImages.add(fb);
+        }
+
+        // Miniatures
+        if (thumbsRow != null) {
+            thumbsRow.getChildren().clear();
+            for (int i = 0; i < galleryImages.size(); i++) {
+                final int idx = i;
+                ImageView thumb = new ImageView(galleryImages.get(i));
+                thumb.setFitWidth(72);
+                thumb.setFitHeight(50);
+                thumb.setPreserveRatio(false);
+                Rectangle clip = new Rectangle(72, 50);
+                clip.setArcWidth(10); clip.setArcHeight(10);
+                thumb.setClip(clip);
+                thumb.getStyleClass().add("thumbImg");
+                thumb.setOnMouseClicked(e -> { currentImageIndex = idx; showImage(idx); });
+                thumbsRow.getChildren().add(thumb);
+            }
+        }
+
+        // Afficher la 1ère image
+        currentImageIndex = 0;
+        showImage(0);
+
+        // Masquer miniatures si une seule image
+        if (thumbsRow != null && thumbsRow.getParent() != null) {
+            boolean show = galleryImages.size() > 1;
+            thumbsRow.getParent().setVisible(show);
+            ((javafx.scene.layout.Region) thumbsRow.getParent()).setManaged(show);
+        }
+    }
+
+    @FXML
+    public void openSiteWeb() {
+        if (current == null) return;
+        String url = safe(current.getSiteWeb()).trim();
+        if (!url.isEmpty()) {
+            if (!url.startsWith("http")) url = "https://" + url;
+            try { if (Desktop.isDesktopSupported()) Desktop.getDesktop().browse(URI.create(url)); }
+            catch (Exception ignored) {}
+        }
+    }
+
+    @FXML
+    public void openInstagram() {
+        if (current == null) return;
+        String insta = safe(current.getInstagram()).trim();
+        if (!insta.isEmpty()) {
+            // Accepte "@handle", "handle", ou URL complète
+            String url = insta.startsWith("http") ? insta
+                : "https://www.instagram.com/" + insta.replace("@", "");
+            try { if (Desktop.isDesktopSupported()) Desktop.getDesktop().browse(URI.create(url)); }
+            catch (Exception ignored) {}
+        }
     }
 
     @FXML
@@ -365,41 +502,139 @@ public class LieuDetailsController {
             return;
         }
 
-        if (image != null) image.setImage(loadImageOrFallback(current.getImageUrl()));
+        // ── Breadcrumb ────────────────────────────────────────
+        if (breadcrumb != null)
+            breadcrumb.setText("Accueil  /  " + safe(current.getNom()));
 
-        if (name != null) name.setText(safe(current.getNom()));
+        // ── Galerie ───────────────────────────────────────────
+        buildGallery(current);
+
+        // ── Nom / badges ──────────────────────────────────────
+        if (name     != null) name.setText(safe(current.getNom()));
         if (categorie != null) categorie.setText(safe(current.getCategorie()));
-        if (type != null) type.setText(safe(current.getType()).isEmpty() ? "PUBLIC" : safe(current.getType()));
-
-        if (ville != null) ville.setText("Ville: " + safe(current.getVille()));
-        if (adresse != null) adresse.setText("Adresse: " + safe(current.getAdresse()));
-
-        String c = (current.getLatitude() == null || current.getLongitude() == null)
-                ? "Coordonnées: —"
-                : "Coordonnées: " + current.getLatitude() + ", " + current.getLongitude();
-        if (coords != null) coords.setText(c);
-
-        String desc = safe(current.getDescription());
-        if (description != null) description.setText(desc.isEmpty() ? "Description: —" : desc);
-
-        if (budget != null) budget.setText(formatBudget(current.getBudgetMin(), current.getBudgetMax()));
-
-        if (telephone != null) telephone.setText(lineOrEmpty("☎ ", current.getTelephone()));
-        if (siteWeb != null) siteWeb.setText(lineOrEmpty("🌐 ", current.getSiteWeb()));
-        if (instagram != null) instagram.setText(lineOrEmpty("📸 ", current.getInstagram()));
-
-        // Bouton favori : état initial
-        if (favoriBtn != null && currentUser != null) {
-            boolean isFavori = favoriService.isFavori(currentUser.getId(), current.getId());
-            updateFavoriBtn(isFavori);
+        if (type     != null) {
+            String t = safe(current.getType()).trim();
+            type.setText(t.isEmpty() ? "" : t);
+            type.setVisible(!t.isEmpty()); type.setManaged(!t.isEmpty());
         }
+
+        // ── Adresse / coords ──────────────────────────────────
+        if (adresse != null) adresse.setText(safe(current.getAdresse()));
+        if (ville   != null) {
+            ville.setText(safe(current.getVille()));
+            ville.setVisible(!safe(current.getVille()).isEmpty());
+            ville.setManaged(!safe(current.getVille()).isEmpty());
+        }
+        if (coords != null) {
+            String c = (current.getLatitude() == null || current.getLongitude() == null) ? ""
+                    : "📌 " + current.getLatitude() + ", " + current.getLongitude();
+            coords.setText(c);
+            coords.setVisible(!c.isEmpty()); coords.setManaged(!c.isEmpty());
+        }
+
+        // ── Description ───────────────────────────────────────
+        String desc = safe(current.getDescription()).trim();
+        if (descriptionCard != null) {
+            descriptionCard.setVisible(!desc.isEmpty()); descriptionCard.setManaged(!desc.isEmpty());
+        }
+        if (description != null) description.setText(desc);
+
+        // ── Budget ────────────────────────────────────────────
+        String budgetTxt = formatBudget(current.getBudgetMin(), current.getBudgetMax());
+        boolean hasBudget = !budgetTxt.isEmpty();
+        if (budgetCard != null) { budgetCard.setVisible(hasBudget); budgetCard.setManaged(hasBudget); }
+        if (budget    != null) budget.setText(budgetTxt);
+        if (budgetBadge != null) budgetBadge.setText(formatBudgetBadge(current.getBudgetMin(), current.getBudgetMax()));
+
+        // ── Téléphone ─────────────────────────────────────────
+        String tel = safe(current.getTelephone()).trim();
+        if (telephone != null) {
+            telephone.setText(tel.isEmpty() ? "" : "☎  " + tel);
+            telephone.setVisible(!tel.isEmpty()); telephone.setManaged(!tel.isEmpty());
+        }
+
+        // ── Site web ──────────────────────────────────────────
+        String web = safe(current.getSiteWeb()).trim();
+        if (siteWebBtn != null) {
+            siteWebBtn.setVisible(!web.isEmpty()); siteWebBtn.setManaged(!web.isEmpty());
+            if (!web.isEmpty()) siteWebBtn.setText("🌐  " + web);
+        }
+
+        // ── Instagram ─────────────────────────────────────────
+        String insta = safe(current.getInstagram()).trim();
+        if (instagramBtn != null) {
+            instagramBtn.setVisible(!insta.isEmpty()); instagramBtn.setManaged(!insta.isEmpty());
+            if (!insta.isEmpty()) instagramBtn.setText("📸  " + (insta.startsWith("@") ? insta : "@" + insta));
+        }
+
+        // ── Carte contact (masquer si rien) ───────────────────
+        if (contactCard != null) {
+            boolean hasContact = !tel.isEmpty() || !web.isEmpty() || !insta.isEmpty();
+            contactCard.setVisible(hasContact); contactCard.setManaged(hasContact);
+        }
+
+        // ── Statut bandeau (Ouvert / Fermé) ───────────────────
+        buildStatutBanner();
+
+        // ── Horaires ──────────────────────────────────────────
+        if (horaireCard != null) {
+            loadHoraires();
+        }
+
+        // ── Avis ──────────────────────────────────────────────
+        loadAvis();
+
+        // ── Bouton favori ─────────────────────────────────────
+        if (favoriBtn != null && currentUser != null) {
+            updateFavoriBtn(favoriService.isFavori(currentUser.getId(), current.getId()));
+        }
+    }
+
+    /** Bandeau statut ouvert/fermé en haut de la colonne droite */
+    private void buildStatutBanner() {
+        if (statutBannerBox == null || current == null) return;
+        if (current.getHoraires() == null || current.getHoraires().isEmpty()) {
+            statutBannerBox.setVisible(false); statutBannerBox.setManaged(false);
+            return;
+        }
+        // Réutilise la logique existante des badges
+        boolean ouvert = badgeOuvert != null && badgeOuvert.isVisible();
+        // On lit directement l'état calculé par buildHoraires — on appelle buildHoraires d'abord
+        // donc on récupère l'état après
+        javafx.application.Platform.runLater(() -> {
+            if (badgeOuvert != null && badgeOuvert.isVisible()) {
+                statutBannerBox.setVisible(true); statutBannerBox.setManaged(true);
+                if (statutBannerLabel != null) statutBannerLabel.setText("🕐  " + badgeOuvert.getText() + "  — horaires aujourd'hui");
+                statutBannerBox.getStyleClass().removeAll("statutBannerFerme");
+                if (!statutBannerBox.getStyleClass().contains("statutBannerOuvert"))
+                    statutBannerBox.getStyleClass().add("statutBannerOuvert");
+            } else if (badgeFerme != null && badgeFerme.isVisible()) {
+                statutBannerBox.setVisible(true); statutBannerBox.setManaged(true);
+                if (statutBannerLabel != null) statutBannerLabel.setText("🔒  " + badgeFerme.getText() + "  — actuellement fermé");
+                statutBannerBox.getStyleClass().removeAll("statutBannerOuvert");
+                if (!statutBannerBox.getStyleClass().contains("statutBannerFerme"))
+                    statutBannerBox.getStyleClass().add("statutBannerFerme");
+            } else {
+                statutBannerBox.setVisible(false); statutBannerBox.setManaged(false);
+            }
+        });
     }
 
     private String formatBudget(Double min, Double max) {
         if (min == null && max == null) return "";
-        if (min != null && max != null) return "Budget: " + min + " – " + max + " TND";
-        if (min != null) return "Budget: à partir de " + min + " TND";
-        return "Budget: jusqu’à " + max + " TND";
+        if (min != null && max != null) return String.format("Entre %.0f TND et %.0f TND", min, max);
+        if (min != null) return String.format("A partir de %.0f TND", min);
+        return String.format("Jusqu a %.0f TND", max);
+    }
+
+    private String formatBudgetBadge(Double min, Double max) {
+        if (min == null && max == null) return "Gratuit";
+        double avg = (min != null && max != null) ? (min + max) / 2.0
+                   : (min != null ? min : max);
+        if (avg == 0)  return "Gratuit";
+        if (avg < 20)  return "Petit budget";
+        if (avg <= 80) return "Budget moyen";
+        return "Premium";
     }
 
     private String lineOrEmpty(String prefix, String v) {
