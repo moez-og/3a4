@@ -12,21 +12,27 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.*;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import models.evenements.Evenement;
 import models.evenements.Inscription;
 import models.evenements.Paiement;
+import models.lieux.Lieu;
 import models.users.User;
 import services.evenements.EvenementService;
 import services.evenements.InscriptionService;
 import services.evenements.PaiementService;
+import services.evenements.TicketService;
+import services.lieux.LieuService;
 import services.payment.CryptoPaymentService;
 import services.payment.FlouciPaymentService;
 import services.payment.StripePaymentService;
 import utils.payment.PaymentConfig;
+import utils.payment.TicketPdfGenerator;
 import utils.ui.ShellNavigator;
 
 import javafx.util.Duration;
 
+import java.io.File;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -122,6 +128,7 @@ public class PaiementController {
     private final EvenementService evenementService       = new EvenementService();
     private final InscriptionService inscriptionService   = new InscriptionService();
     private final PaiementService paiementService         = new PaiementService();
+    private final TicketService ticketService             = new TicketService();
     private final StripePaymentService stripeService      = new StripePaymentService();
     private final FlouciPaymentService flouciService      = new FlouciPaymentService();
     private final CryptoPaymentService cryptoService      = new CryptoPaymentService();
@@ -142,6 +149,10 @@ public class PaiementController {
     // Crypto
     private String selectedCrypto = null;
     private CryptoPaymentService.CryptoQuote currentQuote = null;
+
+    // PDF — stocker le dernier paiement pour le téléchargement
+    private Paiement lastPaiement;
+    private String lastTicketCode;
 
     // WebView
     private ChangeListener<String> webLocationListener;
@@ -604,6 +615,21 @@ public class PaiementController {
 
             if (paiementId > 0) {
                 Paiement p = paiementService.getById(paiementId);
+
+                // ── Créer les tickets dans la table ticket ──
+                int nbTickets = inscription != null ? inscription.getNbTickets() : 1;
+                int firstTicketId = 0;
+                for (int i = 0; i < nbTickets; i++) {
+                    int tid = ticketService.createForInscription(inscriptionId);
+                    if (i == 0) firstTicketId = tid;
+                }
+
+                // ── Générer un code unique pour le PDF ──
+                String ticketCode = "TIK-" + String.format("%06d", firstTicketId)
+                        + "-" + p.getReferenceCode().replace("PAY-", "");
+                lastPaiement   = p;
+                lastTicketCode = ticketCode;
+
                 showRecu(p, total);
             } else {
                 showLayer(mainScroll);
@@ -634,6 +660,59 @@ public class PaiementController {
     @FXML
     public void handleRetourEvenement() {
         goBack();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  TÉLÉCHARGER LE TICKET PDF
+    // ═══════════════════════════════════════════════════════════
+
+    @FXML
+    public void handleDownloadPdf() {
+        if (lastPaiement == null || evenement == null || inscription == null) {
+            showError("Impossible de générer le PDF : données manquantes.");
+            return;
+        }
+
+        // ── Choisir l'emplacement du fichier ──
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Enregistrer le ticket PDF");
+        fc.setInitialFileName("Ticket_" + lastPaiement.getReferenceCode() + ".pdf");
+        fc.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Fichiers PDF", "*.pdf"));
+        File file = fc.showSaveDialog(recuPane.getScene().getWindow());
+
+        if (file == null) return; // annulé
+
+        try {
+            // ── Récupérer le nom du lieu (optionnel) ──
+            String lieuName = null;
+            if (evenement.getLieuId() != null) {
+                try {
+                    LieuService lieuService = new LieuService();
+                    Lieu lieu = lieuService.getById(evenement.getLieuId());
+                    if (lieu != null) lieuName = lieu.getNom();
+                } catch (Exception ignored) { /* pas bloquant */ }
+            }
+
+            // ── Générer le PDF ──
+            TicketPdfGenerator.generate(
+                    file, evenement, inscription, lastPaiement,
+                    currentUser, lastTicketCode, lieuName);
+
+            // ── Feedback visuel ──
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Ticket enregistré");
+            alert.setHeaderText(null);
+            alert.setContentText("Votre ticket a été enregistré avec succès !\n" + file.getAbsolutePath());
+            alert.showAndWait();
+
+        } catch (Exception ex) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Erreur PDF");
+            alert.setHeaderText(null);
+            alert.setContentText("Impossible de générer le PDF :\n" + ex.getMessage());
+            alert.showAndWait();
+        }
     }
 
     // ═══════════════════════════════════════════════════════════

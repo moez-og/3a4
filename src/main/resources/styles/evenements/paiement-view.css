@@ -238,6 +238,21 @@
     -fx-opacity: 0.5;
 }
 
+/* ═══════ DOWNLOAD PDF BUTTON ═══════ */
+.payDownloadBtn {
+    -fx-background-color: linear-gradient(to right, #059669, #10b981);
+    -fx-background-radius: 14;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 14;
+    -fx-padding: 12 28 12 28;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(5,150,105,0.30), 10, 0.18, 0, 4);
+}
+.payDownloadBtn:hover {
+    -fx-background-color: linear-gradient(to right, #047857, #059669);
+}
+
 /* ═══════ WEBVIEW PANE ═══════ */
 .payWebViewPane {
     -fx-background-color: #f8fafc;

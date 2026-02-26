@@ -233,6 +233,8 @@
                 <Label fx:id="recuDate" text="—" styleClass="payValueMuted"/>
             </HBox>
         </VBox>
+        <Button text="📥 Télécharger le ticket PDF" onAction="#handleDownloadPdf"
+                styleClass="payDownloadBtn" prefWidth="260"/>
         <Button text="Retour à l'événement" onAction="#handleRetourEvenement"
                 styleClass="payConfirmBtn" prefWidth="260"/>
     </VBox>
