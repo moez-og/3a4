@@ -7,12 +7,15 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import services.gamification.GamificationService;
+
 /**
  * Gestion des lieux favoris (table favori_lieu).
  */
 public class FavoriLieuService {
 
     private final Connection cnx;
+    private final GamificationService gamifService = new GamificationService();
 
     public FavoriLieuService() {
         cnx = Mydb.getInstance().getConnection();
@@ -24,7 +27,11 @@ public class FavoriLieuService {
         try (PreparedStatement ps = cnx.prepareStatement(sql)) {
             ps.setInt(1, userId);
             ps.setInt(2, lieuId);
-            ps.executeUpdate();
+            int rows = ps.executeUpdate();
+            if (rows > 0) {
+                // Gamification : points pour nouveau favori
+                gamifService.ajouterPoints(userId, "FAVORI");
+            }
         } catch (SQLException e) {
             throw new RuntimeException("FavoriLieuService.add: " + e.getMessage(), e);
         }

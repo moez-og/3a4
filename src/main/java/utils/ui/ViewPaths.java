@@ -19,6 +19,9 @@ public final class ViewPaths {
     public static final String FRONT_HELP = "/fxml/front/help/HelpView.fxml";
     public static final String FRONT_CHATBOT = "/fxml/front/lieux/ChatbotView.fxml";
 
+    // Gamification
+    public static final String FRONT_GAMIFICATION = "/fxml/front/gamification/GamificationView.fxml";
+
     // Back shell (si besoin)
     public static final String BACK_SHELL = "/fxml/back/shell/BackDashboard.fxml";
 }

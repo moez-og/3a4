@@ -54,6 +54,7 @@
                     <ToggleButton fx:id="navOffres" text="Offres" onAction="#showOffres" styleClass="navPill"/>
                     <ToggleButton fx:id="navEvents" text="Événements" onAction="#showEvents" styleClass="navPill"/>
                     <ToggleButton fx:id="navHelp" text="Aide" onAction="#showHelp" styleClass="navPill"/>
+                    <ToggleButton fx:id="navGamif" text="🏆 Classement" onAction="#showGamification" styleClass="navPill,navPillGamif"/>
                     <ToggleButton fx:id="navChatbot" text="🤖 Assistant" onAction="#showChatbot" styleClass="navPill,navPillChatbot"/>
                 </HBox>
 

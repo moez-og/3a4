@@ -1,9 +1,7 @@
 package controllers.front.lieux;
 
 import controllers.front.shell.FrontDashboardController;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -48,7 +46,6 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import javafx.scene.shape.Rectangle;
-import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.List;
@@ -169,28 +166,59 @@ public class LieuDetailsController {
         showImage(currentImageIndex);
     }
 
+    private int lastImageIndex = 0;
+
     private void showImage(int idx) {
         if (image == null || galleryImages.isEmpty()) return;
 
-        // Fade transition
-        FadeTransition ft = new FadeTransition(Duration.millis(180), image);
-        ft.setFromValue(0.4);
-        ft.setToValue(1.0);
-        image.setImage(galleryImages.get(idx));
-        ft.play();
+        // Direction du slide : droite si on avance, gauche si on recule
+        int direction = (idx > lastImageIndex || (lastImageIndex == galleryImages.size() - 1 && idx == 0)) ? 1 : -1;
+        lastImageIndex = idx;
+
+        // Slide + fade out
+        TranslateTransition slideOut = new TranslateTransition(Duration.millis(160), image);
+        slideOut.setToX(-30 * direction);
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(160), image);
+        fadeOut.setToValue(0);
+
+        ParallelTransition out = new ParallelTransition(slideOut, fadeOut);
+        out.setOnFinished(ev -> {
+            image.setImage(galleryImages.get(idx));
+            image.setTranslateX(30 * direction);
+            image.setOpacity(0);
+
+            TranslateTransition slideIn = new TranslateTransition(Duration.millis(220), image);
+            slideIn.setToX(0);
+            slideIn.setInterpolator(Interpolator.EASE_OUT);
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(220), image);
+            fadeIn.setToValue(1);
+            fadeIn.setInterpolator(Interpolator.EASE_OUT);
+
+            new ParallelTransition(slideIn, fadeIn).play();
+        });
+        out.play();
 
         // Compteur
         if (imageCounter != null)
             imageCounter.setText((idx + 1) + " / " + galleryImages.size());
 
-        // Miniature active
+        // Miniature active avec animation scale
         if (thumbsRow != null) {
-            thumbsRow.getChildren().forEach(n -> n.getStyleClass().remove("thumbActive"));
-            if (idx < thumbsRow.getChildren().size())
-                thumbsRow.getChildren().get(idx).getStyleClass().add("thumbActive");
+            for (int i = 0; i < thumbsRow.getChildren().size(); i++) {
+                var n = thumbsRow.getChildren().get(i);
+                n.getStyleClass().remove("thumbActive");
+                if (i == idx) {
+                    n.getStyleClass().add("thumbActive");
+                    ScaleTransition st = new ScaleTransition(Duration.millis(130), n);
+                    st.setToX(1.08); st.setToY(1.08);
+                    ScaleTransition back = new ScaleTransition(Duration.millis(130), n);
+                    back.setToX(1.0); back.setToY(1.0);
+                    st.setOnFinished(e -> back.play());
+                    st.play();
+                }
+            }
         }
 
-        // Afficher/masquer flèches
         boolean multiple = galleryImages.size() > 1;
         if (prevBtn != null) { prevBtn.setVisible(multiple); prevBtn.setManaged(multiple); }
         if (nextBtn != null) { nextBtn.setVisible(multiple); nextBtn.setManaged(multiple); }
@@ -273,6 +301,17 @@ public class LieuDetailsController {
         if (currentUser == null || current == null) return;
         boolean nowFavori = favoriService.toggle(currentUser.getId(), current.getId());
         updateFavoriBtn(nowFavori);
+
+        // Animation pulse sur le bouton
+        if (favoriBtn != null) {
+            ScaleTransition grow = new ScaleTransition(Duration.millis(90), favoriBtn);
+            grow.setToX(1.22); grow.setToY(1.22);
+            ScaleTransition shrink = new ScaleTransition(Duration.millis(160), favoriBtn);
+            shrink.setToX(1.0); shrink.setToY(1.0);
+            shrink.setInterpolator(Interpolator.EASE_OUT);
+            grow.setOnFinished(e -> shrink.play());
+            grow.play();
+        }
     }
 
     private void updateFavoriBtn(boolean isFavori) {
@@ -588,6 +627,38 @@ public class LieuDetailsController {
         if (favoriBtn != null && currentUser != null) {
             updateFavoriBtn(favoriService.isFavori(currentUser.getId(), current.getId()));
         }
+
+        // ── Animations d'entrée des cards ─────────────────────
+        animateDetailsIn();
+    }
+
+    /**
+     * Anime l'entrée de tous les blocs de la page détails :
+     * chaque carte/section fade+slide depuis le bas en cascade.
+     */
+    private void animateDetailsIn() {
+        // Nodes clés à animer
+        javafx.scene.Node[] nodes = {
+            descriptionCard, horaireCard,
+            budgetCard, contactCard,
+            statutBannerBox
+        };
+        for (int i = 0; i < nodes.length; i++) {
+            javafx.scene.Node n = nodes[i];
+            if (n == null || !n.isVisible()) continue;
+            n.setOpacity(0);
+            n.setTranslateY(16);
+            int delay = 80 + i * 60;
+            PauseTransition p = new PauseTransition(Duration.millis(delay));
+            p.setOnFinished(ev -> {
+                FadeTransition ft = new FadeTransition(Duration.millis(300), n);
+                ft.setToValue(1); ft.setInterpolator(Interpolator.EASE_OUT);
+                TranslateTransition tt = new TranslateTransition(Duration.millis(300), n);
+                tt.setToY(0); tt.setInterpolator(Interpolator.EASE_OUT);
+                new ParallelTransition(ft, tt).play();
+            });
+            p.play();
+        }
     }
 
     /** Bandeau statut ouvert/fermé en haut de la colonne droite */
@@ -842,14 +913,25 @@ public class LieuDetailsController {
         avisList.getChildren().clear();
 
         boolean empty = list.isEmpty();
-        if (avisEmpty != null) {
-            avisEmpty.setManaged(empty);
-            avisEmpty.setVisible(empty);
-        }
+        if (avisEmpty != null) { avisEmpty.setManaged(empty); avisEmpty.setVisible(empty); }
         if (empty) return;
 
-        for (EvaluationLieu a : list) {
-            avisList.getChildren().add(buildAvisCard(a));
+        for (int i = 0; i < list.size(); i++) {
+            Node card = buildAvisCard(list.get(i));
+            card.setOpacity(0);
+            card.setTranslateX(-12);
+            avisList.getChildren().add(card);
+
+            int delay = i * 55;
+            PauseTransition p = new PauseTransition(Duration.millis(delay));
+            p.setOnFinished(ev -> {
+                FadeTransition ft = new FadeTransition(Duration.millis(260), card);
+                ft.setToValue(1); ft.setInterpolator(Interpolator.EASE_OUT);
+                TranslateTransition tt = new TranslateTransition(Duration.millis(260), card);
+                tt.setToX(0); tt.setInterpolator(Interpolator.EASE_OUT);
+                new ParallelTransition(ft, tt).play();
+            });
+            p.play();
         }
     }
 

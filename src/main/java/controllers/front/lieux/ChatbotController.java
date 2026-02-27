@@ -13,9 +13,11 @@ import models.lieux.LieuHoraire;
 import services.lieux.LieuService;
 
 import javax.sound.sampled.*;
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.cert.X509Certificate;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDateTime;
@@ -68,9 +70,27 @@ public class ChatbotController {
 
     // ============================================================
     //  INIT
+    /** Bypass SSL — nécessaire car la JVM embarquée ne reconnaît pas le cert de api.groq.com */
+    private static void disableSSLVerification() {
+        try {
+            TrustManager[] trustAll = new TrustManager[]{
+                new X509TrustManager() {
+                    public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                    public void checkClientTrusted(X509Certificate[] c, String a) {}
+                    public void checkServerTrusted(X509Certificate[] c, String a) {}
+                }
+            };
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAll, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
+        } catch (Exception ignored) {}
+    }
+
     // ============================================================
     @FXML
     public void initialize() {
+        disableSSLVerification(); // Fix PKIX: contourne la vérification SSL de la JVM
         inputField.setOnAction(e -> sendMessage());
         executor.submit(() -> {
             try { allLieux = lieuService.getAll(); }

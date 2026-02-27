@@ -34,6 +34,7 @@ import java.util.Map;
 
 public class BackDashboardController {
 
+    private static final String ANALYTICS_VIEW_PATH = "/fxml/back/analytics/AnalyticsDashboard.fxml";
     private static final String DASHBOARD_VIEW_PATH = "/fxml/back/dashboard/DashboardAdmin.fxml";
     private static final String USERS_VIEW_PATH = "/fxml/back/users/UserDashboard.fxml";
     private static final String SORTIES_VIEW_PATH = "/fxml/back/sorties/SortiesAdmin.fxml";
@@ -56,6 +57,7 @@ public class BackDashboardController {
     @FXML private Button btnLieux;
     @FXML private Button btnOffres;
     @FXML private Button btnEvents;
+    @FXML private Button btnAnalytics;
     @FXML private Button btnGoFront;
 
     private Stage primaryStage;
@@ -129,6 +131,22 @@ public class BackDashboardController {
         setActive(btnEvents);
         setHeader("Gestion des Événements", "Agenda, inscriptions, gestion");
         loadAndSetCachedView("events", EVENTS_VIEW_PATH);
+    }
+
+    @FXML
+    public void showAnalytics() {
+        setActive(btnAnalytics);
+        setHeader("🔬  Analytics IA", "Heatmap · Corrélation Pearson · Entropie Shannon · Score pondéré");
+        // Pas de cache : les données doivent être recalculées à chaque visite
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource(ANALYTICS_VIEW_PATH));
+            javafx.scene.Node view = loader.load();
+            dynamicContent.getChildren().setAll(view);
+        } catch (Exception e) {
+            Alert a = new Alert(Alert.AlertType.ERROR, "Erreur chargement Analytics : " + e.getMessage());
+            a.showAndWait();
+        }
     }
 
     @FXML
@@ -218,6 +236,7 @@ public class BackDashboardController {
             setDisable(btnLieux, false);
             setDisable(btnOffres, false);
             setDisable(btnEvents, false);
+            setDisable(btnAnalytics, false);  // admin : accès complet
             setDisable(btnGoFront, false);
             return;
         }
@@ -229,6 +248,7 @@ public class BackDashboardController {
             setDisable(btnLieux, false);
             setDisable(btnOffres, false);
             setDisable(btnEvents, false);
+            setDisable(btnAnalytics, true);  // partenaire : pas d'analytics
             setDisable(btnGoFront, false);
             return;
         }
@@ -240,6 +260,7 @@ public class BackDashboardController {
         setDisable(btnLieux, true);
         setDisable(btnOffres, true);
         setDisable(btnEvents, true);
+        setDisable(btnAnalytics, true);
         setDisable(btnGoFront, true);
     }
 
@@ -444,7 +465,7 @@ public class BackDashboardController {
     }
 
     private void setActive(Button activeBtn) {
-        Button[] all = {btnDashboard, btnUtilisateurs, btnSorties, btnLieux, btnOffres, btnEvents, btnGoFront};
+        Button[] all = {btnDashboard, btnUtilisateurs, btnSorties, btnLieux, btnOffres, btnEvents, btnAnalytics, btnGoFront};
         for (Button b : all) {
             if (b == null) continue;
             b.getStyleClass().remove("active");

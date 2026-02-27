@@ -42,6 +42,7 @@ public class FrontDashboardController implements ShellNavigator {
     public static final String ROUTE_CHATBOT = "chatbot";
     public static final String ROUTE_PROFIL = "profil";
     public static final String ROUTE_FAVORIS = "favoris";
+    public static final String ROUTE_GAMIFICATION = "gamification";
 
     public static final String ROUTE_LIEU_DETAILS_PREFIX = "lieu-details:";
     public static final String ROUTE_EVENEMENT_DETAILS_PREFIX = "evenement-details:";
@@ -62,6 +63,7 @@ public class FrontDashboardController implements ShellNavigator {
     @FXML private ToggleButton navEvents;
     @FXML private ToggleButton navHelp;
     @FXML private ToggleButton navChatbot;
+    @FXML private ToggleButton navGamif;
 
     @FXML private Label userName;
     @FXML private Label userRole;
@@ -106,6 +108,7 @@ public class FrontDashboardController implements ShellNavigator {
         navEvents.setToggleGroup(navGroup);
         navHelp.setToggleGroup(navGroup);
         navChatbot.setToggleGroup(navGroup);
+        if (navGamif != null) navGamif.setToggleGroup(navGroup);
         navAccueil.setSelected(true);
     }
 
@@ -154,6 +157,13 @@ public class FrontDashboardController implements ShellNavigator {
         navChatbot.setSelected(true);
         setHeader("Assistant IA", "Posez vos questions sur les lieux");
         ensureLoadedAndShow(ROUTE_CHATBOT, ViewPaths.FRONT_CHATBOT);
+    }
+
+    @FXML
+    public void showGamification() {
+        if (navGamif != null) navGamif.setSelected(true);
+        setHeader("🏆 Classement & Badges", "Points fidélité · Badges explorateur · Classement local");
+        ensureLoadedAndShow(ROUTE_GAMIFICATION, ViewPaths.FRONT_GAMIFICATION);
     }
 
     @Override
@@ -207,6 +217,7 @@ public class FrontDashboardController implements ShellNavigator {
             case ROUTE_PROFIL -> showProfil();
             case ROUTE_CHATBOT -> showChatbot();
             case ROUTE_FAVORIS -> showMesFavoris();
+            case ROUTE_GAMIFICATION -> showGamification();
             default -> info("Navigation", "Route inconnue: " + route);
         }
     }
