@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.front.offres.OffresController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            stylesheets="@/styles/offres/offres-front.css"
+            styleClass="offresScroll">
+
+    <content>
+        <VBox spacing="16" styleClass="offresRoot">
+            <padding>
+                <Insets top="14" right="14" bottom="18" left="14"/>
+            </padding>
+
+            <!-- HERO -->
+            <HBox spacing="14" alignment="CENTER_LEFT" styleClass="offresHero">
+                <VBox spacing="4">
+                    <Label text="Offres" styleClass="offresTitle"/>
+                    <Label text="Promotions et coupons disponibles" styleClass="offresSubtitle"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="offresTools">
+                    <ComboBox fx:id="filtreLieuCombo" prefWidth="240" promptText="Filtrer par lieu" styleClass="filterCombo"/>
+                    <Button text="Tout afficher" onAction="#onOpenAllOffers" styleClass="ghostBtn"/>
+                </HBox>
+            </HBox>
+
+            <!-- CONTENT -->
+            <HBox spacing="14" alignment="TOP_LEFT">
+                <!-- LIST -->
+                <VBox spacing="10" styleClass="offresSurface" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Offres disponibles" styleClass="sectionTitle"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                    </HBox>
+
+                    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="listScroll">
+                        <content>
+                            <VBox fx:id="offersListBox" spacing="10" styleClass="offersList">
+                                <padding>
+                                    <Insets top="2" right="2" bottom="6" left="2"/>
+                                </padding>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+
+                    <VBox.vgrow>
+                        <Priority fx:constant="ALWAYS"/>
+                    </VBox.vgrow>
+                </VBox>
+
+                <!-- DETAILS -->
+                <VBox spacing="10" styleClass="offresSurface" prefWidth="440">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Détail" styleClass="sectionTitle"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="detailStatut" text="-" styleClass="statusChip status-cloturee"/>
+                    </HBox>
+
+                    <Label fx:id="detailTitre" text="Sélectionne une offre" styleClass="cardTitle" wrapText="true"/>
+
+                    <VBox spacing="6" styleClass="detailsLines">
+                        <Label fx:id="detailLieu" text="Lieu: -" styleClass="cardLine" wrapText="true"/>
+                        <Label fx:id="detailType" text="Type: -" styleClass="cardLine" wrapText="true"/>
+                        <Label fx:id="detailPourcentage" text="Réduction: -" styleClass="cardLine" wrapText="true"/>
+                        <Label fx:id="detailDates" text="Validité: -" styleClass="cardLine" wrapText="true"/>
+                    </VBox>
+
+                    <Label fx:id="detailDescription" text="" wrapText="true" styleClass="detailsDesc"/>
+
+                    <Button fx:id="btnGetPromo" text="Obtenir le code promo" onAction="#onGetPromo" styleClass="primaryBtn" disable="true"/>
+                    <Label fx:id="promoInfo" text="Aucun code promo généré." styleClass="stateLabel" wrapText="true"/>
+                    <ImageView fx:id="qrImageView" fitWidth="210" fitHeight="210" preserveRatio="true" visible="false" managed="false"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </content>
+</ScrollPane>
