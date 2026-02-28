@@ -12,6 +12,7 @@ public final class ViewPaths {
     public static final String FRONT_SORTIE_DETAILS = "/fxml/front/sorties/SortieDetailsView.fxml"; // ✅ AJOUT
     public static final String FRONT_LIEUX = "/fxml/front/lieux/LieuxView.fxml";
     public static final String FRONT_LIEU_DETAILS = "/fxml/front/lieux/LieuDetailsView.fxml"; // ✅ AJOUT
+    public static final String FRONT_NEURO_MODE   = "/fxml/front/lieux/NeuroModeView.fxml";   // ✅ Mode neurodiversité
     public static final String FRONT_OFFRES = "/fxml/front/offres/OffresView.fxml";
     public static final String FRONT_EVENEMENTS = "/fxml/front/evenements/Evenementsview.fxml";
     public static final String FRONT_EVENEMENT_DETAILS = "/fxml/front/evenements/EvenementsDetailsView.fxml";

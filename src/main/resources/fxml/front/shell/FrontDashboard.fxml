@@ -18,7 +18,7 @@
            xmlns:fx="http://javafx.com/fxml/1"
            fx:id="root"
            fx:controller="controllers.front.shell.FrontDashboardController"
-           stylesheets="@/styles/front/front-layout.css"
+           stylesheets="@/styles/front/front-layout.css,@/styles/front/neuro-mode.css"
            styleClass="app-root">
 
     <!-- MAIN LAYOUT -->
@@ -147,6 +147,12 @@
             <Button text="＋ Nouveau (Sortie/Offre/Événement)" onAction="#newAction" styleClass="drawerBtnPrimary"/>
             <Button text="♥ Mes lieux favoris" onAction="#showMesFavoris" styleClass="drawerBtn"/>
             <Button text="📌 Mes activités" onAction="#showMyActivity" styleClass="drawerBtn"/>
+
+            <Separator styleClass="sep"/>
+
+            <Label text="Accessibilité" styleClass="drawerSectionTitle"/>
+            <ToggleButton fx:id="drawerNeuroToggle" text="🧠 Mode simplifié"
+                          onAction="#toggleNeuroMode" styleClass="drawerBtn"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 

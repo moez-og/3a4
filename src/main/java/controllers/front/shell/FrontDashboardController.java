@@ -6,11 +6,9 @@ package controllers.front.shell;
 import controllers.front.evenements.EvenementDetailsController;
 import controllers.front.lieux.LieuDetailsController;
 import controllers.front.lieux.LieuxController;
+import controllers.front.lieux.NeuroModeController;
 import javafx.animation.FadeTransition;
-import javafx.animation.Interpolator;
-import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -24,7 +22,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -32,10 +29,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import models.lieux.Lieu;
 import models.notifications.LieuNotification;
 import models.users.User;
 import services.notifications.LieuSuggestionService;
+import utils.ui.AccessibilityManager;
 import utils.ui.GestureNavigationManager;
 import utils.ui.ShellNavigator;
 import utils.ui.ViewPaths;
@@ -82,6 +79,7 @@ public class FrontDashboardController implements ShellNavigator {
     @FXML private ToggleButton navHelp;
     @FXML private ToggleButton navChatbot;
     @FXML private ToggleButton navGamif;
+    @FXML private ToggleButton drawerNeuroToggle;
 
     @FXML private Label userName;
     @FXML private Label userRole;
@@ -169,7 +167,21 @@ public class FrontDashboardController implements ShellNavigator {
         navHelp.setToggleGroup(navGroup);
         navChatbot.setToggleGroup(navGroup);
         if (navGamif != null) navGamif.setToggleGroup(navGroup);
+        // (actif / inactif sans dé-sélectionner les autres nav pills)
         navAccueil.setSelected(true);
+
+        // Synchroniser l'état visuel du bouton neuro avec AccessibilityManager
+        AccessibilityManager.get().addListener(active -> {
+            javafx.application.Platform.runLater(() -> {
+                if (drawerNeuroToggle != null) drawerNeuroToggle.setSelected(active);
+                // Appliquer/retirer la classe neuro-mode sur la racine du shell
+                AccessibilityManager.get().applyClass(root);
+                // Mettre à jour le sous-titre de la page
+                if (active && pageSubtitle != null) {
+                    pageSubtitle.setText("🧠  Mode simplifié actif — navigation accessible");
+                }
+            });
+        });
     }
 
     @FXML
@@ -323,6 +335,14 @@ public class FrontDashboardController implements ShellNavigator {
     private void showLieuDetails(int id) {
         pushHistory(ROUTE_LIEU_DETAILS_PREFIX + id);
         navLieux.setSelected(true);
+
+        // ── Si le mode neurodiversité est actif → vue simplifiée ─────────
+        if (AccessibilityManager.get().isNeuroMode()) {
+            setHeader("🧠 Mode simplifié", "Informations essentielles");
+            showNeuroDetails(id);
+            return;
+        }
+
         setHeader("Lieux", "Détails du lieu");
 
         try {
@@ -686,6 +706,79 @@ public class FrontDashboardController implements ShellNavigator {
         if (root != null) {
             if (dark) root.getStyleClass().add("theme-dark");
             else root.getStyleClass().remove("theme-dark");
+        }
+    }
+
+    /**
+     * Toggle du mode neurodiversité — bouton 🧠 Neuro dans la nav bar.
+     * Active/désactive AccessibilityManager.neuroMode et applique la classe CSS.
+     * Si une vue détail de lieu est ouverte, recharge en mode neuro.
+     */
+    @FXML
+    public void toggleNeuroMode() {
+        boolean active = AccessibilityManager.get().toggleNeuroMode();
+        AccessibilityManager.get().applyClass(root);
+                if (drawerNeuroToggle != null) drawerNeuroToggle.setSelected(active);
+
+        if (active) {
+            // Feedback visuel dans le header
+            setHeader("🧠 Mode simplifié", "Interface adaptée · peu de texte · icônes claires");
+            // Si on est sur une vue de détail lieu, recharger en mode neuro
+            reloadCurrentLieuInNeuroIfNeeded();
+        } else {
+            // Retour mode normal — restaurer l'header courant
+            setHeader("Lieux", "Découverte · filtres · détails");
+        }
+    }
+
+    /**
+     * Affiche la vue neuro simplifiée pour un lieu donné.
+     * Utilisé quand le mode neuro est actif et qu'on ouvre un lieu.
+     */
+    private void showNeuroDetails(int id) {
+        pushHistory(ROUTE_LIEU_DETAILS_PREFIX + id);
+        navLieux.setSelected(true);
+        setHeader("🧠 Mode simplifié", safe(String.valueOf(id)));
+
+        try {
+            URL url = getClass().getResource(ViewPaths.FRONT_NEURO_MODE);
+            if (url == null) throw new IllegalStateException("FXML introuvable: " + ViewPaths.FRONT_NEURO_MODE);
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Node view = loader.load();
+
+            Object controller = loader.getController();
+            trySetPrimaryStage(controller, resolveStage());
+            trySetCurrentUser(controller, currentUser);
+            trySetNavigator(controller, this);
+
+            if (controller instanceof NeuroModeController nc) {
+                // Callback pour revenir en vue normale
+                nc.setOnSwitchToNormal(() -> {
+                    AccessibilityManager.get().setNeuroMode(false);
+                        if (drawerNeuroToggle != null) drawerNeuroToggle.setSelected(false);
+                    showLieuDetails(id);
+                });
+                nc.setLieuId(id);
+            }
+
+            animateSwap(view);
+
+        } catch (Exception e) {
+            // Fallback vers la vue standard
+            showLieuDetails(id);
+        }
+    }
+
+    /** Si on vient d'activer le mode neuro et qu'un lieu-détails est affiché, recharger. */
+    private void reloadCurrentLieuInNeuroIfNeeded() {
+        if (navHistory.isEmpty()) return;
+        String top = navHistory.peek();
+        if (top != null && top.startsWith(ROUTE_LIEU_DETAILS_PREFIX)) {
+            try {
+                int id = Integer.parseInt(top.substring(ROUTE_LIEU_DETAILS_PREFIX.length()).trim());
+                showNeuroDetails(id);
+            } catch (Exception ignored) {}
         }
     }
 

@@ -20,6 +20,7 @@ import models.users.User;
 import services.lieux.EvaluationLieuService;
 import services.lieux.FavoriLieuService;
 import services.lieux.LieuService;
+import utils.ui.AccessibilityManager;
 import utils.ui.LieuSearchAutoComplete;
 import utils.ui.ShellNavigator;
 import utils.ui.ViewPaths;
@@ -120,6 +121,15 @@ public class LieuxController {
                 rightPanel.setMaxWidth(w * RIGHT_RATIO);
             }
         });
+
+        // ── Mode neurodiversité : appliquer classe CSS + rerender cartes ─
+        AccessibilityManager.get().bindClass(rootHBox);
+        AccessibilityManager.get().addListener(active ->
+            javafx.application.Platform.runLater(() -> {
+                // Rerender les cartes en taille adaptée
+                if (cardsPane != null) applyFilters();
+            })
+        );
 
         loadData();
         wireSearch();
@@ -463,6 +473,156 @@ public class LieuxController {
        BUILD CARD (style image 3)
     ══════════════════════════════════════════════ */
     private VBox buildCard(Lieu l, double cardW) {
+        // ── Mode neurodiversité : carte ultra-simplifiée ───────────────────
+        if (AccessibilityManager.get().isNeuroMode()) {
+            return buildNeuroCard(l, cardW);
+        }
+        return buildStandardCard(l, cardW);
+    }
+
+    /**
+     * Carte mode neurodiversité : icône large + nom + 2 infos essentielles + 1 bouton.
+     * Pas de surcharge visuelle, texte minimal, zones cliquables larges.
+     */
+    private VBox buildNeuroCard(Lieu l, double cardW) {
+        double neuroW = Math.max(cardW, 260);
+        VBox card = new VBox(0);
+        card.getStyleClass().add("lxCard");
+        card.setPrefWidth(neuroW);
+        card.setMaxWidth(neuroW);
+
+        // ── Image simplifiée (juste la photo, sans catégorie badge)
+        StackPane imgWrap = new StackPane();
+        ImageView iv = new ImageView();
+        iv.setFitWidth(neuroW);
+        iv.setFitHeight(160);
+        iv.setPreserveRatio(false);
+        Rectangle clip = new Rectangle(neuroW, 160);
+        clip.setArcWidth(20); clip.setArcHeight(20);
+        iv.setClip(clip);
+        iv.setImage(loadImg(l.getImageUrl()));
+
+        // Icône catégorie — grande et centrée sur l'image
+        String catIcon = AccessibilityManager.categoryIcon(safe(l.getCategorie()));
+        Label iconOverlay = new Label(catIcon);
+        iconOverlay.setStyle(
+            "-fx-font-size: 36px;" +
+            "-fx-background-color: rgba(255,255,255,0.88);" +
+            "-fx-background-radius: 999;" +
+            "-fx-padding: 8 10;"
+        );
+        StackPane.setAlignment(iconOverlay, Pos.BOTTOM_LEFT);
+        StackPane.setMargin(iconOverlay, new Insets(0, 0, 10, 10));
+        imgWrap.getChildren().addAll(iv, iconOverlay);
+
+        // Favori
+        if (currentUser != null) {
+            boolean[] fav = { favoriService.isFavori(currentUser.getId(), l.getId()) };
+            Button heart = new Button(fav[0] ? "♥" : "♡");
+            heart.getStyleClass().add("lxHeartBtn");
+            heart.setStyle(
+                (fav[0] ? "-fx-background-color: #e11d48; -fx-text-fill: white;" :
+                          "-fx-background-color: rgba(255,255,255,0.88); -fx-text-fill: #9f1239;") +
+                "-fx-background-radius: 999; -fx-font-size: 18px;" +
+                "-fx-min-width: 40; -fx-min-height: 40; -fx-max-width: 40; -fx-max-height: 40;" +
+                "-fx-cursor: hand;"
+            );
+            heart.setOnAction(e -> {
+                e.consume();
+                fav[0] = favoriService.toggle(currentUser.getId(), l.getId());
+                heart.setText(fav[0] ? "♥" : "♡");
+                heart.setStyle(
+                    (fav[0] ? "-fx-background-color: #e11d48; -fx-text-fill: white;" :
+                              "-fx-background-color: rgba(255,255,255,0.88); -fx-text-fill: #9f1239;") +
+                    "-fx-background-radius: 999; -fx-font-size: 18px;" +
+                    "-fx-min-width: 40; -fx-min-height: 40; -fx-max-width: 40; -fx-max-height: 40;" +
+                    "-fx-cursor: hand;"
+                );
+            });
+            StackPane.setAlignment(heart, Pos.TOP_RIGHT);
+            StackPane.setMargin(heart, new Insets(10));
+            imgWrap.getChildren().add(heart);
+        }
+
+        // ── Corps simplifié
+        VBox body = new VBox(8);
+        body.setPadding(new Insets(14, 16, 16, 16));
+
+        // Nom — grand et lisible
+        Label nomLbl = new Label(safe(l.getNom()));
+        nomLbl.setStyle(
+            "-fx-font-size: 16px; -fx-font-weight: 900;" +
+            "-fx-text-fill: #0b1a2e; -fx-wrap-text: true;"
+        );
+        nomLbl.setWrapText(true);
+        nomLbl.setMaxWidth(neuroW - 32);
+
+        // Ligne prix + ville — les 2 infos les plus importantes
+        HBox keyRow = new HBox(10);
+        keyRow.setAlignment(Pos.CENTER_LEFT);
+
+        // Prix
+        String budStr = AccessibilityManager.buildBudgetText(l.getBudgetMin(), l.getBudgetMax());
+        Label prixLbl = new Label("💰 " + budStr);
+        prixLbl.setStyle(
+            "-fx-background-color: rgba(212,175,55,0.15);" +
+            "-fx-background-radius: 10;" +
+            "-fx-border-color: rgba(212,175,55,0.45);" +
+            "-fx-border-radius: 10;" +
+            "-fx-border-width: 1.8;" +
+            "-fx-text-fill: #7a5000;" +
+            "-fx-font-weight: 900;" +
+            "-fx-font-size: 13px;" +
+            "-fx-padding: 5 12;"
+        );
+
+        // Ville
+        String v = safe(l.getVille());
+        if (!v.isEmpty()) {
+            Label villeLbl = new Label("📍 " + v);
+            villeLbl.setStyle(
+                "-fx-text-fill: #334155; -fx-font-size: 13px; -fx-font-weight: 700;"
+            );
+            keyRow.getChildren().addAll(prixLbl, villeLbl);
+        } else {
+            keyRow.getChildren().add(prixLbl);
+        }
+
+        // Bouton unique : grand, texte clair
+        Button detBtn = new Button("Voir ce lieu  →");
+        detBtn.setStyle(
+            "-fx-background-color: #0b1a2e;" +
+            "-fx-background-radius: 14;" +
+            "-fx-text-fill: white;" +
+            "-fx-font-weight: 900;" +
+            "-fx-font-size: 14px;" +
+            "-fx-padding: 12 20;" +
+            "-fx-cursor: hand;" +
+            "-fx-max-width: Infinity;" +
+            "-fx-min-height: 46;"
+        );
+        detBtn.setMaxWidth(Double.MAX_VALUE);
+        detBtn.setOnAction(e -> { e.consume(); openFullscreen(l); });
+
+        body.getChildren().addAll(nomLbl, keyRow, detBtn);
+        card.getChildren().addAll(imgWrap, body);
+        cardMap.put(l.getId(), card);
+
+        // ── Hover simple (pas d'animation complexe)
+        DropShadow shadowHover = new DropShadow(24, 0, 7, Color.rgb(11, 26, 46, 0.20));
+        DropShadow shadowNorm  = new DropShadow(14, 0, 4, Color.rgb(11, 26, 46, 0.12));
+        card.setEffect(shadowNorm);
+        card.setOnMouseEntered(ev -> card.setEffect(shadowHover));
+        card.setOnMouseExited(ev  -> card.setEffect(shadowNorm));
+        card.setOnMouseClicked(e  -> selectLieu(l, card));
+
+        return card;
+    }
+
+    /**
+     * Carte standard (mode normal) — identique à l'implémentation d'origine.
+     */
+    private VBox buildStandardCard(Lieu l, double cardW) {
         VBox card = new VBox(0);
         card.getStyleClass().add("lxCard");
         card.setPrefWidth(cardW);
