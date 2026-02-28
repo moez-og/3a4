@@ -50,6 +50,11 @@ public class GamificationController {
         loadData();
     }
 
+    /** Actualiser les données du classement et badges (appeler après chaque action qui gagne des points) */
+    public void refresh() {
+        loadData();
+    }
+
     private void loadData() {
         if (currentUser == null) return;
 

@@ -433,7 +433,41 @@ public class FrontDashboardController implements ShellNavigator {
         );
         subtitleLbl.getStyleClass().add("notifPopupSubtitle");
 
-        javafx.scene.control.Button markAllBtn = new javafx.scene.control.Button("Tout marquer lu");
+        javafx.scene.control.Button markAllBtn = new javafx.scene.control.Button("✓  Tout marquer lu");
+        markAllBtn.setStyle(
+            "-fx-background-color: #1d4ed8;" +
+            "-fx-text-fill: #ffffff;" +
+            "-fx-font-size: 11.5px;" +
+            "-fx-font-weight: 700;" +
+            "-fx-cursor: hand;" +
+            "-fx-padding: 6px 14px;" +
+            "-fx-background-radius: 20px;" +
+            "-fx-border-color: transparent;" +
+            "-fx-effect: dropshadow(gaussian, rgba(29,78,216,0.30), 6, 0, 0, 2);"
+        );
+        markAllBtn.setOnMouseEntered(ev -> markAllBtn.setStyle(
+            "-fx-background-color: #1e40af;" +
+            "-fx-text-fill: #ffffff;" +
+            "-fx-font-size: 11.5px;" +
+            "-fx-font-weight: 700;" +
+            "-fx-cursor: hand;" +
+            "-fx-padding: 6px 14px;" +
+            "-fx-background-radius: 20px;" +
+            "-fx-border-color: transparent;" +
+            "-fx-translate-y: -1px;" +
+            "-fx-effect: dropshadow(gaussian, rgba(29,78,216,0.45), 10, 0, 0, 3);"
+        ));
+        markAllBtn.setOnMouseExited(ev -> markAllBtn.setStyle(
+            "-fx-background-color: #1d4ed8;" +
+            "-fx-text-fill: #ffffff;" +
+            "-fx-font-size: 11.5px;" +
+            "-fx-font-weight: 700;" +
+            "-fx-cursor: hand;" +
+            "-fx-padding: 6px 14px;" +
+            "-fx-background-radius: 20px;" +
+            "-fx-border-color: transparent;" +
+            "-fx-effect: dropshadow(gaussian, rgba(29,78,216,0.30), 6, 0, 0, 2);"
+        ));
         markAllBtn.getStyleClass().add("notifMarkAllBtn");
         markAllBtn.setOnAction(e -> {
             notifications.forEach(LieuNotification::markRead);
@@ -873,7 +907,10 @@ public class FrontDashboardController implements ShellNavigator {
         Node cached = viewCache.get(key);
         if (cached != null) {
             animateSwap(cached);
-            return controllerCache.get(key);
+            Object controller = controllerCache.get(key);
+            // Actualiser le contrôleur s'il a une méthode refresh() (pour Gamification et autres)
+            tryCallRefresh(controller);
+            return controller;
         }
 
         try {
@@ -902,6 +939,18 @@ public class FrontDashboardController implements ShellNavigator {
                             root.getClass().getSimpleName() + " : " + safe(root.getMessage()));
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private void tryCallRefresh(Object controller) {
+        if (controller == null) return;
+        try {
+            var refreshMethod = controller.getClass().getMethod("refresh");
+            refreshMethod.invoke(controller);
+        } catch (NoSuchMethodException ignored) {
+            // Contrôleur n'a pas de méthode refresh()
+        } catch (Exception e) {
+            System.err.println("Erreur lors de l'appel à refresh(): " + e.getMessage());
         }
     }
 

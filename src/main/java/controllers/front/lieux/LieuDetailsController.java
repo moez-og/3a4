@@ -31,6 +31,7 @@ import services.lieux.EvaluationLieuService;
 import services.lieux.FavoriLieuService;
 import services.lieux.LieuService;
 import services.lieux.ModerationService;
+import services.gamification.GamificationService;
 import utils.ui.ShellNavigator;
 import utils.ui.FrontOfferContext;
 import services.offres.OffreService;
@@ -145,6 +146,7 @@ public class LieuDetailsController {
     private final ModerationService moderationService = new ModerationService();
     private final AvisSuggestionService suggestionService = new AvisSuggestionService();
     private final FavoriLieuService favoriService = new FavoriLieuService();
+    private final GamificationService gamificationService = new GamificationService();
 
     private ShellNavigator navigator;
     private User currentUser;
@@ -1199,6 +1201,11 @@ public class LieuDetailsController {
         if (current == null) {
             if (name != null) name.setText("Lieu introuvable");
             return;
+        }
+
+        // ── Enregistrer la visite (gamification) ──
+        if (currentUser != null) {
+            gamificationService.ajouterPoints(currentUser.getId(), "VISITE_LIEU");
         }
 
         // ── Breadcrumb ────────────────────────────────────────
