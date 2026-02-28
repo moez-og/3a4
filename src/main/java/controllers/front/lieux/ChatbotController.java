@@ -155,8 +155,7 @@ public class ChatbotController {
                 String response = callGroqAPI(text);
                 Platform.runLater(() -> {
                     addBotMessage(response);
-                    // TTS : lire la réponse à voix haute
-                    speakText(response);
+                    // TTS : bouton optionnel pour lire la réponse (plus d'appel automatique)
                     inputField.setDisable(false);
                     sendBtn.setDisable(false);
                     if (voiceBtn != null) voiceBtn.setDisable(false);
@@ -697,12 +696,23 @@ public class ChatbotController {
         avatar.getStyleClass().add("chatAvatar");
         avatar.setMinSize(34, 34);
         avatar.setMaxSize(34, 34);
+        
+        VBox bubbleContainer = new VBox(6);
         Label bubble = new Label(text);
         bubble.setWrapText(true);
         bubble.setMaxWidth(520);
         bubble.getStyleClass().add("chatBubbleBot");
-        HBox.setHgrow(bubble, Priority.SOMETIMES);
-        row.getChildren().addAll(avatar, bubble);
+        bubbleContainer.getChildren().add(bubble);
+        
+        // Bouton pour lire la réponse à voix haute
+        Button readBtn = new Button("🔊 Lire la réponse");
+        readBtn.setStyle("-fx-font-size: 11px; -fx-padding: 4 10 4 10; -fx-cursor: hand;");
+        readBtn.getStyleClass().add("chatReadBtn");
+        readBtn.setOnAction(e -> speakText(text));
+        bubbleContainer.getChildren().add(readBtn);
+        
+        HBox.setHgrow(bubbleContainer, Priority.SOMETIMES);
+        row.getChildren().addAll(avatar, bubbleContainer);
         messagesBox.getChildren().add(row);
         scrollToBottom();
     }

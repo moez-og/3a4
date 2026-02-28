@@ -311,3 +311,25 @@
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.50), 10, 0, 0, 0);
 }
+
+/* ---- Bouton lire la réponse ---- */
+.chatReadBtn {
+    -fx-background-color: #f0f4f9;
+    -fx-border-color: #3b82f6;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: #2563eb;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+.chatReadBtn:hover {
+    -fx-background-color: #e0edff;
+    -fx-border-color: #1d4ed8;
+    -fx-text-fill: #1d4ed8;
+}
+.chatReadBtn:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
