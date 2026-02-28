@@ -1,256 +1,323 @@
-/* ═══════════════════════════════════════════════════════════════════
-   LIEUX VIEW — Redesign complet
-   Concept : "Luxury Travel Guide" — Navy profond × Or chaud × Blanc pur
-   Animations : entrée cascade, hover élévation, chip pulse, skeleton shimmer
-═══════════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   LIEUX VIEW — Compact filters + Grid cards + Split view
+   Palette : Navy #0b2550 · Or #d4af37 · Blanc
+   ⚠️ Largeurs panels : JAVA uniquement
+═══════════════════════════════════════════════════════════════ */
 
-/* ── ROOT ───────────────────────────────────────────────────────── */
-.lieuxScroll           { -fx-background-color: transparent; -fx-background: transparent; }
-.lieuxScroll .viewport { -fx-background-color: transparent; }
-.lieuxRoot             { -fx-background-color: transparent; }
+.lieuxRoot  { -fx-background-color: #f0f2f7; }
+.leftPanel  { -fx-background-color: #f0f2f7; }
 
-.lieuxScroll .scroll-bar:vertical { -fx-pref-width: 4; }
-.lieuxScroll .scroll-bar:vertical .thumb {
-    -fx-background-color: rgba(11,37,80,0.22);
-    -fx-background-radius: 999;
-}
-.lieuxScroll .scroll-bar:vertical .track,
-.lieuxScroll .scroll-bar:vertical .increment-button,
-.lieuxScroll .scroll-bar:vertical .decrement-button {
-    -fx-background-color: transparent;
-    -fx-padding: 0;
-}
-
-/* ── HERO HEADER ────────────────────────────────────────────────── */
-.lieuxHero {
-    -fx-background-color: linear-gradient(to bottom right, #0d2d5c, #163a75);
-    -fx-background-radius: 24;
-    -fx-border-color: rgba(212,175,55,0.25);
-    -fx-border-radius: 24;
-    -fx-border-width: 1;
-    -fx-padding: 22 24;
-    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.40), 28, 0.22, 0, 10);
-}
-.lieuxTitle {
-    -fx-text-fill: white;
-    -fx-font-size: 30px;
-    -fx-font-weight: 900;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 8, 0, 0, 2);
-}
-.lieuxSubtitle {
-    -fx-text-fill: rgba(255,255,255,0.62);
-    -fx-font-size: 12.5px;
-    -fx-font-weight: 700;
-}
-
-/* Barre recherche dans le hero */
-.lieuxSearchBox {
-    -fx-background-color: rgba(255,255,255,0.14);
-    -fx-background-radius: 18;
-    -fx-border-color: rgba(255,255,255,0.22);
-    -fx-border-radius: 18;
-    -fx-border-width: 1.5;
-    -fx-padding: 9 16;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 10, 0, 0, 3);
-}
-.lieuxSearchIcon   { -fx-text-fill: rgba(255,255,255,0.70); -fx-font-size: 14px; }
-.lieuxSearchField  {
-    -fx-pref-width: 290;
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-text-fill: white;
-    -fx-font-weight: 800;
-    -fx-font-size: 13px;
-    -fx-prompt-text-fill: rgba(255,255,255,0.45);
-}
-.lieuxGhostBtn {
-    -fx-background-color: rgba(255,255,255,0.16);
-    -fx-background-radius: 14;
-    -fx-border-color: rgba(255,255,255,0.28);
-    -fx-border-radius: 14;
-    -fx-border-width: 1.5;
-    -fx-text-fill: rgba(255,255,255,0.90);
-    -fx-font-weight: 900;
-    -fx-font-size: 11.5px;
-    -fx-padding: 8 16;
-    -fx-cursor: hand;
-}
-.lieuxGhostBtn:hover {
-    -fx-background-color: rgba(255,255,255,0.26);
-    -fx-border-color: rgba(255,255,255,0.45);
-    -fx-translate-y: -1;
-}
-.lieuxGhostBtn:pressed { -fx-translate-y: 0; }
-
-/* ── SECTIONS FILTRES ───────────────────────────────────────────── */
-.lieuxSection {
+/* ══════════════════════════════════════════════
+   TOOLBAR — une seule ligne compacte (Lead Mgmt style)
+══════════════════════════════════════════════ */
+.lxToolbar {
     -fx-background-color: white;
-    -fx-background-radius: 20;
-    -fx-border-color: rgba(11,37,80,0.07);
-    -fx-border-radius: 20;
-    -fx-border-width: 1;
-    -fx-padding: 16 18;
-    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.08), 16, 0.12, 0, 5);
-}
-.lieuxSectionTitle {
-    -fx-text-fill: #0b2550;
-    -fx-font-size: 13.5px;
-    -fx-font-weight: 900;
+    -fx-border-color: transparent transparent #e2e6ef transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 11 16;
+    -fx-min-height: 56;
 }
 
-/* Compteur résultats — badge doré */
-.countLabel {
-    -fx-background-color: linear-gradient(to right, rgba(212,175,55,0.18), rgba(201,146,15,0.12));
+.lxTitle {
+    -fx-text-fill: #0b2550;
+    -fx-font-size: 15px;
+    -fx-font-weight: 900;
+}
+.lxCount {
+    -fx-background-color: rgba(212,175,55,0.16);
     -fx-background-radius: 999;
-    -fx-border-color: rgba(212,175,55,0.45);
+    -fx-border-color: rgba(212,175,55,0.42);
     -fx-border-radius: 999;
     -fx-text-fill: #7a5c00;
-    -fx-font-size: 11.5px;
-    -fx-font-weight: 900;
-    -fx-padding: 4 16;
-    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.20), 6, 0, 0, 2);
-}
-
-/* ── CHIPS ──────────────────────────────────────────────────────── */
-.chipsScroll           { -fx-background-color: transparent; -fx-background: transparent; }
-.chipsScroll .viewport { -fx-background-color: transparent; }
-.chipsScroll .scroll-bar:horizontal { -fx-pref-height: 3; }
-.chipsScroll .scroll-bar:horizontal .thumb { -fx-background-color: rgba(11,37,80,0.18); -fx-background-radius: 999; }
-.chipsScroll .scroll-bar:horizontal .track,
-.chipsScroll .scroll-bar:horizontal .increment-button,
-.chipsScroll .scroll-bar:horizontal .decrement-button { -fx-background-color: transparent; -fx-padding: 0; }
-.chipsRow { -fx-padding: 4 2; }
-
-.chip {
-    -fx-background-color: #f4f6fb;
-    -fx-background-radius: 999;
-    -fx-border-color: rgba(11,37,80,0.13);
-    -fx-border-radius: 999;
-    -fx-border-width: 1.5;
-    -fx-text-fill: rgba(11,37,80,0.75);
-    -fx-font-weight: 900;
-    -fx-font-size: 12px;
-    -fx-padding: 8 20;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.05), 4, 0, 0, 1);
-}
-.chip:hover {
-    -fx-background-color: #eaedff;
-    -fx-border-color: rgba(11,37,80,0.30);
-    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.14), 10, 0, 0, 3);
-    -fx-translate-y: -2;
-}
-.chip:pressed { -fx-translate-y: 0; -fx-scale-x: 0.96; -fx-scale-y: 0.96; }
-
-/* Chip sélectionné : gradient or */
-.chipSelected {
-    -fx-background-color: linear-gradient(to bottom right, #d4af37, #b8860b);
-    -fx-border-color: rgba(212,175,55,0.30);
-    -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.55), 16, 0.30, 0, 4);
-    -fx-translate-y: -2;
-}
-.chipSelected:hover { -fx-translate-y: -3; }
-.chipSelected:pressed { -fx-translate-y: -1; }
-
-/* Chip budget — teinte légèrement différente */
-.chipMuted {
-    -fx-background-color: rgba(34,197,94,0.08);
-    -fx-border-color: rgba(34,197,94,0.30);
-    -fx-text-fill: #166534;
-}
-
-/* Bouton reset */
-.resetChipBtn {
-    -fx-background-color: transparent;
-    -fx-background-radius: 999;
-    -fx-border-color: rgba(11,37,80,0.20);
-    -fx-border-radius: 999;
-    -fx-border-width: 1.5;
-    -fx-text-fill: rgba(11,37,80,0.55);
-    -fx-font-weight: 900;
-    -fx-font-size: 11px;
-    -fx-padding: 5 16;
-    -fx-cursor: hand;
-}
-.resetChipBtn:hover {
-    -fx-background-color: rgba(11,37,80,0.06);
-    -fx-border-color: rgba(11,37,80,0.38);
-    -fx-text-fill: #0b2550;
-    -fx-translate-y: -1;
-}
-
-/* ── CARDS ──────────────────────────────────────────────────────── */
-.cardsPane { -fx-padding: 6 0 12 0; }
-
-.lieuCard {
-    -fx-background-color: white;
-    -fx-background-radius: 22;
-    -fx-border-color: rgba(11,37,80,0.07);
-    -fx-border-radius: 22;
-    -fx-border-width: 1;
-    -fx-padding: 0;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.10), 20, 0.14, 0, 7);
-}
-/* Hover géré dans le Java via DropShadow + Timeline */
-
-.cardBody   { -fx-padding: 13 15 15 15; }
-.cardTitle  { -fx-text-fill: #0b2550; -fx-font-size: 15px; -fx-font-weight: 900; }
-.cardMeta   { -fx-text-fill: rgba(11,37,80,0.60); -fx-font-size: 11.5px; -fx-font-weight: 800; }
-.cardAddr   { -fx-text-fill: rgba(11,37,80,0.48); -fx-font-size: 11px; -fx-font-weight: 700; }
-
-/* Badge budget */
-.cardBudgetBadge {
-    -fx-background-color: rgba(34,197,94,0.10);
-    -fx-background-radius: 999;
-    -fx-border-color: rgba(34,197,94,0.35);
-    -fx-border-radius: 999;
-    -fx-text-fill: #15803d;
     -fx-font-size: 10.5px;
     -fx-font-weight: 900;
-    -fx-padding: 3 11;
+    -fx-padding: 2 10;
 }
 
-/* ── BOUTONS CARDS ──────────────────────────────────────────────── */
-.primaryBtn {
-    -fx-background-color: linear-gradient(to bottom right, #d4af37, #b8860b);
-    -fx-background-radius: 13;
+/* Chips actifs dans la toolbar */
+.lxActiveFiltersBar { -fx-padding: 0 4; }
+
+/* Badge filtre actif inline */
+.lxActiveFilterChip {
+    -fx-background-color: #0b2550;
+    -fx-background-radius: 999;
     -fx-text-fill: white;
+    -fx-font-size: 10.5px;
     -fx-font-weight: 900;
-    -fx-font-size: 12px;
-    -fx-padding: 9 18;
+    -fx-padding: 4 10;
     -fx-cursor: hand;
-    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.42), 10, 0.24, 0, 3);
 }
-.primaryBtn:hover {
-    -fx-background-color: linear-gradient(to bottom right, #e8c547, #d4af37);
-    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.65), 14, 0.32, 0, 4);
+.lxActiveFilterChip:hover {
+    -fx-background-color: #163a75;
     -fx-translate-y: -1;
 }
-.primaryBtn:pressed { -fx-translate-y: 0; -fx-opacity: 0.88; }
 
-.ghostBtn {
-    -fx-background-color: #f4f6fb;
-    -fx-background-radius: 13;
-    -fx-border-color: rgba(11,37,80,0.11);
-    -fx-border-radius: 13;
+/* Searchbox */
+.lxSearchBox {
+    -fx-background-color: #f0f2f7;
+    -fx-background-radius: 20;
+    -fx-border-color: #dde2ee;
+    -fx-border-radius: 20;
+    -fx-border-width: 1.5;
+    -fx-padding: 6 12;
+}
+.lxSearchIcon  { -fx-text-fill: rgba(11,37,80,0.42); -fx-font-size: 11px; }
+.lxSearchField {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #0b2550;
+    -fx-font-weight: 700;
+    -fx-font-size: 12px;
+    -fx-prompt-text-fill: rgba(11,37,80,0.35);
+    -fx-pref-width: 150;
+}
+
+/* Bouton "⊞ Filtres" */
+.lxToggleFiltersBtn {
+    -fx-background-color: rgba(11,37,80,0.06);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(11,37,80,0.14);
+    -fx-border-radius: 8;
+    -fx-border-width: 1.5;
     -fx-text-fill: #0b2550;
     -fx-font-weight: 900;
     -fx-font-size: 11.5px;
-    -fx-padding: 9 14;
+    -fx-padding: 7 14;
     -fx-cursor: hand;
 }
-.ghostBtn:hover {
-    -fx-background-color: #eaedff;
-    -fx-border-color: rgba(11,37,80,0.22);
+.lxToggleFiltersBtn:hover {
+    -fx-background-color: rgba(11,37,80,0.12);
+    -fx-border-color: rgba(11,37,80,0.28);
     -fx-translate-y: -1;
 }
-
-/* ── EMPTY STATE ────────────────────────────────────────────────── */
-.stateLabel {
-    -fx-text-fill: rgba(11,37,80,0.45);
-    -fx-font-size: 13.5px;
-    -fx-font-weight: 800;
-    -fx-padding: 20 0;
+.lxToggleFiltersBtnActive {
+    -fx-background-color: #0b2550;
+    -fx-border-color: #0b2550;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.30), 8, 0.2, 0, 2);
 }
+.lxToggleFiltersBtnActive:hover { -fx-translate-y: -1; }
+
+/* Reset X */
+.lxResetBtn {
+    -fx-background-color: rgba(11,37,80,0.07);
+    -fx-background-radius: 999;
+    -fx-text-fill: rgba(11,37,80,0.50);
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-min-width: 28; -fx-max-width: 28;
+    -fx-min-height: 28; -fx-max-height: 28;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+}
+.lxResetBtn:hover { -fx-background-color: rgba(11,37,80,0.14); -fx-text-fill: #0b2550; }
+
+/* ══════════════════════════════════════════════
+   PANEL FILTRES EXTENSIBLE
+══════════════════════════════════════════════ */
+.lxFiltersPanel {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #e2e6ef transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 18 14 18;
+    /* clip géré en Java pour l'animation slide */
+}
+.lxFilterLabel {
+    -fx-text-fill: rgba(11,37,80,0.50);
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 900;
+}
+.lxFilterResetBtn {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(11,37,80,0.40);
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+    -fx-padding: 2 8;
+    -fx-background-radius: 999;
+    -fx-cursor: hand;
+}
+.lxFilterResetBtn:hover { -fx-background-color: rgba(11,37,80,0.07); -fx-text-fill: #0b2550; }
+
+/* Chip scroll */
+.lxChipsScroll            { -fx-background-color: transparent; -fx-background: transparent; -fx-max-height: 36; }
+.lxChipsScroll .viewport  { -fx-background-color: transparent; }
+.lxChipsScroll .scroll-bar:horizontal { -fx-pref-height: 3; }
+.lxChipsScroll .scroll-bar:horizontal .thumb { -fx-background-color: rgba(11,37,80,0.14); -fx-background-radius: 999; }
+.lxChipsScroll .scroll-bar:horizontal .track,
+.lxChipsScroll .scroll-bar:horizontal .increment-button,
+.lxChipsScroll .scroll-bar:horizontal .decrement-button { -fx-background-color: transparent; -fx-padding: 0; }
+.lxChipsRow { -fx-padding: 1 2; -fx-alignment: CENTER_LEFT; }
+
+/* CHIPS */
+.lxChip {
+    -fx-background-color: #f0f2f7;
+    -fx-background-radius: 999;
+    -fx-border-color: #dde2ee;
+    -fx-border-radius: 999;
+    -fx-border-width: 1.5;
+    -fx-text-fill: rgba(11,37,80,0.68);
+    -fx-font-weight: 800;
+    -fx-font-size: 11.5px;
+    -fx-padding: 5 14;
+    -fx-cursor: hand;
+}
+.lxChip:hover { -fx-background-color: #e4e8f5; -fx-border-color: rgba(11,37,80,0.26); -fx-translate-y: -1; }
+.lxChip:pressed { -fx-translate-y: 0; }
+.lxChipActive {
+    -fx-background-color: #0b2550;
+    -fx-border-color: #0b2550;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.30), 8, 0.20, 0, 2);
+}
+.lxChipActive:hover { -fx-translate-y: -1; }
+
+/* ══════════════════════════════════════════════
+   GRILLE DE CARDS (style image 3)
+══════════════════════════════════════════════ */
+.lxCardsScroll           { -fx-background-color: transparent; -fx-background: transparent; }
+.lxCardsScroll .viewport { -fx-background-color: transparent; }
+.lxCardsScroll .scroll-bar:vertical { -fx-pref-width: 4; }
+.lxCardsScroll .scroll-bar:vertical .thumb { -fx-background-color: rgba(11,37,80,0.16); -fx-background-radius: 999; }
+.lxCardsScroll .scroll-bar:vertical .track,
+.lxCardsScroll .scroll-bar:vertical .increment-button,
+.lxCardsScroll .scroll-bar:vertical .decrement-button { -fx-background-color: transparent; -fx-padding: 0; }
+
+.lxCardsWrapper { -fx-background-color: transparent; }
+.lxCardsGrid    { -fx-background-color: transparent; }
+
+/* CARD individuelle */
+.lxCard {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(11,37,80,0.07);
+    -fx-border-radius: 18;
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.10), 16, 0.12, 0, 5);
+}
+.lxCardSelected {
+    -fx-border-color: #d4af37;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.45), 18, 0.28, 0, 4);
+}
+
+.lxCardTitle {
+    -fx-text-fill: #0b2550;
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-wrap-text: false;
+}
+.lxCardMeta {
+    -fx-text-fill: rgba(11,37,80,0.52);
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+.lxCardAddr {
+    -fx-text-fill: rgba(11,37,80,0.40);
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 700;
+}
+.lxCardCatBadge {
+    -fx-background-color: rgba(11,37,80,0.08);
+    -fx-background-radius: 999;
+    -fx-text-fill: rgba(11,37,80,0.70);
+    -fx-font-size: 9.5px; -fx-font-weight: 900;
+    -fx-padding: 3 9;
+}
+.lxCardBudgetBadge {
+    -fx-background-color: rgba(212,175,55,0.13);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(212,175,55,0.38);
+    -fx-border-radius: 999;
+    -fx-text-fill: #7a5c00;
+    -fx-font-size: 9.5px; -fx-font-weight: 900;
+    -fx-padding: 3 9;
+}
+
+.lxCardPrimaryBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #b8860b);
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 11.5px;
+    -fx-padding: 7 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.35), 8, 0.2, 0, 2);
+}
+.lxCardPrimaryBtn:hover {
+    -fx-background-color: linear-gradient(to right, #e8c547, #d4af37);
+    -fx-translate-y: -1;
+}
+.lxCardGhostBtn {
+    -fx-background-color: #f0f2f7;
+    -fx-background-radius: 10;
+    -fx-border-color: #dde2ee;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #0b2550;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-padding: 7 14;
+    -fx-cursor: hand;
+}
+.lxCardGhostBtn:hover { -fx-background-color: #e4e8f5; -fx-translate-y: -1; }
+
+.lxHeartBtn {
+    -fx-background-radius: 999;
+    -fx-min-width: 32; -fx-max-width: 32;
+    -fx-min-height: 32; -fx-max-height: 32;
+    -fx-padding: 0; -fx-font-size: 15px;
+    -fx-alignment: center; -fx-cursor: hand;
+}
+
+.lxStateLabel {
+    -fx-text-fill: rgba(11,37,80,0.42);
+    -fx-font-size: 13px; -fx-font-weight: 800;
+    -fx-padding: 30 18; -fx-alignment: center;
+}
+
+/* ══════════════════════════════════════════════
+   PANEL DROIT — split view
+══════════════════════════════════════════════ */
+.rightPanel {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent transparent #e2e6ef;
+    -fx-border-width: 0 0 0 1;
+}
+
+/* Header du panel droit */
+.lxRightHeader {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #e2e6ef transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 14;
+    -fx-min-height: 46;
+}
+.lxRightTitle {
+    -fx-text-fill: #0b2550;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 900;
+}
+.lxRightFullBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #b8860b);
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-padding: 6 14;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.30), 6, 0.2, 0, 2);
+}
+.lxRightFullBtn:hover { -fx-background-color: linear-gradient(to right, #e8c547, #d4af37); -fx-translate-y: -1; }
+.lxRightCloseBtn {
+    -fx-background-color: rgba(11,37,80,0.06);
+    -fx-background-radius: 999;
+    -fx-text-fill: rgba(11,37,80,0.50);
+    -fx-font-weight: 900; -fx-font-size: 12px;
+    -fx-min-width: 28; -fx-max-width: 28;
+    -fx-min-height: 28; -fx-max-height: 28;
+    -fx-padding: 0; -fx-cursor: hand;
+}
+.lxRightCloseBtn:hover { -fx-background-color: rgba(220,38,38,0.12); -fx-text-fill: #dc2626; }
+
+.detailContainer { -fx-background-color: white; }

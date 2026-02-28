@@ -55,10 +55,10 @@
                 </VBox>
 
                 <!-- ══ DEUX COLONNES : galerie gauche | infos droite ══ -->
-                <HBox spacing="16" alignment="TOP_LEFT">
+                <HBox fx:id="twoColLayout" spacing="16" alignment="TOP_LEFT">
 
                     <!-- ── COLONNE GAUCHE : galerie ── -->
-                    <VBox spacing="10" HBox.hgrow="ALWAYS" styleClass="galerieCol">
+                    <VBox fx:id="galerieColBox" spacing="10" HBox.hgrow="ALWAYS" styleClass="galerieCol">
 
                         <!-- Galerie avec flèches -->
                         <StackPane fx:id="galeriePane" styleClass="galerieWrap">
@@ -111,7 +111,7 @@
                     </VBox>
 
                     <!-- ── COLONNE DROITE : infos ── -->
-                    <VBox spacing="12" styleClass="infoCol">
+                    <VBox fx:id="infoColBox" spacing="12" styleClass="infoCol">
 
                         <!-- Statut ouverture (bandeau jaune) -->
                         <HBox fx:id="statutBannerBox" styleClass="statutBanner" visible="false" managed="false">
@@ -149,10 +149,43 @@
                             <Button fx:id="instagramBtn" text="" onAction="#openInstagram" styleClass="instagramBtn" visible="false" managed="false"/>
                         </VBox>
 
-                        <!-- Actions -->
-                        <VBox spacing="8" styleClass="infoBlock">
-                            <Button text="🗺  Ouvrir sur Maps"      onAction="#openMaps"    styleClass="primaryBtn fullWidthBtn"/>
-                            <Button text="⤴  Partager ce lieu"      onAction="#openShare"   styleClass="shareBtn  fullWidthBtn"/>
+                        <!-- ── Bloc Actions ── -->
+                        <VBox fx:id="actionsBlock" spacing="12" styleClass="infoBlock actionsBlock">
+
+                            <!-- Ligne 1 : Maps + Partager côte à côte -->
+                            <HBox spacing="8" alignment="CENTER_LEFT">
+                                <Button text="🗺️  Ouvrir sur Maps"
+                                        onAction="#openMaps"
+                                        styleClass="actionBtnMaps"
+                                        HBox.hgrow="ALWAYS"
+                                        maxWidth="Infinity"/>
+                                <Button text="⤴  Partager"
+                                        onAction="#openShare"
+                                        styleClass="actionBtnShare"
+                                        HBox.hgrow="ALWAYS"
+                                        maxWidth="Infinity"/>
+                            </HBox>
+
+                            <!-- Séparateur -->
+                            <Region styleClass="actionsDivider" minHeight="1" maxHeight="1" maxWidth="Infinity"/>
+
+                            <!-- Ligne 2 : Offres (privé) + Ajouter sortie -->
+                            <HBox fx:id="actionsRow2" spacing="8" alignment="CENTER_LEFT">
+                                <Button fx:id="offresBtn"
+                                        text="🏷  Voir les offres"
+                                        onAction="#openOffres"
+                                        styleClass="actionBtnOffres"
+                                        visible="false" managed="false"
+                                        HBox.hgrow="ALWAYS"
+                                        maxWidth="Infinity"/>
+                                <Button fx:id="sortieBtn"
+                                        text="＋  Ajouter une sortie"
+                                        onAction="#openSortieCreate"
+                                        styleClass="actionBtnSortie"
+                                        HBox.hgrow="ALWAYS"
+                                        maxWidth="Infinity"/>
+                            </HBox>
+
                         </VBox>
 
                     </VBox>

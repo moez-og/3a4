@@ -8,81 +8,118 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<ScrollPane xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.front.lieux.LieuxController"
-            fitToWidth="true"
-            hbarPolicy="NEVER"
-            vbarPolicy="AS_NEEDED"
-            stylesheets="@/styles/lieux/lieux-view.css"
-            styleClass="lieuxScroll">
+<HBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.lieux.LieuxController"
+      fx:id="rootHBox"
+      spacing="0"
+      styleClass="lieuxRoot"
+      stylesheets="@/styles/lieux/lieux-view.css">
 
-    <content>
-        <VBox fx:id="rootVBox" spacing="16" styleClass="lieuxRoot">
-            <padding>
-                <Insets top="14" right="14" bottom="18" left="14"/>
-            </padding>
+    <!-- ═══════════════════════════════════════════
+         PANEL GAUCHE — plein écran par défaut
+    ═══════════════════════════════════════════ -->
+    <VBox fx:id="leftPanel" styleClass="leftPanel">
 
-            <!-- HERO / HEADER -->
-            <HBox spacing="14" alignment="CENTER_LEFT" styleClass="lieuxHero">
-                <VBox spacing="4">
-                    <Label text="Explorer les lieux" styleClass="lieuxTitle"/>
-                    <Label text="Filtre par ville / catégorie + recherche rapide" styleClass="lieuxSubtitle"/>
-                </VBox>
-                <Region HBox.hgrow="ALWAYS"/>
-                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="lieuxSearchBox">
-                    <Label text="🔎" styleClass="lieuxSearchIcon"/>
-                    <TextField fx:id="searchField" promptText="Ex: Marsa, café, musée…" styleClass="lieuxSearchField"/>
-                    <Button text="Réinitialiser" onAction="#resetFilters" styleClass="lieuxGhostBtn"/>
-                </HBox>
+        <!-- ── TOOLBAR : titre + recherche + filtres actifs inline ── -->
+        <HBox fx:id="toolbar" styleClass="lxToolbar" alignment="CENTER_LEFT" spacing="10">
+            <!-- Titre + compteur -->
+            <VBox spacing="2" minWidth="140">
+                <Label text="Explorer les lieux" styleClass="lxTitle"/>
+                <Label fx:id="countLabel" text="" styleClass="lxCount"/>
+            </VBox>
+
+            <!-- Chips de filtres actifs (affichés inline dans la toolbar) -->
+            <HBox fx:id="activeFiltersBar" spacing="6" alignment="CENTER_LEFT"
+                  HBox.hgrow="ALWAYS" styleClass="lxActiveFiltersBar"/>
+
+            <!-- Recherche -->
+            <HBox styleClass="lxSearchBox" alignment="CENTER_LEFT" spacing="6">
+                <Label text="🔍" styleClass="lxSearchIcon"/>
+                <TextField fx:id="searchField"
+                           promptText="Rechercher…"
+                           styleClass="lxSearchField"/>
             </HBox>
 
-            <!-- VILLES -->
-            <VBox spacing="8" styleClass="lieuxSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Villes" styleClass="lieuxSectionTitle"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Tous" onAction="#selectAllVilles" styleClass="resetChipBtn"/>
-                </HBox>
-                <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" styleClass="chipsScroll">
-                    <content><HBox fx:id="villesChips" spacing="10" styleClass="chipsRow"/></content>
-                </ScrollPane>
-            </VBox>
+            <!-- Bouton toggle filtres -->
+            <Button fx:id="toggleFiltersBtn"
+                    text="⊞  Filtres"
+                    onAction="#toggleFilters"
+                    styleClass="lxToggleFiltersBtn"/>
 
-            <!-- CATEGORIES -->
-            <VBox spacing="8" styleClass="lieuxSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Catégories" styleClass="lieuxSectionTitle"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Toutes" onAction="#selectAllCategories" styleClass="resetChipBtn"/>
-                </HBox>
-                <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" styleClass="chipsScroll">
-                    <content><HBox fx:id="categoriesChips" spacing="10" styleClass="chipsRow"/></content>
-                </ScrollPane>
-            </VBox>
+            <!-- Reset -->
+            <Button fx:id="resetBtn" text="✕" onAction="#resetFilters" styleClass="lxResetBtn"/>
+        </HBox>
 
-            <!-- BUDGET -->
-            <VBox spacing="8" styleClass="lieuxSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="💰  Budget" styleClass="lieuxSectionTitle"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Tous" onAction="#selectAllBudgets" styleClass="resetChipBtn"/>
-                </HBox>
-                <HBox fx:id="budgetChips" spacing="10" styleClass="chipsRow"/>
-            </VBox>
+        <!-- ── PANEL FILTRES EXTENSIBLE (caché par défaut) ── -->
+        <VBox fx:id="filtersPanel" styleClass="lxFiltersPanel" spacing="10"
+              managed="false" visible="false">
 
-            <!-- RÉSULTATS -->
-            <VBox spacing="10" styleClass="lieuxSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Résultats" styleClass="lieuxSectionTitle"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="countLabel" text="" styleClass="countLabel"/>
-                </HBox>
-                <FlowPane fx:id="cardsPane" hgap="14" vgap="14" prefWrapLength="1100" styleClass="cardsPane"/>
-                <Label fx:id="stateLabel" text="" visible="false" managed="false" styleClass="stateLabel"/>
-            </VBox>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Villes" styleClass="lxFilterLabel"/>
+                <Button text="Tous" onAction="#selectAllVilles" styleClass="lxFilterResetBtn"/>
+            </HBox>
+            <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" styleClass="lxChipsScroll">
+                <content><HBox fx:id="villesChips" spacing="8" styleClass="lxChipsRow"/></content>
+            </ScrollPane>
+
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Catégories" styleClass="lxFilterLabel"/>
+                <Button text="Toutes" onAction="#selectAllCategories" styleClass="lxFilterResetBtn"/>
+            </HBox>
+            <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER" styleClass="lxChipsScroll">
+                <content><HBox fx:id="categoriesChips" spacing="8" styleClass="lxChipsRow"/></content>
+            </ScrollPane>
+
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label text="Budget" styleClass="lxFilterLabel"/>
+                <Button text="Tous" onAction="#selectAllBudgets" styleClass="lxFilterResetBtn"/>
+            </HBox>
+            <HBox fx:id="budgetChips" spacing="8" styleClass="lxChipsRow"/>
+
         </VBox>
-    </content>
-</ScrollPane>
+
+        <!-- ── GRILLE DES CARDS ── -->
+        <ScrollPane fx:id="cardsScroll"
+                    fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    styleClass="lxCardsScroll"
+                    VBox.vgrow="ALWAYS">
+            <content>
+                <VBox spacing="0" styleClass="lxCardsWrapper">
+                    <FlowPane fx:id="cardsPane"
+                              hgap="16" vgap="16"
+                              styleClass="lxCardsGrid">
+                        <padding><Insets top="18" right="18" bottom="18" left="18"/></padding>
+                    </FlowPane>
+                    <Label fx:id="stateLabel" text="" visible="false" managed="false" styleClass="lxStateLabel"/>
+                </VBox>
+            </content>
+        </ScrollPane>
+
+    </VBox>
+
+    <!-- ═══════════════════════════════════════════
+         PANEL DROIT — caché par défaut, split view
+    ═══════════════════════════════════════════ -->
+    <VBox fx:id="rightPanel" styleClass="rightPanel" managed="false" visible="false">
+
+        <!-- Header du panel droit avec bouton "plein écran" -->
+        <HBox styleClass="lxRightHeader" alignment="CENTER_LEFT" spacing="8">
+            <Label fx:id="rightPanelTitle" text="" styleClass="lxRightTitle"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="⛶  Plein écran" onAction="#openCurrentFullscreen"
+                    styleClass="lxRightFullBtn"/>
+            <Button text="✕" onAction="#closePanel" styleClass="lxRightCloseBtn"/>
+        </HBox>
+
+        <!-- Contenu détail injecté en Java -->
+        <StackPane fx:id="detailContainer" VBox.vgrow="ALWAYS" styleClass="detailContainer"/>
+
+    </VBox>
+
+</HBox>

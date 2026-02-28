@@ -32,6 +32,7 @@ import services.lieux.FavoriLieuService;
 import services.lieux.LieuService;
 import services.lieux.ModerationService;
 import utils.ui.ShellNavigator;
+import utils.ui.FrontOfferContext;
 
 import java.awt.Desktop;
 import java.awt.Toolkit;
@@ -105,6 +106,17 @@ public class LieuDetailsController {
     // ====== FAVORI ======
     @FXML private Button favoriBtn;
 
+    // ====== LAYOUT (split-view inline adaptation) ======
+    @FXML private HBox twoColLayout;
+    @FXML private VBox galerieColBox;
+    @FXML private VBox infoColBox;
+
+    // ====== ACTIONS BLOC (boutons infoCol) ======
+    @FXML private VBox   actionsBlock;
+    @FXML private HBox   actionsRow2;
+    @FXML private Button offresBtn;
+    @FXML private Button sortieBtn;
+
     // ====== GALERIE STATE ======
     private List<javafx.scene.image.Image> galleryImages = new ArrayList<>();
     private int currentImageIndex = 0;
@@ -118,6 +130,9 @@ public class LieuDetailsController {
     private ShellNavigator navigator;
     private User currentUser;
 
+    /** Callback optionnel — appelé quand le bouton "← Retour" est cliqué en mode inline (split view) */
+    private Runnable onBackCallback = null;
+
     private int lieuId = -1;
     private Lieu current;
 
@@ -125,6 +140,76 @@ public class LieuDetailsController {
 
     public void setNavigator(ShellNavigator navigator) {
         this.navigator = navigator;
+    }
+
+    /** Injecte un callback pour le mode split-view (panel droit inline) */
+    public void setOnBackCallback(Runnable callback) {
+        this.onBackCallback = callback;
+        // Activer immédiatement le mode inline dès que le callback est injecté
+        javafx.application.Platform.runLater(this::applyInlineLayout);
+    }
+
+    /**
+     * Adapte le layout pour le mode panel droit (split-view) :
+     * - Passe de 2 colonnes côte-à-côte à une seule colonne (galerie en haut, infos en dessous)
+     * - Réduit la taille de l'image et du titre
+     * - Supprime les contraintes de largeur fixes
+     */
+    private void applyInlineLayout() {
+        if (twoColLayout == null || galerieColBox == null || infoColBox == null) return;
+
+        // ── 1. Supprimer toutes les contraintes fixes des colonnes ──────────
+        galerieColBox.setMinWidth(0);    galerieColBox.setPrefWidth(-1);  galerieColBox.setMaxWidth(Double.MAX_VALUE);
+        infoColBox.setMinWidth(0);       infoColBox.setPrefWidth(-1);     infoColBox.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(galerieColBox, Priority.ALWAYS);
+        HBox.setHgrow(infoColBox, Priority.ALWAYS);
+
+        // ── 2. Contraindre l'ImageView + galeriePane pour ne PAS dépasser ──
+        if (galeriePane != null) {
+            galeriePane.setMinWidth(0);
+            galeriePane.setPrefWidth(-1);
+            galeriePane.setMaxWidth(Double.MAX_VALUE);
+        }
+        if (image != null) {
+            // fitWidth/Height seront recalculés dynamiquement via un listener
+            image.setFitHeight(210);
+            image.setFitWidth(0);       // 0 = auto (calculé par le listener)
+            image.setPreserveRatio(false);
+        }
+
+        // ── 3. Titre compact ───────────────────────────────────────────────
+        if (name != null) {
+            name.setStyle("-fx-font-size: 17px; -fx-font-weight: 900; -fx-wrap-text: true;");
+        }
+
+        // ── 4. Réorganiser HBox → VBox (1 colonne) ───────────────────────
+        javafx.scene.layout.VBox wrapper = new javafx.scene.layout.VBox(10);
+        wrapper.setMaxWidth(Double.MAX_VALUE);
+
+        javafx.scene.Parent parent = twoColLayout.getParent();
+        if (parent instanceof javafx.scene.layout.VBox parentVBox) {
+            int idx = parentVBox.getChildren().indexOf(twoColLayout);
+            if (idx >= 0) {
+                twoColLayout.getChildren().clear();
+                wrapper.getChildren().addAll(galerieColBox, infoColBox);
+                parentVBox.getChildren().set(idx, wrapper);
+
+                // ── 5. Binder la largeur de l'image au parent dès qu'il a une largeur réelle ──
+                // On attend que le wrapper ait une largeur mesurée, puis on fixe fitWidth
+                wrapper.widthProperty().addListener((obs, oldW, newW) -> {
+                    double w = newW.doubleValue();
+                    if (w > 0 && image != null) {
+                        image.setFitWidth(w);
+                        // Clip arrondi de l'image
+                        if (galeriePane != null) {
+                            javafx.scene.shape.Rectangle imgClip = new javafx.scene.shape.Rectangle(w, 210);
+                            imgClip.setArcWidth(22); imgClip.setArcHeight(22);
+                            image.setClip(imgClip);
+                        }
+                    }
+                });
+            }
+        }
     }
 
     public void setCurrentUser(User u) {
@@ -147,6 +232,12 @@ public class LieuDetailsController {
 
     @FXML
     public void goBack() {
+        // Mode split-view : fermer le panel droit via callback
+        if (onBackCallback != null) {
+            onBackCallback.run();
+            return;
+        }
+        // Mode fullscreen : retour navigation normale
         if (navigator != null) navigator.navigate(FrontDashboardController.ROUTE_LIEUX);
     }
 
@@ -530,6 +621,28 @@ public class LieuDetailsController {
         } catch (Exception ignored) {}
     }
 
+    /* ── Voir les offres liées à ce lieu (visible si lieu PRIVE) ── */
+    @FXML
+    public void openOffres() {
+        if (current == null || navigator == null) return;
+        // Utilise FrontOfferContext pour pré-filtrer par lieu dans OffresController
+        FrontOfferContext.setSelectedLieuId(current.getId());
+        navigator.navigate(FrontDashboardController.ROUTE_OFFRES);
+    }
+
+    /* ── Ajouter une sortie associée à ce lieu ── */
+    @FXML
+    public void openSortieCreate() {
+        if (navigator == null) return;
+        // Pré-remplir le lieuTexte via FrontOfferContext (champ générique)
+        if (current != null) {
+            String lieuLabel = safe(current.getNom())
+                + (safe(current.getVille()).isEmpty() ? "" : " · " + safe(current.getVille()));
+            FrontOfferContext.setSelectedLieuId(current.getId());
+        }
+        navigator.navigate(FrontDashboardController.ROUTE_SORTIES);
+    }
+
     /* ======================= LIEU ======================= */
 
     private void loadLieu() {
@@ -626,6 +739,33 @@ public class LieuDetailsController {
         // ── Bouton favori ─────────────────────────────────────
         if (favoriBtn != null && currentUser != null) {
             updateFavoriBtn(favoriService.isFavori(currentUser.getId(), current.getId()));
+        }
+
+        // ── Bouton "Voir les offres" : visible uniquement si lieu PRIVE ───
+        boolean isPrive = "PRIVE".equalsIgnoreCase(safe(current.getType()).trim());
+        if (offresBtn != null) {
+            offresBtn.setVisible(isPrive);
+            offresBtn.setManaged(isPrive);
+        }
+        // actionsRow2 : visible dès qu'au moins un des deux boutons l'est
+        if (actionsRow2 != null) {
+            actionsRow2.setVisible(true);
+            actionsRow2.setManaged(true);
+        }
+
+        // Anime le bloc actions en entrée
+        if (actionsBlock != null) {
+            actionsBlock.setOpacity(0);
+            actionsBlock.setTranslateY(12);
+            PauseTransition p = new PauseTransition(Duration.millis(350));
+            p.setOnFinished(ev -> {
+                FadeTransition ft = new FadeTransition(Duration.millis(300), actionsBlock);
+                ft.setToValue(1); ft.setInterpolator(Interpolator.EASE_OUT);
+                TranslateTransition tt = new TranslateTransition(Duration.millis(300), actionsBlock);
+                tt.setToY(0); tt.setInterpolator(Interpolator.EASE_OUT);
+                new ParallelTransition(ft, tt).play();
+            });
+            p.play();
         }
 
         // ── Animations d'entrée des cards ─────────────────────
