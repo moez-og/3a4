@@ -28,8 +28,11 @@ import utils.ui.ViewPaths;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import utils.ui.GestureNavigationManager;
 
 public class FrontDashboardController implements ShellNavigator {
 
@@ -84,6 +87,10 @@ public class FrontDashboardController implements ShellNavigator {
     private User currentUser;
     private boolean dark = false;
 
+    /** Navigation history — top = current route (used by GestureNavigationManager) */
+    private final Deque<String> navHistory = new ArrayDeque<>();
+    private GestureNavigationManager gestureNav = null;
+
     public void setPrimaryStage(Stage stage) {
         this.primaryStage = stage;
     }
@@ -98,6 +105,34 @@ public class FrontDashboardController implements ShellNavigator {
         bindNavGroup();
         refreshAccountUI();
         showAccueil();
+        // Install gesture navigation as soon as the scene is attached
+        if (root != null) {
+            root.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                if (newScene != null && gestureNav == null) {
+                    gestureNav = GestureNavigationManager.install(newScene, navHistory, this);
+                }
+            });
+            // Also try immediately if scene already available
+            installGestureNavigation();
+        }
+    }
+
+    @Override
+    public Deque<String> getNavigationHistory() {
+        return navHistory;
+    }
+
+    /**
+     * Install gesture navigation once the Scene is available.
+     * Call this from the application startup after the Scene is set on the Stage.
+     */
+    public void installGestureNavigation() {
+        if (root == null) return;
+        javafx.application.Platform.runLater(() -> {
+            if (root.getScene() != null && gestureNav == null) {
+                gestureNav = GestureNavigationManager.install(root.getScene(), navHistory, this);
+            }
+        });
     }
 
     private void bindNavGroup() {
@@ -113,7 +148,21 @@ public class FrontDashboardController implements ShellNavigator {
     }
 
     @FXML
+    /**
+     * Pushes a route to the navigation history stack.
+     * Called by every showXxx() method so gesture-back always has a valid history.
+     */
+    private void pushHistory(String route) {
+        if (navHistory.isEmpty() || !route.equals(navHistory.peek())) {
+            navHistory.push(route);
+            while (navHistory.size() > 50) {
+                ((ArrayDeque<String>) navHistory).removeLast();
+            }
+        }
+    }
+
     public void showAccueil() {
+        pushHistory(ROUTE_HOME);
         navAccueil.setSelected(true);
         setHeader("Accueil", "Vue d’ensemble des gestions");
         ensureLoadedAndShow(ROUTE_HOME, ViewPaths.FRONT_HOME);
@@ -121,6 +170,7 @@ public class FrontDashboardController implements ShellNavigator {
 
     @FXML
     public void showSorties() {
+        pushHistory(ROUTE_SORTIES);
         navSorties.setSelected(true);
         setHeader("Sorties", "Annonces · participations · suivi");
         ensureLoadedAndShow(ROUTE_SORTIES, ViewPaths.FRONT_SORTIES);
@@ -128,11 +178,13 @@ public class FrontDashboardController implements ShellNavigator {
 
     @FXML
     public void showLieux() {
+        pushHistory(ROUTE_LIEUX);
         openLieuxPageAndGetController();
     }
 
     @FXML
     public void showOffres() {
+        pushHistory(ROUTE_OFFRES);
         navOffres.setSelected(true);
         setHeader("Offres", "Promos · partenariats · coupons");
         ensureLoadedAndShow(ROUTE_OFFRES, ViewPaths.FRONT_OFFRES);
@@ -140,6 +192,7 @@ public class FrontDashboardController implements ShellNavigator {
 
     @FXML
     public void showEvents() {
+        pushHistory(ROUTE_EVENTS);
         navEvents.setSelected(true);
         setHeader("Événements", "Agenda · inscriptions · infos");
         ensureLoadedAndShow(ROUTE_EVENTS, ViewPaths.FRONT_EVENEMENTS);
@@ -147,6 +200,7 @@ public class FrontDashboardController implements ShellNavigator {
 
     @FXML
     public void showHelp() {
+        pushHistory(ROUTE_HELP);
         navHelp.setSelected(true);
         setHeader("Aide", "FAQ · guide · support");
         ensureLoadedAndShow(ROUTE_HELP, ViewPaths.FRONT_HELP);
@@ -154,6 +208,7 @@ public class FrontDashboardController implements ShellNavigator {
 
     @FXML
     public void showChatbot() {
+        pushHistory(ROUTE_CHATBOT);
         navChatbot.setSelected(true);
         setHeader("Assistant IA", "Posez vos questions sur les lieux");
         ensureLoadedAndShow(ROUTE_CHATBOT, ViewPaths.FRONT_CHATBOT);
@@ -161,6 +216,7 @@ public class FrontDashboardController implements ShellNavigator {
 
     @FXML
     public void showGamification() {
+        pushHistory(ROUTE_GAMIFICATION);
         if (navGamif != null) navGamif.setSelected(true);
         setHeader("🏆 Classement & Badges", "Points fidélité · Badges explorateur · Classement local");
         ensureLoadedAndShow(ROUTE_GAMIFICATION, ViewPaths.FRONT_GAMIFICATION);
@@ -169,6 +225,14 @@ public class FrontDashboardController implements ShellNavigator {
     @Override
     public void navigate(String route) {
         if (route == null) return;
+        // ── Push to history (avoid duplicating same route consecutively) ──
+        if (navHistory.isEmpty() || !route.equals(navHistory.peek())) {
+            navHistory.push(route);
+            // Cap history at 50 entries
+            while (navHistory.size() > 50) {
+                ((ArrayDeque<String>) navHistory).removeLast();
+            }
+        }
 
         if (route.startsWith(ROUTE_LIEU_DETAILS_PREFIX)) {
             String raw = route.substring(ROUTE_LIEU_DETAILS_PREFIX.length()).trim();
@@ -232,6 +296,7 @@ public class FrontDashboardController implements ShellNavigator {
     }
 
     private void showLieuDetails(int id) {
+        pushHistory(ROUTE_LIEU_DETAILS_PREFIX + id);
         navLieux.setSelected(true);
         setHeader("Lieux", "Détails du lieu");
 
@@ -261,6 +326,7 @@ public class FrontDashboardController implements ShellNavigator {
     }
 
     private void showEvenementDetails(int id) {
+        pushHistory(ROUTE_EVENEMENT_DETAILS_PREFIX + id);
         navEvents.setSelected(true);
         setHeader("Événements", "Détails de l'événement");
 

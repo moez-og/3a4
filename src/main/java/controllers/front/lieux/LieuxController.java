@@ -20,6 +20,7 @@ import models.users.User;
 import services.lieux.EvaluationLieuService;
 import services.lieux.FavoriLieuService;
 import services.lieux.LieuService;
+import utils.ui.LieuSearchAutoComplete;
 import utils.ui.ShellNavigator;
 import utils.ui.ViewPaths;
 
@@ -76,6 +77,9 @@ public class LieuxController {
     private final Map<String, Button>  villeMap = new HashMap<>();
     private final Map<String, Button>  catMap   = new HashMap<>();
     private final Map<Integer, VBox>   cardMap  = new HashMap<>();
+
+    /** Live autocomplete attached to the search bar */
+    private LieuSearchAutoComplete autoComplete = null;
 
     /* Ratios split */
     private static final double LEFT_RATIO  = 0.42;
@@ -230,14 +234,31 @@ public class LieuxController {
             buildCatChips(lieuService.getDistinctCategories());
             buildBudgetChips();
             applyFilters();
+            // Refresh autocomplete source with latest data
+            if (autoComplete != null) autoComplete.refreshSource(new ArrayList<>(all));
         } catch (Exception e) {
             showState("Erreur : " + safe(e.getMessage()));
         }
     }
 
     private void wireSearch() {
-        if (searchField != null)
-            searchField.textProperty().addListener((obs, o, n) -> applyFilters());
+        if (searchField == null) return;
+
+        // ── Live filter (existing) ──
+        searchField.textProperty().addListener((obs, o, n) -> applyFilters());
+
+        // ── Autocomplete dropdown ──
+        // We pass a mutable copy so refreshSource works; the list is updated in loadData()
+        List<Lieu> acSource = new ArrayList<>(all);
+        autoComplete = LieuSearchAutoComplete.attach(searchField, acSource, lieu -> {
+            // When user picks a suggestion: filter to that lieu name and navigate to its details
+            searchField.setText(safe(lieu.getNom()));
+            applyFilters();
+            // Navigate to the lieu details directly
+            if (navigator != null) {
+                navigator.navigate(controllers.front.shell.FrontDashboardController.ROUTE_LIEU_DETAILS_PREFIX + lieu.getId());
+            }
+        });
     }
 
     /* ══════════════════════════════════════════════
