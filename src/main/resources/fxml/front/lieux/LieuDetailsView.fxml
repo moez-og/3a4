@@ -152,24 +152,7 @@
                         <!-- ── Bloc Actions ── -->
                         <VBox fx:id="actionsBlock" spacing="12" styleClass="infoBlock actionsBlock">
 
-                            <!-- Ligne 1 : Maps + Partager côte à côte -->
-                            <HBox spacing="8" alignment="CENTER_LEFT">
-                                <Button text="🗺️  Ouvrir sur Maps"
-                                        onAction="#openMaps"
-                                        styleClass="actionBtnMaps"
-                                        HBox.hgrow="ALWAYS"
-                                        maxWidth="Infinity"/>
-                                <Button text="⤴  Partager"
-                                        onAction="#openShare"
-                                        styleClass="actionBtnShare"
-                                        HBox.hgrow="ALWAYS"
-                                        maxWidth="Infinity"/>
-                            </HBox>
-
-                            <!-- Séparateur -->
-                            <Region styleClass="actionsDivider" minHeight="1" maxHeight="1" maxWidth="Infinity"/>
-
-                            <!-- Ligne 2 : Offres (privé) + Ajouter sortie -->
+                            <!-- Ligne : Offres (privé) + Ajouter sortie -->
                             <HBox fx:id="actionsRow2" spacing="8" alignment="CENTER_LEFT">
                                 <Button fx:id="offresBtn"
                                         text="🏷  Voir les offres"
@@ -187,6 +170,9 @@
                             </HBox>
 
                         </VBox>
+
+                        <!-- ── Formulaire Sortie Inline (caché par défaut) ── -->
+                        <VBox fx:id="inlineSortieContainer" spacing="0" visible="false" managed="false"/>
 
                     </VBox>
                 </HBox>

@@ -33,6 +33,20 @@ import services.lieux.LieuService;
 import services.lieux.ModerationService;
 import utils.ui.ShellNavigator;
 import utils.ui.FrontOfferContext;
+import services.offres.OffreService;
+import models.offres.Offre;
+import utils.geo.TunisiaGeo;
+import utils.ui.AutoCompleteComboBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.FileChooser;
+import javafx.scene.input.KeyCode;
+import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import java.awt.Desktop;
 import java.awt.Toolkit;
@@ -116,6 +130,11 @@ public class LieuDetailsController {
     @FXML private HBox   actionsRow2;
     @FXML private Button offresBtn;
     @FXML private Button sortieBtn;
+    @FXML private VBox inlineSortieContainer;
+
+    // ====== INLINE SORTIE STATE ======
+    private boolean sortieFormOpen = false;
+    private final OffreService offreService = new OffreService();
 
     // ====== GALERIE STATE ======
     private List<javafx.scene.image.Image> galleryImages = new ArrayList<>();
@@ -621,26 +640,554 @@ public class LieuDetailsController {
         } catch (Exception ignored) {}
     }
 
-    /* ── Voir les offres liées à ce lieu (visible si lieu PRIVE) ── */
+    /* ── Voir les offres liées à ce lieu — popup modal ── */
     @FXML
     public void openOffres() {
-        if (current == null || navigator == null) return;
-        // Utilise FrontOfferContext pour pré-filtrer par lieu dans OffresController
-        FrontOfferContext.setSelectedLieuId(current.getId());
-        navigator.navigate(FrontDashboardController.ROUTE_OFFRES);
+        if (current == null) return;
+
+        List<Offre> offres = new ArrayList<>();
+        try {
+            offres = offreService.obtenirOffresParLieu(current.getId());
+        } catch (Exception ignored) {}
+
+        showOffresPopup(offres);
     }
 
-    /* ── Ajouter une sortie associée à ce lieu ── */
+    private void showOffresPopup(List<Offre> offres) {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        try {
+            if (offresBtn != null && offresBtn.getScene() != null)
+                dialog.initOwner(offresBtn.getScene().getWindow());
+        } catch (Exception ignored) {}
+        dialog.setTitle("Offres — " + safe(current.getNom()));
+        dialog.setResizable(true);
+
+        // ── Header ──
+        Label titleLbl = new Label("🏷  Offres associées à ce lieu");
+        titleLbl.setStyle("-fx-font-size:17px;-fx-font-weight:900;-fx-text-fill:#0f172a;");
+
+        Region spacerTop = new Region();
+        HBox.setHgrow(spacerTop, Priority.ALWAYS);
+
+        Button closeBtn = new Button("✕");
+        closeBtn.setStyle(
+            "-fx-background-color:rgba(15,23,42,0.08);-fx-background-radius:999;" +
+            "-fx-text-fill:#374151;-fx-font-weight:900;-fx-cursor:hand;" +
+            "-fx-min-width:32;-fx-min-height:32;-fx-font-size:13px;");
+        closeBtn.setOnAction(e -> dialog.close());
+
+        HBox header = new HBox(10, titleLbl, spacerTop, closeBtn);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(0, 0, 14, 0));
+
+        // ── Subtitle ──
+        Label subtitle = new Label(
+            safe(current.getNom()) + (safe(current.getVille()).isEmpty() ? "" : "  ·  " + safe(current.getVille()))
+        );
+        subtitle.setStyle("-fx-font-size:12px;-fx-text-fill:rgba(15,23,42,0.45);-fx-font-weight:700;");
+
+        // ── Divider ──
+        Region divider = new Region();
+        divider.setStyle("-fx-background-color:rgba(15,23,42,0.10);-fx-min-height:1;-fx-max-height:1;");
+        divider.setMaxWidth(Double.MAX_VALUE);
+
+        // ── Offres list ──
+        VBox offresList = new VBox(10);
+        offresList.setPadding(new Insets(10, 0, 0, 0));
+
+        if (offres == null || offres.isEmpty()) {
+            VBox emptyBox = new VBox(12);
+            emptyBox.setAlignment(Pos.CENTER);
+            emptyBox.setPadding(new Insets(30, 20, 30, 20));
+
+            Label emptyIcon = new Label("🏷");
+            emptyIcon.setStyle("-fx-font-size:40px;");
+
+            Label emptyLbl = new Label("Aucune offre disponible");
+            emptyLbl.setStyle(
+                "-fx-font-size:16px;-fx-font-weight:900;-fx-text-fill:#374151;");
+
+            Label emptyHint = new Label("Ce lieu n'a pas encore d'offres associées.");
+            emptyHint.setStyle("-fx-font-size:12px;-fx-text-fill:rgba(15,23,42,0.45);");
+
+            emptyBox.getChildren().addAll(emptyIcon, emptyLbl, emptyHint);
+            offresList.getChildren().add(emptyBox);
+        } else {
+            for (Offre o : offres) {
+                offresList.getChildren().add(buildOffreCard(o));
+            }
+        }
+
+        ScrollPane sp = new ScrollPane(offresList);
+        sp.setFitToWidth(true);
+        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        sp.setStyle("-fx-background-color:transparent;-fx-background:transparent;-fx-border-color:transparent;");
+        sp.setPrefHeight(offres == null || offres.isEmpty() ? 180 : Math.min(440, offres.size() * 100 + 40));
+
+        VBox content = new VBox(0, header, subtitle, new Region() {{ setStyle("-fx-min-height:8;"); }}, divider, sp);
+        content.setPadding(new Insets(22, 22, 16, 22));
+        content.setStyle("-fx-background-color:white;-fx-background-radius:18;");
+        content.setPrefWidth(520);
+
+        Scene scene = new Scene(content);
+        scene.setFill(Color.TRANSPARENT);
+        scene.addEventFilter(javafx.scene.input.KeyEvent.KEY_PRESSED, ev -> {
+            if (ev.getCode() == KeyCode.ESCAPE) dialog.close();
+        });
+
+        dialog.setScene(scene);
+        dialog.centerOnScreen();
+        dialog.showAndWait();
+    }
+
+    private VBox buildOffreCard(Offre o) {
+        VBox card = new VBox(8);
+        card.setStyle(
+            "-fx-background-color:#f8fafc;-fx-background-radius:14;" +
+            "-fx-border-color:rgba(15,23,42,0.08);-fx-border-radius:14;-fx-padding:14 16;");
+
+        HBox titleRow = new HBox(8);
+        titleRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label nomLbl = new Label(safe(o.getTitre()).isEmpty() ? "Offre #" + o.getId() : o.getTitre());
+        nomLbl.setStyle("-fx-font-size:14px;-fx-font-weight:900;-fx-text-fill:#0f172a;");
+        HBox.setHgrow(nomLbl, Priority.ALWAYS);
+
+        // Statut badge
+        String statut = safe(o.getStatut()).toUpperCase();
+        String badgeColor = statut.equals("ACTIVE") || statut.equals("ACTIF") ? "#16a34a" :
+                            statut.equals("EXPIREE") || statut.equals("EXPIRE") ? "#dc2626" : "#d4af37";
+        Label statutLbl = new Label(statut.isEmpty() ? "—" : statut);
+        statutLbl.setStyle(
+            "-fx-font-size:10px;-fx-font-weight:800;-fx-text-fill:white;" +
+            "-fx-background-color:" + badgeColor + ";-fx-background-radius:999;-fx-padding:3 10;");
+
+        titleRow.getChildren().addAll(nomLbl, statutLbl);
+
+        // Type + pourcentage
+        String typeTxt = safe(o.getType());
+        String pctTxt = o.getPourcentage() > 0 ? String.format("-%.0f%%", o.getPourcentage()) : "";
+        Label typeLbl = new Label(
+            (typeTxt.isEmpty() ? "" : "📌 " + typeTxt) +
+            (pctTxt.isEmpty() ? "" : "   🏷 " + pctTxt + " de réduction")
+        );
+        typeLbl.setStyle("-fx-font-size:12px;-fx-text-fill:rgba(15,23,42,0.65);-fx-font-weight:700;");
+
+        // Description
+        String desc = safe(o.getDescription()).trim();
+        Label descLbl = new Label(desc.isEmpty() ? "Aucune description" : desc);
+        descLbl.setStyle("-fx-font-size:12px;-fx-text-fill:rgba(15,23,42,0.55);");
+        descLbl.setWrapText(true);
+
+        // Dates
+        String dates = "";
+        if (o.getDate_debut() != null && o.getDate_fin() != null) {
+            dates = "📅  Du " + o.getDate_debut() + "  au  " + o.getDate_fin();
+        } else if (o.getDate_debut() != null) {
+            dates = "📅  À partir du " + o.getDate_debut();
+        } else if (o.getDate_fin() != null) {
+            dates = "📅  Jusqu'au " + o.getDate_fin();
+        }
+
+        card.getChildren().addAll(titleRow, typeLbl);
+        if (!desc.isEmpty()) card.getChildren().add(descLbl);
+        if (!dates.isEmpty()) {
+            Label dateLbl = new Label(dates);
+            dateLbl.setStyle("-fx-font-size:11px;-fx-text-fill:rgba(15,23,42,0.45);-fx-font-weight:700;");
+            card.getChildren().add(dateLbl);
+        }
+
+        return card;
+    }
+
+    /* ── Ajouter une sortie associée à ce lieu — formulaire inline ── */
     @FXML
     public void openSortieCreate() {
-        if (navigator == null) return;
-        // Pré-remplir le lieuTexte via FrontOfferContext (champ générique)
-        if (current != null) {
-            String lieuLabel = safe(current.getNom())
-                + (safe(current.getVille()).isEmpty() ? "" : " · " + safe(current.getVille()));
-            FrontOfferContext.setSelectedLieuId(current.getId());
+        if (inlineSortieContainer == null) return;
+
+        // Toggle : si déjà ouvert, fermer
+        if (sortieFormOpen) {
+            closeSortieInlineForm();
+            return;
         }
-        navigator.navigate(FrontDashboardController.ROUTE_SORTIES);
+
+        // Changer le libellé du bouton
+        if (sortieBtn != null) {
+            sortieBtn.setText("✕  Fermer le formulaire");
+        }
+
+        buildAndShowInlineSortieForm();
+        sortieFormOpen = true;
+
+        inlineSortieContainer.setVisible(true);
+        inlineSortieContainer.setManaged(true);
+
+        // Scroll jusqu'au formulaire
+        javafx.application.Platform.runLater(() -> {
+            javafx.scene.Node parent = inlineSortieContainer.getParent();
+            while (parent != null && !(parent instanceof ScrollPane)) {
+                parent = parent.getParent();
+            }
+            if (parent instanceof ScrollPane sp) {
+                sp.setVvalue(1.0);
+            }
+        });
+    }
+
+    private void closeSortieInlineForm() {
+        if (inlineSortieContainer != null) {
+            inlineSortieContainer.getChildren().clear();
+            inlineSortieContainer.setVisible(false);
+            inlineSortieContainer.setManaged(false);
+        }
+        if (sortieBtn != null) sortieBtn.setText("＋  Ajouter une sortie");
+        sortieFormOpen = false;
+    }
+
+    private static final int SORTIE_TITLE_MAX = 60;
+    private static final List<String> SORTIE_ACTIVITY_PRESETS =
+        List.of("Marche","Footing","Pique-nique","Sortie café","Restaurant","Randonnée","Autre");
+
+    private void buildAndShowInlineSortieForm() {
+        if (inlineSortieContainer == null || current == null) return;
+        inlineSortieContainer.getChildren().clear();
+
+        services.sorties.AnnonceSortieService sortieService = new services.sorties.AnnonceSortieService();
+
+        // ── Title ──
+        Label formTitle = new Label("＋  Nouvelle sortie");
+        formTitle.setStyle(
+            "-fx-font-size:15px;-fx-font-weight:900;-fx-text-fill:#0f172a;" +
+            "-fx-padding:0 0 4 0;");
+
+        Label formSub = new Label("Formulaire pré-rempli avec les informations du lieu");
+        formSub.setStyle("-fx-font-size:11px;-fx-text-fill:rgba(15,23,42,0.45);-fx-font-weight:700;");
+
+        // ── Fields ──
+        // Titre
+        TextField tfTitre = new TextField();
+        tfTitre.setPromptText("Titre de la sortie");
+        tfTitre.setStyle(fieldStyle());
+
+        Label titleCount = new Label("0/" + SORTIE_TITLE_MAX);
+        titleCount.setStyle("-fx-font-size:10px;-fx-text-fill:rgba(15,23,42,0.45);-fx-font-weight:700;");
+        tfTitre.textProperty().addListener((obs,o,n) -> {
+            if (n != null && n.length() > SORTIE_TITLE_MAX) tfTitre.setText(o);
+            titleCount.setText(Math.min(safe(tfTitre.getText()).length(), SORTIE_TITLE_MAX) + "/" + SORTIE_TITLE_MAX);
+        });
+
+        HBox titreRow = new HBox(8, tfTitre, titleCount);
+        titreRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(tfTitre, Priority.ALWAYS);
+
+        // Ville (AUTO-FILL)
+        ComboBox<String> cbVille = new ComboBox<>(
+            javafx.collections.FXCollections.observableArrayList(utils.geo.TunisiaGeo.villes()));
+        cbVille.setStyle(fieldStyle());
+        cbVille.setMaxWidth(Double.MAX_VALUE);
+        AutoCompleteComboBox.install(cbVille);
+        // Pre-fill ville from lieu
+        String villeLieu = safe(current.getVille()).trim();
+        if (!villeLieu.isEmpty()) {
+            String matched = utils.geo.TunisiaGeo.villes().stream()
+                .filter(v -> v.equalsIgnoreCase(villeLieu)).findFirst().orElse(null);
+            if (matched != null) cbVille.getSelectionModel().select(matched);
+            else { cbVille.getItems().add(0, villeLieu); cbVille.getSelectionModel().selectFirst(); }
+        }
+
+        // Lieu/région (AUTO-FILL)
+        ComboBox<String> cbRegion = new ComboBox<>();
+        cbRegion.setStyle(fieldStyle());
+        cbRegion.setMaxWidth(Double.MAX_VALUE);
+        AutoCompleteComboBox.install(cbRegion);
+
+        TextField tfRegionAutre = new TextField();
+        tfRegionAutre.setStyle(fieldStyle());
+        tfRegionAutre.setVisible(false);
+        tfRegionAutre.setManaged(false);
+        tfRegionAutre.setPromptText("Région / quartier");
+
+        cbVille.valueProperty().addListener((obs,o,villeSel) -> {
+            cbRegion.getItems().setAll(utils.geo.TunisiaGeo.regionsForVille(villeSel));
+            AutoCompleteComboBox.refreshOriginalItems(cbRegion);
+            cbRegion.getSelectionModel().clearSelection();
+            tfRegionAutre.setVisible(false); tfRegionAutre.setManaged(false);
+        });
+
+        // Pre-fill region from lieu nom/adresse
+        cbRegion.getItems().setAll(utils.geo.TunisiaGeo.regionsForVille(cbVille.getValue()));
+        String lieuNomForRegion = safe(current.getNom()).trim();
+        String adresseLieu = safe(current.getAdresse()).trim();
+        String regionPreset = cbRegion.getItems().stream()
+            .filter(r -> r.equalsIgnoreCase(lieuNomForRegion) || r.equalsIgnoreCase(adresseLieu))
+            .findFirst().orElse(null);
+        if (regionPreset != null) {
+            cbRegion.getSelectionModel().select(regionPreset);
+        } else if (!lieuNomForRegion.isEmpty()) {
+            tfRegionAutre.setText(lieuNomForRegion);
+            cbRegion.getSelectionModel().select(utils.geo.TunisiaGeo.REGION_OTHER);
+            tfRegionAutre.setVisible(true); tfRegionAutre.setManaged(true);
+        }
+
+        cbRegion.valueProperty().addListener((obs,o,regSel) -> {
+            boolean other = utils.geo.TunisiaGeo.REGION_OTHER.equals(regSel);
+            tfRegionAutre.setVisible(other); tfRegionAutre.setManaged(other);
+        });
+
+        VBox regionWrap = new VBox(6, cbRegion, tfRegionAutre);
+
+        // Point de rencontre
+        TextField tfPoint = new TextField();
+        tfPoint.setStyle(fieldStyle());
+        tfPoint.setPromptText("Point de rencontre (ex: devant l'entrée principale)");
+        // Auto-fill from lieu adresse
+        if (!adresseLieu.isEmpty()) tfPoint.setText(adresseLieu);
+
+        // Activité (AUTO-FILL from categorie)
+        ComboBox<String> cbAct = new ComboBox<>(
+            javafx.collections.FXCollections.observableArrayList(SORTIE_ACTIVITY_PRESETS));
+        cbAct.setStyle(fieldStyle());
+        cbAct.setMaxWidth(Double.MAX_VALUE);
+        String categoriePreset = safe(current.getCategorie()).trim();
+        String matchedAct = SORTIE_ACTIVITY_PRESETS.stream()
+            .filter(a -> a.equalsIgnoreCase(categoriePreset)).findFirst().orElse(null);
+        if (matchedAct != null) cbAct.getSelectionModel().select(matchedAct);
+        else cbAct.getSelectionModel().select("Restaurant");
+
+        TextField tfAutreAct = new TextField();
+        tfAutreAct.setStyle(fieldStyle());
+        tfAutreAct.setVisible(false); tfAutreAct.setManaged(false);
+        tfAutreAct.setPromptText("Type d'activité");
+        if (matchedAct == null && !categoriePreset.isEmpty()) {
+            tfAutreAct.setText(categoriePreset);
+            cbAct.getSelectionModel().select("Autre");
+            tfAutreAct.setVisible(true); tfAutreAct.setManaged(true);
+        }
+        cbAct.valueProperty().addListener((obs,o,n) -> {
+            boolean other = "Autre".equalsIgnoreCase(String.valueOf(n));
+            tfAutreAct.setVisible(other); tfAutreAct.setManaged(other);
+        });
+        VBox actWrap = new VBox(6, cbAct, tfAutreAct);
+
+        // Date + heure
+        DatePicker dpDate = new DatePicker(LocalDate.now().plusDays(1));
+        dpDate.setStyle(fieldStyle());
+        dpDate.setDayCellFactory(p -> new DateCell() {
+            @Override public void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty && item != null) setDisable(item.isBefore(LocalDate.now()));
+            }
+        });
+        Spinner<Integer> spHour = new Spinner<>(0, 23, 10); spHour.setEditable(true);
+        Spinner<Integer> spMin = new Spinner<>(0, 59, 0); spMin.setEditable(true);
+        HBox timeRow2 = new HBox(8, dpDate, new Label("h"), spHour, new Label("min"), spMin);
+        timeRow2.setAlignment(Pos.CENTER_LEFT);
+
+        // Budget
+        CheckBox cbNoBudget = new CheckBox("Aucun budget");
+        TextField tfBudget = new TextField();
+        tfBudget.setStyle(fieldStyle());
+        tfBudget.setPromptText("Budget max (TND)");
+        cbNoBudget.selectedProperty().addListener((obs,o,n) -> {
+            tfBudget.setDisable(Boolean.TRUE.equals(n));
+            if (Boolean.TRUE.equals(n)) tfBudget.setText("0");
+            else if ("0".equals(tfBudget.getText())) tfBudget.clear();
+        });
+        // Pre-fill budget from lieu
+        if (current.getBudgetMax() != null && current.getBudgetMax() > 0)
+            tfBudget.setText(String.format("%.0f", current.getBudgetMax()));
+
+        HBox budgetRow2 = new HBox(10, cbNoBudget, tfBudget);
+        budgetRow2.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(tfBudget, Priority.ALWAYS);
+
+        // Places
+        Spinner<Integer> spPlaces = new Spinner<>(1, 999, 5); spPlaces.setEditable(true);
+
+        // Description
+        TextArea taDesc = new TextArea();
+        taDesc.setStyle(fieldStyle());
+        taDesc.setPromptText("Description de la sortie (optionnel)");
+        taDesc.setPrefRowCount(3);
+
+        // Error label
+        Label errLbl = new Label("");
+        errLbl.setStyle("-fx-text-fill:#dc2626;-fx-font-size:12px;-fx-font-weight:800;-fx-wrap-text:true;");
+        errLbl.setWrapText(true);
+        errLbl.setVisible(false); errLbl.setManaged(false);
+
+        // ── Buttons ──
+        Button btnSave = new Button("✓  Créer la sortie");
+        btnSave.setStyle(
+            "-fx-background-color:linear-gradient(to right,#1e3a5f,#163259);" +
+            "-fx-background-radius:10;-fx-text-fill:white;-fx-font-weight:900;" +
+            "-fx-font-size:13px;-fx-padding:10 22;-fx-cursor:hand;");
+
+        Button btnCancelForm = new Button("Annuler");
+        btnCancelForm.setStyle(
+            "-fx-background-color:transparent;-fx-border-color:rgba(15,23,42,0.18);" +
+            "-fx-border-radius:10;-fx-background-radius:10;-fx-text-fill:#374151;" +
+            "-fx-font-weight:800;-fx-font-size:13px;-fx-padding:10 22;-fx-cursor:hand;");
+        btnCancelForm.setOnAction(e -> closeSortieInlineForm());
+
+        btnSave.setOnAction(e -> {
+            String titre2 = safe(tfTitre.getText()).trim();
+            if (titre2.length() < 5) {
+                errLbl.setText("Titre trop court (min 5 caractères)");
+                errLbl.setVisible(true); errLbl.setManaged(true); return;
+            }
+            String ville2 = safe(cbVille.getValue()).trim();
+            if (ville2.isEmpty()) {
+                errLbl.setText("Choisir une ville");
+                errLbl.setVisible(true); errLbl.setManaged(true); return;
+            }
+            LocalDate d = dpDate.getValue();
+            if (d == null || !LocalDateTime.of(d, LocalTime.of(spHour.getValue(), spMin.getValue())).isAfter(LocalDateTime.now())) {
+                errLbl.setText("Date + heure doit être dans le futur");
+                errLbl.setVisible(true); errLbl.setManaged(true); return;
+            }
+            try {
+                models.sorties.AnnonceSortie newSortie = new models.sorties.AnnonceSortie();
+                if (currentUser != null) newSortie.setUserId(currentUser.getId());
+                newSortie.setTitre(titre2);
+                newSortie.setVille(ville2);
+
+                String regSel2 = cbRegion.getValue();
+                String lieuTxt = utils.geo.TunisiaGeo.REGION_OTHER.equals(regSel2)
+                    ? safe(tfRegionAutre.getText()).trim() : safe(regSel2);
+                newSortie.setLieuTexte(lieuTxt.isEmpty() ? safe(current.getNom()) : lieuTxt);
+
+                newSortie.setPointRencontre(safe(tfPoint.getText()).trim());
+
+                String actSel = safe(cbAct.getValue()).trim();
+                newSortie.setTypeActivite("Autre".equalsIgnoreCase(actSel)
+                    ? safe(tfAutreAct.getText()).trim() : actSel);
+
+                newSortie.setDateSortie(LocalDateTime.of(d, LocalTime.of(spHour.getValue(), spMin.getValue())));
+
+                double budgetVal = 0;
+                if (!cbNoBudget.isSelected()) {
+                    String raw = safe(tfBudget.getText()).trim().replace(',', '.');
+                    if (!raw.isEmpty()) try { budgetVal = Double.parseDouble(raw); } catch (Exception ignored2) {}
+                }
+                newSortie.setBudgetMax(budgetVal);
+                newSortie.setNbPlaces(spPlaces.getValue());
+                newSortie.setStatut("OUVERTE");
+                newSortie.setDescription(safe(taDesc.getText()).trim().isEmpty() ? null : taDesc.getText().trim());
+
+                sortieService.add(newSortie);
+
+                // Success feedback
+                closeSortieInlineForm();
+                showInlineSuccessToast("Sortie créée avec succès !");
+            } catch (Exception ex) {
+                errLbl.setText("Erreur : " + safe(ex.getMessage()));
+                errLbl.setVisible(true); errLbl.setManaged(true);
+            }
+        });
+
+        HBox formFooter = new HBox(10, btnCancelForm, btnSave);
+        formFooter.setAlignment(Pos.CENTER_RIGHT);
+        formFooter.setPadding(new Insets(6, 0, 0, 0));
+
+        // ── Grid layout ──
+        GridPane grid2 = new GridPane();
+        grid2.setHgap(10); grid2.setVgap(10);
+        ColumnConstraints cc1 = new ColumnConstraints(110);
+        ColumnConstraints cc2 = new ColumnConstraints();
+        cc2.setHgrow(Priority.ALWAYS);
+        grid2.getColumnConstraints().addAll(cc1, cc2);
+
+        int row2 = 0;
+        grid2.add(inlineLbl("Titre *"), 0, row2); grid2.add(titreRow, 1, row2++);
+        grid2.add(inlineLbl("Ville *"), 0, row2); grid2.add(cbVille, 1, row2++);
+        grid2.add(inlineLbl("Lieu / région"), 0, row2); grid2.add(regionWrap, 1, row2++);
+        grid2.add(inlineLbl("Point RDV"), 0, row2); grid2.add(tfPoint, 1, row2++);
+        grid2.add(inlineLbl("Activité"), 0, row2); grid2.add(actWrap, 1, row2++);
+        grid2.add(inlineLbl("Date *"), 0, row2); grid2.add(timeRow2, 1, row2++);
+        grid2.add(inlineLbl("Budget"), 0, row2); grid2.add(budgetRow2, 1, row2++);
+        grid2.add(inlineLbl("Places"), 0, row2); grid2.add(spPlaces, 1, row2++);
+        grid2.add(inlineLbl("Description"), 0, row2); grid2.add(taDesc, 1, row2++);
+
+        // Pre-fill badge info row
+        HBox prefilledInfo = new HBox(8);
+        prefilledInfo.setStyle(
+            "-fx-background-color:#f0f9ff;-fx-border-color:#bae6fd;" +
+            "-fx-border-radius:8;-fx-background-radius:8;-fx-padding:8 12;");
+        Label infoIcon = new Label("ℹ️");
+        Label infoTxt = new Label(
+            "Pré-rempli avec : " + safe(current.getNom()) +
+            (villeLieu.isEmpty() ? "" : " · " + villeLieu) +
+            (categoriePreset.isEmpty() ? "" : " · " + categoriePreset));
+        infoTxt.setStyle("-fx-font-size:11px;-fx-text-fill:#0369a1;-fx-font-weight:700;");
+        infoTxt.setWrapText(true);
+        HBox.setHgrow(infoTxt, Priority.ALWAYS);
+        prefilledInfo.getChildren().addAll(infoIcon, infoTxt);
+
+        // Wrapper card
+        VBox formCard = new VBox(12,
+            formTitle, formSub, prefilledInfo,
+            new Region() {{ setStyle("-fx-min-height:2;"); }},
+            grid2, errLbl, formFooter
+        );
+        formCard.setStyle(
+            "-fx-background-color:white;" +
+            "-fx-border-color:rgba(30,58,95,0.15);" +
+            "-fx-border-radius:14;-fx-background-radius:14;" +
+            "-fx-padding:18 16;-fx-effect:dropshadow(gaussian,rgba(0,0,0,0.08),10,0,0,3);");
+        formCard.setMaxWidth(Double.MAX_VALUE);
+        VBox.setMargin(formCard, new Insets(10, 0, 0, 0));
+
+        inlineSortieContainer.getChildren().add(formCard);
+    }
+
+    private Label inlineLbl(String text) {
+        Label l = new Label(text);
+        l.setStyle("-fx-font-size:12px;-fx-font-weight:800;-fx-text-fill:#374151;-fx-wrap-text:true;");
+        return l;
+    }
+
+    private String fieldStyle() {
+        return "-fx-background-color:#f8fafc;-fx-border-color:rgba(15,23,42,0.12);" +
+               "-fx-border-radius:8;-fx-background-radius:8;-fx-font-size:12px;-fx-padding:6 10;";
+    }
+
+    private void showInlineSuccessToast(String message) {
+        if (sortieBtn == null) return;
+        javafx.stage.Window window = null;
+        try { window = sortieBtn.getScene().getWindow(); } catch (Exception ignored) {}
+        if (window == null) return;
+
+        Stage toast = new Stage();
+        toast.initOwner(window);
+        toast.initStyle(StageStyle.TRANSPARENT);
+        toast.initModality(Modality.NONE);
+
+        Label lbl = new Label("✓  " + message);
+        lbl.setStyle("-fx-background-color:#16a34a;-fx-background-radius:10;" +
+            "-fx-text-fill:white;-fx-font-weight:900;-fx-font-size:13px;-fx-padding:12 22;");
+
+        StackPane root2 = new StackPane(lbl);
+        root2.setStyle("-fx-background-color:transparent;");
+        Scene s = new Scene(root2);
+        s.setFill(Color.TRANSPARENT);
+        toast.setScene(s);
+        toast.setOpacity(0);
+        toast.show();
+
+        toast.setX(window.getX() + (window.getWidth() - toast.getWidth()) / 2);
+        toast.setY(window.getY() + window.getHeight() - 80);
+
+        Timeline tl = new Timeline(
+            new KeyFrame(Duration.ZERO,        new KeyValue(toast.opacityProperty(), 0)),
+            new KeyFrame(Duration.millis(200),  new KeyValue(toast.opacityProperty(), 1)),
+            new KeyFrame(Duration.seconds(2.2), new KeyValue(toast.opacityProperty(), 1)),
+            new KeyFrame(Duration.seconds(2.6), new KeyValue(toast.opacityProperty(), 0))
+        );
+        tl.setOnFinished(e -> toast.close());
+        tl.play();
     }
 
     /* ======================= LIEU ======================= */
