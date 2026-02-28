@@ -13,7 +13,7 @@ public final class ViewPaths {
     public static final String FRONT_LIEUX = "/fxml/front/lieux/LieuxView.fxml";
     public static final String FRONT_LIEU_DETAILS = "/fxml/front/lieux/LieuDetailsView.fxml"; // ✅ AJOUT
     public static final String FRONT_OFFRES = "/fxml/front/offres/OffresView.fxml";
-    public static final String FRONT_EVENEMENTS = "/fxml/front/evenements/Evenementsview.fxml";
+    public static final String FRONT_EVENEMENTS = "/fxml/front/evenements/EvenementsView.fxml";
     public static final String FRONT_EVENEMENT_DETAILS = "/fxml/front/evenements/EvenementsDetailsView.fxml";
     public static final String FRONT_PROFIL = "/fxml/front/profil/ProfilView.fxml";
     public static final String FRONT_HELP = "/fxml/front/help/HelpView.fxml";
