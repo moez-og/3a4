@@ -68,7 +68,13 @@
                 </HBox>
 
                 <!-- QUICK ACTIONS -->
-                <Button fx:id="btnNotif" text="🔔" onAction="#showNotifications" styleClass="iconBtn"/>
+                <!-- BELL with badge -->
+                <StackPane fx:id="bellPane" styleClass="bellPane">
+                    <Button fx:id="btnNotif" text="🔔" onAction="#showNotifications" styleClass="iconBtn"/>
+                    <Label fx:id="notifBadge" text="0" styleClass="notifBadge"
+                           visible="false" managed="false"
+                           StackPane.alignment="TOP_RIGHT"/>
+                </StackPane>
                 <Button fx:id="btnTheme" text="🌓" onAction="#toggleTheme" styleClass="iconBtn"/>
 
                 <!-- ACCOUNT -->

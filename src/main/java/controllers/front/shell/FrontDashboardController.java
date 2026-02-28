@@ -7,32 +7,47 @@ import controllers.front.evenements.EvenementDetailsController;
 import controllers.front.lieux.LieuDetailsController;
 import controllers.front.lieux.LieuxController;
 import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import models.lieux.Lieu;
+import models.notifications.LieuNotification;
 import models.users.User;
+import services.notifications.LieuSuggestionService;
+import utils.ui.GestureNavigationManager;
 import utils.ui.ShellNavigator;
 import utils.ui.ViewPaths;
-
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
-import utils.ui.GestureNavigationManager;
 
 public class FrontDashboardController implements ShellNavigator {
 
@@ -72,6 +87,9 @@ public class FrontDashboardController implements ShellNavigator {
     @FXML private Label userRole;
     @FXML private Label avatarLetter;
 
+    @FXML private StackPane bellPane;
+    @FXML private Button    btnNotif;
+    @FXML private Label     notifBadge;
     @FXML private StackPane overlay;
     @FXML private VBox accountDrawer;
     @FXML private Label avatarLetterLarge;
@@ -87,6 +105,11 @@ public class FrontDashboardController implements ShellNavigator {
     private User currentUser;
     private boolean dark = false;
 
+    // ── Notification state ──────────────────────────────────────────────────
+    private final List<LieuNotification>  notifications      = new ArrayList<>();
+    private final LieuSuggestionService   suggestionService  = new LieuSuggestionService();
+    private Popup                          notifPopup         = null;
+
     /** Navigation history — top = current route (used by GestureNavigationManager) */
     private final Deque<String> navHistory = new ArrayDeque<>();
     private GestureNavigationManager gestureNav = null;
@@ -98,6 +121,8 @@ public class FrontDashboardController implements ShellNavigator {
     public void setCurrentUser(User user) {
         this.currentUser = user;
         refreshAccountUI();
+        // Generate fresh suggestions based on this user's favorites
+        javafx.application.Platform.runLater(this::loadNotifications);
     }
 
     @FXML
@@ -367,7 +392,292 @@ public class FrontDashboardController implements ShellNavigator {
 
     @FXML
     public void showNotifications() {
-        info("Notifications", "Brancher alertes: participations, validations, nouveautés.");
+        if (notifPopup != null && notifPopup.isShowing()) {
+            notifPopup.hide();
+            return;
+        }
+        buildAndShowNotifPopup();
+    }
+
+    // ── Notification popup ───────────────────────────────────────────────────
+
+    private void buildAndShowNotifPopup() {
+        // ── Header ──────────────────────────────────────────────────────────
+        long unread = notifications.stream().filter(n -> !n.isRead()).count();
+
+        javafx.scene.control.Label titleLbl = new javafx.scene.control.Label("🔔  Suggestions pour vous");
+        titleLbl.getStyleClass().add("notifPopupTitle");
+
+        javafx.scene.control.Label subtitleLbl = new javafx.scene.control.Label(
+            unread > 0 ? unread + " nouvelle(s) suggestion(s)" : "Tout est lu"
+        );
+        subtitleLbl.getStyleClass().add("notifPopupSubtitle");
+
+        javafx.scene.control.Button markAllBtn = new javafx.scene.control.Button("Tout marquer lu");
+        markAllBtn.getStyleClass().add("notifMarkAllBtn");
+        markAllBtn.setOnAction(e -> {
+            notifications.forEach(LieuNotification::markRead);
+            updateBadge();
+            if (notifPopup != null) {
+                notifPopup.hide();
+                buildAndShowNotifPopup();
+            }
+        });
+
+        Region hSpacer = new Region();
+        javafx.scene.layout.HBox.setHgrow(hSpacer, Priority.ALWAYS);
+
+        javafx.scene.layout.HBox titleRow = new javafx.scene.layout.HBox(8,
+            new VBox(2, titleLbl, subtitleLbl), hSpacer, markAllBtn);
+        titleRow.setAlignment(Pos.CENTER_LEFT);
+        titleRow.getStyleClass().add("notifPopupHeader");
+        titleRow.setPadding(new Insets(14, 16, 10, 16));
+        // Solid header bg — prevents transparency bleed
+        titleRow.setStyle(
+            "-fx-background-color: #f8fafc;" +
+            "-fx-background-radius: 14px 14px 0px 0px;" +
+            "-fx-border-color: transparent transparent #e2e8f0 transparent;" +
+            "-fx-border-width: 0 0 1px 0;"
+        );
+
+        // ── Notification rows ────────────────────────────────────────────────
+        VBox listBox = new VBox(0);
+        // Solid list background — no transparency
+        listBox.setStyle("-fx-background-color: #ffffff;");
+
+        if (notifications.isEmpty()) {
+            javafx.scene.control.Label empty = new javafx.scene.control.Label("✨  Ajoutez des lieux en favoris pour recevoir des suggestions !");
+            empty.getStyleClass().add("notifEmpty");
+            empty.setWrapText(true);
+            empty.setAlignment(Pos.CENTER);
+            empty.setPadding(new Insets(28, 20, 28, 20));
+            listBox.getChildren().add(empty);
+        } else {
+            for (int i = 0; i < notifications.size(); i++) {
+                LieuNotification n = notifications.get(i);
+                listBox.getChildren().add(buildNotifRow(n));
+                if (i < notifications.size() - 1) {
+                    Region div = new Region();
+                    div.getStyleClass().add("notifDivider");
+                    div.setMaxWidth(Double.MAX_VALUE);
+                    listBox.getChildren().add(div);
+                }
+            }
+        }
+
+        ScrollPane sp = new ScrollPane(listBox);
+        sp.setFitToWidth(true);
+        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        // Keep the ScrollPane viewport solid white (not transparent)
+        sp.setStyle(
+            "-fx-background-color: #ffffff;" +
+            "-fx-background: #ffffff;" +
+            "-fx-border-color: transparent;"
+        );
+        sp.setPrefHeight(Math.min(notifications.size() * 72 + 20, 380));
+
+        // ── Footer ───────────────────────────────────────────────────────────
+        javafx.scene.control.Button refreshBtn = new javafx.scene.control.Button("🔄  Actualiser les suggestions");
+        refreshBtn.setStyle(
+            "-fx-background-color: transparent;" +
+            "-fx-text-fill: #64748b;" +
+            "-fx-font-size: 11px;" +
+            "-fx-font-weight: 800;" +
+            "-fx-cursor: hand;" +
+            "-fx-padding: 6px 0;");
+        refreshBtn.setMaxWidth(Double.MAX_VALUE);
+        refreshBtn.setOnAction(e -> {
+            if (notifPopup != null) notifPopup.hide();
+            loadNotifications();
+            javafx.application.Platform.runLater(this::buildAndShowNotifPopup);
+        });
+
+        javafx.scene.layout.HBox footer = new javafx.scene.layout.HBox(refreshBtn);
+        footer.getStyleClass().add("notifFooter");
+        footer.setAlignment(Pos.CENTER);
+        // Solid footer bg
+        footer.setStyle(
+            "-fx-background-color: #f8fafc;" +
+            "-fx-background-radius: 0px 0px 14px 14px;" +
+            "-fx-border-color: #e2e8f0 transparent transparent transparent;" +
+            "-fx-border-width: 1px 0 0 0;" +
+            "-fx-padding: 8px 14px;"
+        );
+
+        // ── Assemble ─────────────────────────────────────────────────────────
+        VBox popupRoot = new VBox(titleRow, sp, footer);
+        popupRoot.getStyleClass().add("notifPopupRoot");
+        popupRoot.setPrefWidth(360);
+        popupRoot.setMaxWidth(360);
+
+        // ── Force fully opaque white background at the inline style level.
+        // JavaFX Popup scenes are transparent by default; the CSS class alone
+        // is not enough — we set the background directly so no content from
+        // behind the popup bleeds through.
+        popupRoot.setStyle(
+            "-fx-background-color: #ffffff;" +
+            "-fx-background-radius: 14px;" +
+            "-fx-border-color: #dee5ef;" +
+            "-fx-border-width: 1px;" +
+            "-fx-border-radius: 14px;" +
+            "-fx-effect: dropshadow(gaussian, rgba(15,23,42,0.22), 28, 0, 0, 10);"
+        );
+
+        // Copy stylesheet from main scene so CSS classes still apply
+        if (root != null && root.getScene() != null) {
+            for (String ss : root.getScene().getStylesheets()) {
+                if (!popupRoot.getStylesheets().contains(ss)) popupRoot.getStylesheets().add(ss);
+            }
+        }
+
+        notifPopup = new Popup();
+        notifPopup.setAutoHide(true);
+        // Make the popup window itself opaque (no OS-level transparency)
+        notifPopup.getScene().setFill(javafx.scene.paint.Color.TRANSPARENT);
+        notifPopup.getContent().add(popupRoot);
+
+        // Position: below the bell button
+        javafx.geometry.Bounds bellBounds = null;
+        try {
+            if (btnNotif != null && btnNotif.getScene() != null)
+                bellBounds = btnNotif.localToScreen(btnNotif.getBoundsInLocal());
+        } catch (Exception ignored) {}
+
+        double x = bellBounds != null ? bellBounds.getMinX() - 300 : 200;
+        double y = bellBounds != null ? bellBounds.getMaxY() + 8   : 60;
+
+        // Fade in
+        popupRoot.setOpacity(0);
+        popupRoot.setTranslateY(-8);
+        notifPopup.show(resolveStage(), x, y);
+
+        FadeTransition ft = new FadeTransition(javafx.util.Duration.millis(180), popupRoot);
+        ft.setToValue(1); ft.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+        TranslateTransition tt = new TranslateTransition(javafx.util.Duration.millis(180), popupRoot);
+        tt.setToY(0); tt.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+        ft.play(); tt.play();
+    }
+
+    private javafx.scene.Node buildNotifRow(LieuNotification n) {
+        // Icon circle
+        javafx.scene.control.Label iconLbl = new javafx.scene.control.Label(n.getCategoryIcon());
+        iconLbl.getStyleClass().add("notifIcon");
+        iconLbl.setMinSize(40, 40); iconLbl.setMaxSize(40, 40);
+        iconLbl.setAlignment(Pos.CENTER);
+
+        // Text content
+        javafx.scene.control.Label nameLbl = new javafx.scene.control.Label(safe(n.getLieu().getNom()));
+        nameLbl.getStyleClass().add("notifLieuName");
+        nameLbl.setWrapText(true);
+        nameLbl.setMaxWidth(220);
+
+        String meta = buildMeta(n.getLieu());
+        javafx.scene.control.Label metaLbl = new javafx.scene.control.Label(meta);
+        metaLbl.getStyleClass().add("notifLieuMeta");
+
+        javafx.scene.control.Label reasonLbl = new javafx.scene.control.Label(n.getReason());
+        reasonLbl.getStyleClass().add("notifReason");
+        reasonLbl.setWrapText(true);
+        reasonLbl.setMaxWidth(220);
+
+        // Type chip
+        javafx.scene.control.Label typeLbl = new javafx.scene.control.Label(n.getTypeLabel());
+        typeLbl.getStyleClass().add("notifTypeChip");
+
+        VBox textCol = new VBox(2, nameLbl, metaLbl, reasonLbl);
+        javafx.scene.layout.HBox.setHgrow(textCol, Priority.ALWAYS);
+
+        // Unread blue dot
+        Region dot = new Region();
+        dot.getStyleClass().add("notifUnreadDot");
+        dot.setMinSize(8, 8); dot.setMaxSize(8, 8);
+        dot.setVisible(!n.isRead()); dot.setManaged(!n.isRead());
+
+        VBox rightCol = new VBox(dot);
+        rightCol.setAlignment(Pos.TOP_CENTER);
+        rightCol.setPadding(new Insets(4, 0, 0, 0));
+
+        javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(12, iconLbl, textCol, rightCol);
+        row.setAlignment(Pos.TOP_LEFT);
+        row.setPadding(new Insets(10, 14, 10, 14));
+        row.getStyleClass().addAll("notifRow", n.isRead() ? "" : "notifRowUnread");
+        row.getStyleClass().removeIf(String::isEmpty);
+        row.setMinWidth(340);
+        // Ensure solid background per row (belt-and-suspenders vs CSS)
+        row.setStyle(n.isRead()
+            ? "-fx-background-color: #ffffff; -fx-cursor: hand;"
+            : "-fx-background-color: #eff6ff; -fx-cursor: hand;");
+        // Hover: swap bg via mouse events since JavaFX doesn't animate CSS :hover transitions
+        final String normalBg = n.isRead() ? "#ffffff" : "#eff6ff";
+        final String hoverBg  = n.isRead() ? "#f8fafc" : "#dbeafe";
+        row.setOnMouseEntered(ev -> row.setStyle("-fx-background-color: " + hoverBg + "; -fx-cursor: hand;"));
+        row.setOnMouseExited(ev  -> row.setStyle("-fx-background-color: " + normalBg + "; -fx-cursor: hand;"));
+
+        // Click → mark read + navigate to lieu details
+        row.setOnMouseClicked(e -> {
+            n.markRead();
+            dot.setVisible(false);
+            dot.setManaged(false);
+            row.getStyleClass().remove("notifRowUnread");
+            // Update inline style to read state
+            row.setStyle("-fx-background-color: #ffffff; -fx-cursor: hand;");
+            row.setOnMouseEntered(ev -> row.setStyle("-fx-background-color: #f8fafc; -fx-cursor: hand;"));
+            row.setOnMouseExited(ev  -> row.setStyle("-fx-background-color: #ffffff; -fx-cursor: hand;"));
+            updateBadge();
+            if (notifPopup != null) notifPopup.hide();
+            navigate(ROUTE_LIEU_DETAILS_PREFIX + n.getLieu().getId());
+        });
+
+        return row;
+    }
+
+    private String buildMeta(models.lieux.Lieu l) {
+        String cat   = safe(l.getCategorie()).trim();
+        String ville = safe(l.getVille()).trim();
+        if (!cat.isEmpty() && !ville.isEmpty()) return cat + "  ·  " + ville;
+        if (!cat.isEmpty())  return cat;
+        if (!ville.isEmpty()) return ville;
+        return "";
+    }
+
+    // ── Badge management ──────────────────────────────────────────────────────
+
+    private void updateBadge() {
+        if (notifBadge == null) return;
+        long unread = notifications.stream().filter(n -> !n.isRead()).count();
+        javafx.application.Platform.runLater(() -> {
+            if (unread <= 0) {
+                notifBadge.setVisible(false);
+                notifBadge.setManaged(false);
+            } else {
+                notifBadge.setText(unread > 9 ? "9+" : String.valueOf(unread));
+                notifBadge.setVisible(true);
+                notifBadge.setManaged(true);
+                // Pulse animation on badge update
+                javafx.animation.ScaleTransition pulse =
+                    new javafx.animation.ScaleTransition(javafx.util.Duration.millis(200), notifBadge);
+                pulse.setFromX(1.0); pulse.setFromY(1.0);
+                pulse.setToX(1.3);   pulse.setToY(1.3);
+                javafx.animation.ScaleTransition shrink =
+                    new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), notifBadge);
+                shrink.setToX(1.0); shrink.setToY(1.0);
+                pulse.setOnFinished(ev -> shrink.play());
+                pulse.play();
+            }
+        });
+    }
+
+    // ── Load/generate notifications ───────────────────────────────────────────
+
+    private void loadNotifications() {
+        if (currentUser == null) return;
+        notifications.clear();
+        try {
+            List<LieuNotification> suggestions = suggestionService.generateSuggestions(currentUser.getId());
+            notifications.addAll(suggestions);
+        } catch (Exception ignored) {}
+        updateBadge();
     }
 
     @FXML

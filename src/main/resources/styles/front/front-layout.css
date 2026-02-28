@@ -494,3 +494,207 @@
     -fx-text-fill: white;
     -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.45), 12, 0.2, 0, 4);
 }
+
+
+/* ===================================================
+   NOTIFICATION BELL & BADGE
+   =================================================== */
+
+.bellPane {
+    -fx-cursor: hand;
+}
+
+/* ── Red badge on the bell ───────────────────────── */
+.notifBadge {
+    -fx-background-color: #ef4444;
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-size: 9px;
+    -fx-font-weight: 900;
+    -fx-min-width: 17px;
+    -fx-min-height: 17px;
+    -fx-max-width: 22px;
+    -fx-pref-width: -1;
+    -fx-alignment: center;
+    -fx-padding: 0 3px;
+    -fx-translate-x: 6px;
+    -fx-translate-y: -4px;
+    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.55), 7, 0, 0, 2);
+}
+
+/* ===================================================
+   NOTIFICATION DROPDOWN POPUP
+   Full opaque white bg — no transparency bleed-through
+   =================================================== */
+
+/* Outer wrapper: solid white, strong shadow, rounded */
+.notifPopupRoot {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14px;
+    -fx-border-color: #dee5ef;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.22), 28, 0, 0, 10);
+}
+
+/* Header zone: title + subtitle + mark-all button */
+.notifPopupHeader {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 14px 14px 0px 0px;
+    -fx-padding: 14px 16px 12px 16px;
+    -fx-border-color: transparent transparent #e2e8f0 transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.notifPopupTitle {
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+
+.notifPopupSubtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 600;
+}
+
+/* "Tout marquer lu" button */
+.notifMarkAllBtn {
+    -fx-background-color: #eff6ff;
+    -fx-text-fill: #1d4ed8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+    -fx-padding: 5px 12px;
+    -fx-background-radius: 20px;
+    -fx-border-color: #bfdbfe;
+    -fx-border-radius: 20px;
+    -fx-border-width: 1px;
+}
+.notifMarkAllBtn:hover {
+    -fx-background-color: #dbeafe;
+    -fx-border-color: #93c5fd;
+}
+
+/* ── Notification row (read) ─────────────────────── */
+.notifRow {
+    -fx-background-color: #ffffff;
+    -fx-padding: 11px 14px;
+    -fx-cursor: hand;
+}
+.notifRow:hover {
+    -fx-background-color: #f8fafc;
+}
+
+/* ── Notification row (unread) ───────────────────── */
+.notifRowUnread {
+    -fx-background-color: #eff6ff;
+}
+.notifRowUnread:hover {
+    -fx-background-color: #dbeafe;
+}
+
+/* ── Icon circle ─────────────────────────────────── */
+.notifIcon {
+    -fx-background-color: #e0f2fe;
+    -fx-background-radius: 999;
+    -fx-min-width: 42px;
+    -fx-min-height: 42px;
+    -fx-max-width: 42px;
+    -fx-max-height: 42px;
+    -fx-alignment: center;
+    -fx-font-size: 20px;
+}
+
+/* ── Text labels ─────────────────────────────────── */
+.notifLieuName {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+    -fx-wrap-text: true;
+}
+.notifLieuMeta {
+    -fx-font-size: 11px;
+    -fx-text-fill: #475569;
+    -fx-font-weight: 700;
+}
+.notifReason {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 600;
+    -fx-wrap-text: true;
+}
+
+/* ── Unread dot ──────────────────────────────────── */
+.notifUnreadDot {
+    -fx-background-color: #3b82f6;
+    -fx-background-radius: 999;
+    -fx-min-width: 8px;
+    -fx-min-height: 8px;
+    -fx-max-width: 8px;
+    -fx-max-height: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(59,130,246,0.5), 4, 0, 0, 0);
+}
+
+/* ── Category type chip ──────────────────────────── */
+.notifTypeChip {
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #1e40af;
+    -fx-background-color: #dbeafe;
+    -fx-background-radius: 999;
+    -fx-padding: 2px 10px;
+}
+
+/* ── Row divider ─────────────────────────────────── */
+.notifDivider {
+    -fx-background-color: #e2e8f0;
+    -fx-min-height: 1px;
+    -fx-max-height: 1px;
+    -fx-pref-height: 1px;
+}
+
+/* ── Empty state ─────────────────────────────────── */
+.notifEmpty {
+    -fx-font-size: 13px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: 700;
+    -fx-alignment: center;
+    -fx-padding: 28px 20px;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+/* ── Footer (refresh button area) ───────────────── */
+.notifFooter {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 0px 0px 14px 14px;
+    -fx-padding: 8px 14px;
+    -fx-border-color: #e2e8f0 transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+
+/* ── Dark theme overrides ────────────────────────── */
+.theme-dark .notifPopupRoot {
+    -fx-background-color: #1e293b;
+    -fx-border-color: rgba(255,255,255,0.12);
+}
+.theme-dark .notifPopupHeader {
+    -fx-background-color: #0f172a;
+    -fx-border-color: rgba(255,255,255,0.08) transparent rgba(255,255,255,0.08) transparent;
+}
+.theme-dark .notifRow         { -fx-background-color: #1e293b; }
+.theme-dark .notifRow:hover   { -fx-background-color: #273549; }
+.theme-dark .notifRowUnread   { -fx-background-color: #1e3050; }
+.theme-dark .notifRowUnread:hover { -fx-background-color: #243a60; }
+.theme-dark .notifPopupTitle  { -fx-text-fill: #f1f5f9; }
+.theme-dark .notifPopupSubtitle { -fx-text-fill: #94a3b8; }
+.theme-dark .notifLieuName    { -fx-text-fill: #f1f5f9; }
+.theme-dark .notifLieuMeta    { -fx-text-fill: #94a3b8; }
+.theme-dark .notifReason      { -fx-text-fill: #64748b; }
+.theme-dark .notifDivider     { -fx-background-color: rgba(255,255,255,0.07); }
+.theme-dark .notifFooter      { -fx-background-color: #0f172a; -fx-border-color: rgba(255,255,255,0.08) transparent transparent transparent; }
+.theme-dark .notifMarkAllBtn  { -fx-background-color: #1e3a5f; -fx-text-fill: #93c5fd; -fx-border-color: #1d4ed8; }
+.theme-dark .notifIcon        { -fx-background-color: #1e3a5f; }
+.theme-dark .notifTypeChip    { -fx-background-color: #1e3a5f; -fx-text-fill: #93c5fd; }
+.theme-dark .notifEmpty       { -fx-text-fill: #475569; }
