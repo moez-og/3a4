@@ -57,6 +57,13 @@
             <version>5.10.1</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- RichTextFX — zone de texte stylisable (soulignement fautes) -->
+        <dependency>
+            <groupId>org.fxmisc.richtext</groupId>
+            <artifactId>richtextfx</artifactId>
+            <version>0.11.3</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -15,10 +15,13 @@
       fx:controller="controllers.front.lieux.ChatbotController"
       stylesheets="@/styles/lieux/chatbot.css"
       styleClass="chatRoot"
-      spacing="0">
+      spacing="0"
+      minHeight="-1"
+      prefHeight="-1"
+      maxHeight="Infinity">
 
     <!-- ══════════════════ SIDEBAR HISTORIQUE ══════════════════ -->
-    <VBox styleClass="historySidebar" spacing="0" minWidth="220" maxWidth="220">
+    <VBox styleClass="historySidebar" spacing="0" minWidth="220" maxWidth="220" minHeight="0" prefHeight="-1" maxHeight="Infinity">
         <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
 
         <!-- Header sidebar -->
@@ -55,7 +58,7 @@
     </VBox>
 
     <!-- ══════════════════ ZONE PRINCIPALE ══════════════════ -->
-    <VBox styleClass="chatMain" spacing="0" HBox.hgrow="ALWAYS">
+    <VBox styleClass="chatMain" spacing="0" HBox.hgrow="ALWAYS" minHeight="0" prefHeight="-1" maxHeight="Infinity">
 
         <!-- Header chat -->
         <HBox styleClass="chatHeader" alignment="CENTER_LEFT" spacing="14">

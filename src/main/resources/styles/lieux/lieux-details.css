@@ -151,6 +151,90 @@
     -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.15), 22, 0.17, 0, 8);
 }
 
+/* ════ Bloc Météo — Widget style (2nd screenshot) ════ */
+
+/* ── Conteneur principal du widget météo ── */
+.weatherWidget {
+    -fx-background-color: linear-gradient(to bottom right, #0b2550, #1e3a5f, #0f2847);
+    -fx-background-radius: 22;
+    -fx-border-color: rgba(212,175,55,0.25);
+    -fx-border-radius: 22;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.45), 24, 0.22, 0, 8);
+}
+.weatherWidget:hover {
+    -fx-border-color: rgba(212,175,55,0.50);
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.55), 30, 0.28, 0, 10);
+}
+
+/* ── Icône météo (emoji grande) ── */
+.weatherWidgetIcon {
+    -fx-font-size: 42px;
+    -fx-text-fill: white;
+    -fx-padding: 0 0 2 0;
+}
+
+/* ── Température large ── */
+.weatherWidgetTemp {
+    -fx-font-size: 36px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+    -fx-padding: 0;
+}
+
+/* ── Nom de la ville ── */
+.weatherWidgetCity {
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+    -fx-text-fill: rgba(255,255,255,0.78);
+    -fx-padding: 0 0 4 0;
+}
+
+/* ── Séparateur fin ── */
+.weatherWidgetDivider {
+    -fx-background-color: rgba(212,175,55,0.30);
+    -fx-min-height: 1;
+    -fx-max-height: 1;
+    -fx-pref-height: 1;
+}
+
+/* ── Valeur stat (humidité, vent) ── */
+.weatherWidgetStatVal {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+}
+
+/* ── Label stat ── */
+.weatherWidgetStatLbl {
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: rgba(255,255,255,0.52);
+}
+
+/* ── Legacy météo labels (compat) ── */
+.weatherMainLabel {
+    -fx-font-size: 18px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+
+.weatherTempLabel {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1e3a5f;
+}
+
+.weatherDetailLabel {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+    -fx-font-weight: 600;
+}
+
+.weatherDetails {
+    -fx-spacing: 4;
+}
+
 .detailsTitle  { -fx-text-fill: #0b2550; -fx-font-size: 25px; -fx-font-weight: 900; }
 .detailsLine   { -fx-text-fill: rgba(11,37,80,0.80); -fx-font-size: 12.5px; -fx-font-weight: 800; }
 .detailsHint   { -fx-text-fill: rgba(11,37,80,0.52); -fx-font-size: 11.5px; -fx-font-weight: 700; }
@@ -479,6 +563,26 @@
 .detailContainer .scroll-bar:vertical .increment-button,
 .detailContainer .scroll-bar:vertical .decrement-button {
     -fx-background-color: transparent; -fx-padding: 0;
+}
+
+/* ── Widget météo compact en mode split-view ── */
+.detailContainer .weatherWidget {
+    -fx-padding: 12 10;
+}
+.detailContainer .weatherWidgetIcon {
+    -fx-font-size: 32px;
+}
+.detailContainer .weatherWidgetTemp {
+    -fx-font-size: 26px;
+}
+.detailContainer .weatherWidgetCity {
+    -fx-font-size: 12px;
+}
+.detailContainer .weatherWidgetStatVal {
+    -fx-font-size: 11px;
+}
+.detailContainer .weatherWidgetStatLbl {
+    -fx-font-size: 9.5px;
 }
 
 

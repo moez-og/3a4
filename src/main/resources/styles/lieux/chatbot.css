@@ -5,8 +5,6 @@
 /* ---- ROOT ---- */
 .chatRoot {
     -fx-background-color: #f0f4f9;
-    -fx-min-height: 620;
-    -fx-pref-height: 720;
 }
 
 /* ══════════════════════════════════════
@@ -111,6 +109,27 @@
     -fx-text-fill: #64748b;
 }
 
+/* ---- Bouton supprimer une conversation ---- */
+.historyDeleteBtn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-opacity: 0.6;
+}
+.historyDeleteBtn:hover {
+    -fx-opacity: 1;
+    -fx-background-color: rgba(239,68,68,0.15);
+    -fx-background-radius: 6;
+}
+.historyDeleteBtn:pressed {
+    -fx-scale-x: 0.90;
+    -fx-scale-y: 0.90;
+}
+
 /* ══════════════════════════════════════
    ZONE CHAT PRINCIPALE
 ══════════════════════════════════════ */
@@ -179,8 +198,14 @@
 .chatScroll {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
+    -fx-min-height: -1;
+    -fx-pref-height: -1;
 }
-.chatScroll .viewport { -fx-background-color: #f0f4f9; }
+.chatScroll .viewport { 
+    -fx-background-color: #f0f4f9;
+    -fx-min-height: -1;
+    -fx-pref-height: -1;
+}
 .chatScroll .scroll-bar:vertical {
     -fx-pref-width: 5;
     -fx-background-color: transparent;
@@ -197,7 +222,9 @@
 }
 .chatMessages {
     -fx-background-color: transparent;
-    -fx-min-height: 400;
+    -fx-min-height: 0;
+    -fx-pref-height: -1;
+    -fx-max-height: Infinity;
 }
 
 /* ---- Bulles ---- */
@@ -330,6 +357,28 @@
     -fx-text-fill: #1d4ed8;
 }
 .chatReadBtn:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+/* ---- Bouton arrêter la parole ---- */
+.chatStopBtn {
+    -fx-background-color: #fef3f2;
+    -fx-border-color: #ef4444;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+.chatStopBtn:hover {
+    -fx-background-color: #fee2e2;
+    -fx-border-color: #b91c1c;
+    -fx-text-fill: #b91c1c;
+}
+.chatStopBtn:pressed {
     -fx-scale-x: 0.98;
     -fx-scale-y: 0.98;
 }

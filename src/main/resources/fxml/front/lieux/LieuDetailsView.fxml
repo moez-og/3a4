@@ -113,6 +113,30 @@
                     <!-- ── COLONNE DROITE : infos ── -->
                     <VBox fx:id="infoColBox" spacing="12" styleClass="infoCol">
 
+                        <!-- ══ MÉTÉO WIDGET (style compact) ══ -->
+                        <VBox fx:id="weatherCard" spacing="10" styleClass="weatherWidget" visible="false" managed="false" alignment="CENTER">
+                            <padding><Insets top="18" right="16" bottom="14" left="16"/></padding>
+                            <!-- Icône météo grande -->
+                            <Label fx:id="weatherMain" text="" styleClass="weatherWidgetIcon"/>
+                            <!-- Température -->
+                            <Label fx:id="weatherTemp" text="" styleClass="weatherWidgetTemp"/>
+                            <!-- Ville -->
+                            <Label fx:id="weatherFeels" text="" styleClass="weatherWidgetCity"/>
+                            <!-- Séparateur -->
+                            <Region styleClass="weatherWidgetDivider" maxWidth="Infinity"/>
+                            <!-- Stats : humidité + vent -->
+                            <HBox alignment="CENTER" spacing="20">
+                                <VBox alignment="CENTER" spacing="2">
+                                    <Label fx:id="weatherHumidity" text="" styleClass="weatherWidgetStatVal"/>
+                                    <Label text="Humidité" styleClass="weatherWidgetStatLbl"/>
+                                </VBox>
+                                <VBox alignment="CENTER" spacing="2">
+                                    <Label fx:id="weatherWind" text="" styleClass="weatherWidgetStatVal"/>
+                                    <Label text="Vitesse du vent" styleClass="weatherWidgetStatLbl"/>
+                                </VBox>
+                            </HBox>
+                        </VBox>
+
                         <!-- Statut ouverture (bandeau jaune) -->
                         <HBox fx:id="statutBannerBox" styleClass="statutBanner" visible="false" managed="false">
                             <Label fx:id="statutBannerLabel" text="" styleClass="statutBannerTxt" wrapText="true" HBox.hgrow="ALWAYS"/>

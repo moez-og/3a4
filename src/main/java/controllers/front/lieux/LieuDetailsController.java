@@ -32,8 +32,11 @@ import services.lieux.FavoriLieuService;
 import services.lieux.LieuService;
 import services.lieux.ModerationService;
 import services.gamification.GamificationService;
+import services.weather.WeatherService;
+import services.language.LanguageToolService;
 import utils.ui.ShellNavigator;
 import utils.ui.FrontOfferContext;
+import utils.ui.SpellCheckTextArea;
 import services.offres.OffreService;
 import models.offres.Offre;
 import utils.geo.TunisiaGeo;
@@ -65,6 +68,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Locale;
 
 public class LieuDetailsController {
@@ -117,6 +122,14 @@ public class LieuDetailsController {
     @FXML private Label horairesEmpty;
     @FXML private Label badgeOuvert;
     @FXML private Label badgeFerme;
+
+    // ====== MÉTÉO (FXML) ======
+    @FXML private VBox  weatherCard;
+    @FXML private Label weatherMain;      // Emoji + description
+    @FXML private Label weatherTemp;      // Température
+    @FXML private Label weatherFeels;     // Ressenti
+    @FXML private Label weatherHumidity;  // Humidité
+    @FXML private Label weatherWind;      // Vent
 
     // ====== FAVORI ======
     @FXML private Button favoriBtn;
@@ -242,6 +255,7 @@ public class LieuDetailsController {
         loadLieu();
         loadHoraires();
         loadAvis();
+        loadWeather();
     }
 
     @FXML
@@ -1709,9 +1723,12 @@ public class LieuDetailsController {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Avis");
         dialog.setHeaderText(existing == null ? "Ajouter un avis" : "Modifier mon avis");
+        dialog.setResizable(true);
 
         // Style du dialog
         dialog.getDialogPane().getStyleClass().add("avisDialog");
+        dialog.getDialogPane().setPrefSize(650, 580);
+        dialog.getDialogPane().setMinSize(550, 480);
         URL css = getClass().getResource("/styles/lieux/avis-dialog.css");
         if (css != null) dialog.getDialogPane().getStylesheets().add(css.toExternalForm());
 
@@ -1760,14 +1777,22 @@ public class LieuDetailsController {
         selectedNote.addListener((obs, o, n) -> refreshStars.run());
         hoverNote.addListener((obs, o, n) -> refreshStars.run());
 
-        // ---- Zone de commentaire ----
+        // ---- Zone de commentaire (avec correcteur orthographique intégré) ----
         final int MIN_CHARS = 10;
         final int MAX_CHARS = 500;
 
-        TextArea area = new TextArea(existing == null ? "" : safe(existing.getCommentaire()));
-        area.setPromptText("Ecrire un commentaire (min. " + MIN_CHARS + " caracteres)...");
-        area.setWrapText(true);
-        area.setPrefRowCount(4);
+        SpellCheckTextArea spellArea = new SpellCheckTextArea();
+        spellArea.setPromptText("Ecrire un commentaire (min. " + MIN_CHARS + " caracteres)...");
+        spellArea.setPrefHeight(180);
+        if (existing != null) {
+            spellArea.setText(safe(existing.getCommentaire()));
+        }
+
+        // Charger la feuille de style du correcteur
+        URL spellCss = getClass().getResource("/styles/lieux/spell-check.css");
+        if (spellCss != null) {
+            spellArea.addStylesheet(spellCss.toExternalForm());
+        }
 
         // Compteur de caractères
         Label lblCounter = new Label("0 / " + MAX_CHARS + " caracteres");
@@ -1783,12 +1808,12 @@ public class LieuDetailsController {
             "-fx-font-weight: 800; -fx-padding: 2 0 0 2;"
         );
         lblErrComment.setWrapText(true);
-        lblErrComment.setMaxWidth(400);
+        lblErrComment.setMaxWidth(500);
         lblErrComment.setVisible(false);
         lblErrComment.setManaged(false);
 
         // Mise à jour compteur + validation en temps réel
-        area.textProperty().addListener((obs, ov, nv) -> {
+        spellArea.addTextListener((obs, ov, nv) -> {
             int len = nv == null ? 0 : nv.length();
             lblCounter.setText(len + " / " + MAX_CHARS + " caracteres");
 
@@ -1807,8 +1832,6 @@ public class LieuDetailsController {
             if (len > 0) {
                 lblErrComment.setVisible(false);
                 lblErrComment.setManaged(false);
-                // Supprimer le style rouge du TextArea
-                area.setStyle("");
             }
         });
 
@@ -1822,7 +1845,8 @@ public class LieuDetailsController {
         }
 
         // Layout commentaire avec compteur + erreur
-        VBox commentBox = new VBox(4, area, lblCounter, lblErrComment);
+        // Le correcteur orthographique est intégré dans spellArea (soulignement rouge + clic droit)
+        VBox commentBox = new VBox(4, spellArea.getNode(), lblCounter, lblErrComment);
 
         // ── Chips de suggestions ────────────────────────────────
         Label lblSuggTitle = new Label("💡 Suggestions — cliquez pour remplir :");
@@ -1834,7 +1858,7 @@ public class LieuDetailsController {
         FlowPane chipsPane = new FlowPane();
         chipsPane.setHgap(8);
         chipsPane.setVgap(6);
-        chipsPane.setPrefWrapLength(400);
+        chipsPane.setPrefWrapLength(500);
 
         String categorieLieu = (current != null && current.getCategorie() != null)
             ? current.getCategorie() : "";
@@ -1875,9 +1899,9 @@ public class LieuDetailsController {
                 ));
                 // Clic → remplissage automatique du TextArea
                 chip.setOnAction(e -> {
-                    area.setText(suggestion);
-                    area.positionCaret(suggestion.length());
-                    area.requestFocus();
+                    spellArea.setText(suggestion);
+                    spellArea.positionCaret(suggestion.length());
+                    spellArea.requestFocus();
                 });
                 chipsPane.getChildren().add(chip);
             }
@@ -1930,7 +1954,7 @@ public class LieuDetailsController {
         // ---- Bloquer la soumission si commentaire invalide ----
         if (okBtn != null) {
             okBtn.addEventFilter(ActionEvent.ACTION, evt -> {
-                String com = safe(area.getText()).trim();
+                String com = safe(spellArea.getText()).trim();
                 String errMsg = "";
 
                 if (com.isEmpty()) {
@@ -1958,11 +1982,7 @@ public class LieuDetailsController {
                     lblErrComment.setVisible(true);
                     lblErrComment.setManaged(true);
 
-                    // Colorer le TextArea en rouge
-                    area.setStyle(
-                        "-fx-border-color: #dc2626; -fx-border-width: 2; -fx-border-radius: 14;"
-                    );
-                    area.requestFocus();
+                    spellArea.requestFocus();
 
                     // Annuler la fermeture du dialog
                     evt.consume();
@@ -1974,7 +1994,7 @@ public class LieuDetailsController {
             if (bt != save) return;
 
             int note = Math.max(1, Math.min(5, selectedNote.get()));
-            String com = safe(area.getText()).trim();
+            String com = safe(spellArea.getText()).trim();
 
             evalService.upsert(lieuId, currentUser.getId(), note, com);
             loadAvis();
@@ -2033,4 +2053,92 @@ public class LieuDetailsController {
     }
 
     private String safe(String s) { return s == null ? "" : s; }
+
+    /* ======================= MÉTÉO ======================= */
+
+    /**
+     * Charge la météo actuelle via OpenWeatherMap API.
+     * Appel asynchrone en arrière-plan.
+     */
+    private void loadWeather() {
+        if (current == null || current.getLatitude() == null || current.getLongitude() == null) {
+            if (weatherCard != null) {
+                weatherCard.setVisible(false);
+                weatherCard.setManaged(false);
+            }
+            return;
+        }
+
+        // Cacher la carte en attente de chargement
+        if (weatherCard != null) {
+            weatherCard.setVisible(false);
+            weatherCard.setManaged(false);
+        }
+
+        // Appel asynchrone (ne bloque pas l'UI)
+        javafx.concurrent.Task<services.weather.WeatherService.WeatherData> task = 
+            new javafx.concurrent.Task<>() {
+                @Override
+                protected services.weather.WeatherService.WeatherData call() throws Exception {
+                    return WeatherService.getWeather(current.getLatitude(), current.getLongitude());
+                }
+            };
+
+        task.setOnSucceeded(e -> {
+            services.weather.WeatherService.WeatherData weather = task.getValue();
+            Platform.runLater(() -> displayWeather(weather));
+        });
+
+        task.setOnFailed(e -> {
+            System.err.println("Erreur météo: " + task.getException().getMessage());
+            // Silencieusement ignored, la météo n'est pas critiques
+        });
+
+        new Thread(task, "weather-loader").start();
+    }
+
+    /**
+     * Affiche les données météo récupérées dans le widget compact.
+     */
+    private void displayWeather(services.weather.WeatherService.WeatherData weather) {
+        if (weatherCard == null) return;
+
+        weatherCard.setVisible(true);
+        weatherCard.setManaged(true);
+
+        // Emoji météo (grande icône)
+        String emoji = weather.getEmoji();
+        if (weatherMain != null) {
+            weatherMain.setText(emoji);
+        }
+
+        // Température (grande, centrée)
+        if (weatherTemp != null) {
+            weatherTemp.setText(String.format("%.0f°C", weather.temperature));
+        }
+
+        // Ville (réutilise weatherFeels pour afficher le nom de la ville)
+        if (weatherFeels != null) {
+            String villeName = (current != null && current.getVille() != null && !current.getVille().isEmpty())
+                    ? current.getVille()
+                    : (current != null ? safe(current.getNom()) : "");
+            weatherFeels.setText(villeName);
+        }
+
+        // Humidité
+        if (weatherHumidity != null) {
+            weatherHumidity.setText(String.format("💧 %d%%", weather.humidity));
+        }
+
+        // Vent
+        if (weatherWind != null) {
+            weatherWind.setText(String.format("💨 %.1f m/s", weather.windSpeed));
+        }
+
+        // Animation d'entrée
+        weatherCard.setOpacity(0);
+        FadeTransition ft = new FadeTransition(Duration.millis(300), weatherCard);
+        ft.setToValue(1);
+        ft.play();
+    }
 }

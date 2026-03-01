@@ -67,6 +67,9 @@ public class ChatbotController {
     private TargetDataLine micLine;
     private volatile boolean recording = false;
     private ByteArrayOutputStream audioBuffer;
+    
+    // Gestion de la parole (TTS)
+    private volatile Process currentSpeechProcess = null;
 
     // ============================================================
     //  INIT
@@ -111,6 +114,12 @@ public class ChatbotController {
         }
         history.clear();
         messagesBox.getChildren().clear();
+        
+        // Ajouter une spacer région pour que les messages se positionnent en bas
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+        messagesBox.getChildren().add(spacer);
+        
         currentSession = new ChatSession();
         currentSession.id    = UUID.randomUUID().toString();
         currentSession.date  = LocalDateTime.now().format(DT_FMT);
@@ -371,6 +380,9 @@ public class ChatbotController {
     //  TTS — synthèse vocale via PowerShell SAPI (Windows)
     // ============================================================
     private void speakText(String text) {
+        // Arrêter la parole en cours avant de lancer une nouvelle
+        stopSpeech();
+        
         // Nettoyer le texte pour la synthèse (enlever emojis et markdown)
         String clean = text
             .replaceAll("[^\\p{L}\\p{N}\\p{P}\\s]", " ")
@@ -391,21 +403,38 @@ public class ChatbotController {
                         "$s.Rate = 1; $s.Speak('%s');",
                         ttsText.replace("'", " ")
                     );
-                    new ProcessBuilder("powershell", "-Command", ps)
-                        .redirectErrorStream(true).start().waitFor();
+                    currentSpeechProcess = new ProcessBuilder("powershell", "-Command", ps)
+                        .redirectErrorStream(true).start();
+                    currentSpeechProcess.waitFor();
                 } else if (os.contains("mac")) {
                     // macOS : commande say (natif)
-                    new ProcessBuilder("say", "-v", "Thomas", ttsText)
-                        .start().waitFor();
+                    currentSpeechProcess = new ProcessBuilder("say", "-v", "Thomas", ttsText)
+                        .start();
+                    currentSpeechProcess.waitFor();
                 } else {
                     // Linux : espeak (si installé)
-                    new ProcessBuilder("espeak", "-v", "fr", ttsText)
-                        .start().waitFor();
+                    currentSpeechProcess = new ProcessBuilder("espeak", "-v", "fr", ttsText)
+                        .start();
+                    currentSpeechProcess.waitFor();
                 }
             } catch (Exception ignored) {
                 // TTS silencieux si non disponible
+            } finally {
+                currentSpeechProcess = null;
             }
         });
+    }
+    
+    /**
+     * Arrête la parole en cours
+     */
+    private void stopSpeech() {
+        if (currentSpeechProcess != null) {
+            try {
+                currentSpeechProcess.destroyForcibly();
+                currentSpeechProcess = null;
+            } catch (Exception ignored) {}
+        }
     }
 
     // ============================================================
@@ -499,6 +528,20 @@ public class ChatbotController {
         } catch (Exception ignored) {}
     }
 
+    /**
+     * Sauvegarde toutes les sessions en mémoire dans le fichier JSON
+     */
+    private void saveAllSessions() {
+        try {
+            Files.createDirectories(HISTORY_DIR);
+            List<String> lines = new ArrayList<>();
+            for (ChatSession s : sessions) {
+                lines.add(sessionToJson(s));
+            }
+            Files.write(HISTORY_FILE, lines, StandardCharsets.UTF_8);
+        } catch (Exception ignored) {}
+    }
+
     private void loadHistoryFromDisk() {
         try {
             if (!Files.exists(HISTORY_FILE)) return;
@@ -541,11 +584,33 @@ public class ChatbotController {
                 Label dateLbl = new Label(s.date + " · " + s.messages.size()/2 + " msg");
                 dateLbl.getStyleClass().add("historyCardDate");
 
-                card.getChildren().addAll(titleLbl, dateLbl);
-
-                // Clic → recharger la session
+                // Container pour le contenu et le bouton supprimer
+                VBox contentBox = new VBox(3);
+                contentBox.getChildren().addAll(titleLbl, dateLbl);
+                HBox.setHgrow(contentBox, Priority.ALWAYS);
+                
+                HBox cardContent = new HBox(8);
+                cardContent.setAlignment(Pos.CENTER_LEFT);
+                cardContent.getChildren().add(contentBox);
+                
+                // Bouton supprimer
+                Button deleteBtn = new Button("✕");
+                deleteBtn.getStyleClass().add("historyDeleteBtn");
+                deleteBtn.setPrefSize(28, 28);
+                deleteBtn.setMinSize(28, 28);
+                deleteBtn.setMaxSize(28, 28);
                 final ChatSession session = s;
-                card.setOnMouseClicked(e -> loadSession(session));
+                deleteBtn.setOnAction(e -> deleteSession(session));
+                
+                cardContent.getChildren().add(deleteBtn);
+                card.getChildren().add(cardContent);
+
+                // Clic sur la card → recharger la session
+                card.setOnMouseClicked(e -> {
+                    if (!e.getTarget().toString().contains("Button")) {
+                        loadSession(session);
+                    }
+                });
 
                 historySidebar.getChildren().add(card);
             }
@@ -555,6 +620,12 @@ public class ChatbotController {
     private void loadSession(ChatSession s) {
         history.clear();
         messagesBox.getChildren().clear();
+        
+        // Ajouter une spacer région pour que les messages se positionnent en bas
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+        messagesBox.getChildren().add(spacer);
+        
         currentSession = s;
 
         for (String[] msg : s.messages) {
@@ -567,6 +638,23 @@ public class ChatbotController {
             }
         }
         refreshHistorySidebar();
+    }
+
+    /**
+     * Supprime une session de l'historique
+     */
+    private void deleteSession(ChatSession s) {
+        sessions.remove(s);
+        
+        // Si c'est la session courante, créer une nouvelle
+        if (currentSession != null && s.id.equals(currentSession.id)) {
+            startNewChat();
+        } else {
+            refreshHistorySidebar();
+        }
+        
+        // Sauvegarder les changements
+        saveAllSessions();
     }
 
     // ============================================================
@@ -704,12 +792,20 @@ public class ChatbotController {
         bubble.getStyleClass().add("chatBubbleBot");
         bubbleContainer.getChildren().add(bubble);
         
-        // Bouton pour lire la réponse à voix haute
+        // Boutons pour lire et arrêter la réponse à voix haute
+        HBox buttonBox = new HBox(6);
         Button readBtn = new Button("🔊 Lire la réponse");
         readBtn.setStyle("-fx-font-size: 11px; -fx-padding: 4 10 4 10; -fx-cursor: hand;");
         readBtn.getStyleClass().add("chatReadBtn");
         readBtn.setOnAction(e -> speakText(text));
-        bubbleContainer.getChildren().add(readBtn);
+        
+        Button stopBtn = new Button("⏹️ Arrêter");
+        stopBtn.setStyle("-fx-font-size: 11px; -fx-padding: 4 10 4 10; -fx-cursor: hand;");
+        stopBtn.getStyleClass().add("chatStopBtn");
+        stopBtn.setOnAction(e -> stopSpeech());
+        
+        buttonBox.getChildren().addAll(readBtn, stopBtn);
+        bubbleContainer.getChildren().add(buttonBox);
         
         HBox.setHgrow(bubbleContainer, Priority.SOMETIMES);
         row.getChildren().addAll(avatar, bubbleContainer);
@@ -736,6 +832,12 @@ public class ChatbotController {
         saveCurrentSession();
         history.clear();
         messagesBox.getChildren().clear();
+        
+        // Ajouter une spacer région pour que les messages se positionnent en bas
+        Region spacer = new Region();
+        VBox.setVgrow(spacer, Priority.ALWAYS);
+        messagesBox.getChildren().add(spacer);
+        
         currentSession = new ChatSession();
         currentSession.id    = UUID.randomUUID().toString();
         currentSession.date  = LocalDateTime.now().format(DT_FMT);
