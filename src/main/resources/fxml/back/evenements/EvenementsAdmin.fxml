@@ -84,6 +84,9 @@
                 <Button fx:id="btnCalendar" text="📅 Calendrier"
                         onAction="#onToggleCalendar"
                         styleClass="btn-pill"/>
+                <Button text="🤖 Stats IA"
+                        onAction="#onShowStats"
+                        styleClass="btn-pill"/>
                 <Button fx:id="btnAdd" text="Ajouter"
                         onAction="#onAjouterEvenement"
                         styleClass="btn-pill"/>
@@ -198,35 +201,102 @@
         </VBox>
 
         <!-- ───────────────────────────────────────────────────
-             PANNEAU 4 — Calendrier des Événements
+             PANNEAU 4 — Calendrier Moderne (Pink Theme)
         ─────────────────────────────────────────────────── -->
-        <VBox fx:id="panelCalendar" spacing="12" styleClass="card"
+        <VBox fx:id="panelCalendar" spacing="0" styleClass="card"
+              visible="false" managed="false">
+
+            <!-- Top Bar: Back + View Toggles + Month Nav + Today -->
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="cal-top-bar">
+                <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                <Button text="← Retour" onAction="#onRetourFromCalendar"
+                        styleClass="cal-back-btn"/>
+                <HBox spacing="0" styleClass="cal-view-toggle">
+                    <Button fx:id="btnViewMonth" text="Mois" onAction="#onViewMonth"
+                            styleClass="cal-toggle-btn"/>
+                    <Button fx:id="btnViewWeek" text="Semaine" onAction="#onViewWeek"
+                            styleClass="cal-toggle-btn"/>
+                    <Button fx:id="btnViewDay" text="Jour" onAction="#onViewDay"
+                            styleClass="cal-toggle-btn"/>
+                </HBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="btnPrevMonth" text="‹" onAction="#onPrevMonth"
+                        styleClass="cal-arrow-btn"/>
+                <Label fx:id="calMonthLabel" text="Janvier 2026" styleClass="cal-title-label"/>
+                <Button fx:id="btnNextMonth" text="›" onAction="#onNextMonth"
+                        styleClass="cal-arrow-btn"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Aujourd'hui" onAction="#onCalendarToday"
+                        styleClass="cal-today-pill"/>
+            </HBox>
+
+            <!-- Compact Tools Bar: ICS + Notion -->
+            <HBox spacing="8" alignment="CENTER_LEFT" styleClass="cal-tools-bar">
+                <padding><Insets top="6" right="16" bottom="6" left="16"/></padding>
+                <Button text="📤 Export .ics" onAction="#onExportAllIcs"
+                        styleClass="cal-tool-btn"/>
+                <Button text="📅 Mois .ics" onAction="#onExportMonthIcs"
+                        styleClass="cal-tool-btn"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="calNotionStatus" text="☁ Notion connecté"
+                       styleClass="cal-notion-status"/>
+                <Button text="🔄 Sync Notion" onAction="#onSyncToNotion"
+                        styleClass="cal-tool-btn"/>
+                <Button text="🗑 Vider" onAction="#onClearNotion"
+                        styleClass="cal-tool-btn cal-tool-danger"/>
+            </HBox>
+
+            <!-- Main: Calendar Grid + Detail Side Panel -->
+            <HBox VBox.vgrow="ALWAYS" spacing="0" style="-fx-min-width:0;">
+                <ScrollPane fitToWidth="true" HBox.hgrow="ALWAYS"
+                            vbarPolicy="AS_NEEDED" hbarPolicy="NEVER"
+                            styleClass="cal-scroll" style="-fx-min-width:0;">
+                    <content>
+                        <VBox fx:id="calendarContainer" spacing="0"
+                              styleClass="cal-grid-wrap"/>
+                    </content>
+                </ScrollPane>
+                <ScrollPane fitToWidth="true" fitToHeight="false"
+                            hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                            fx:id="calDetailScroll"
+                            visible="false" managed="false"
+                            prefWidth="290" maxWidth="290" minWidth="0"
+                            styleClass="cal-detail-scroll">
+                    <content>
+                        <VBox fx:id="calDetailPanel" spacing="0"
+                              styleClass="cal-detail-panel"/>
+                    </content>
+                </ScrollPane>
+            </HBox>
+        </VBox>
+
+        <!-- ───────────────────────────────────────────────────
+             PANNEAU 5 — Statistiques IA des intérêts
+        ─────────────────────────────────────────────────── -->
+        <VBox fx:id="panelStats" spacing="12" styleClass="card"
               visible="false" managed="false">
             <padding>
                 <Insets top="14" right="14" bottom="14" left="14"/>
             </padding>
 
-            <!-- Navigation mois -->
-            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="top-actions-row">
-                <Button text="← Retour" onAction="#onRetourFromCalendar"
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="top-actions-row">
+                <Button text="← Retour" onAction="#onRetourFromStats"
                         styleClass="card-btn"/>
+                <Label text="🤖 Statistiques IA — Intérêts des utilisateurs"
+                       styleClass="card-title"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button fx:id="btnPrevMonth" text="◀" onAction="#onPrevMonth"
-                        styleClass="cal-nav-btn"/>
-                <Label fx:id="calMonthLabel" text="Janvier 2026" styleClass="cal-month-title"/>
-                <Button fx:id="btnNextMonth" text="▶" onAction="#onNextMonth"
-                        styleClass="cal-nav-btn"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Aujourd'hui" onAction="#onCalendarToday"
-                        styleClass="btn-pill"/>
             </HBox>
 
-            <!-- Grille calendrier -->
             <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
-                        vbarPolicy="AS_NEEDED" hbarPolicy="NEVER"
+                        vbarPolicy="ALWAYS" hbarPolicy="NEVER"
                         styleClass="cards-scroll">
                 <content>
-                    <VBox fx:id="calendarContainer" spacing="0" styleClass="cal-container"/>
+                    <VBox fx:id="statsContainer" spacing="12"
+                          styleClass="cards-pane">
+                        <padding>
+                            <Insets top="8" right="8" bottom="8" left="8"/>
+                        </padding>
+                    </VBox>
                 </content>
             </ScrollPane>
         </VBox>

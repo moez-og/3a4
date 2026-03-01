@@ -114,17 +114,17 @@
     -fx-effect: dropshadow(gaussian, rgba(217,119,6,0.35), 10, 0.18, 0, 4);
 }
 
-/* ── Bouton Crypto (accent violet/bleu) ── */
+/* ── Bouton Crypto (accent bleu) ── */
 .payCryptoBtn:selected {
-    -fx-background-color: linear-gradient(to right, #7c3aed, #a78bfa);
-    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.35), 10, 0.18, 0, 4);
+    -fx-background-color: linear-gradient(to right, #1a4a7a, #4a8cc7);
+    -fx-effect: dropshadow(gaussian, rgba(26,74,122,0.35), 10, 0.18, 0, 4);
 }
 
 .payCryptoToggle:selected {
-    -fx-background-color: linear-gradient(to right, #7c3aed, #a78bfa);
+    -fx-background-color: linear-gradient(to right, #1a4a7a, #4a8cc7);
     -fx-text-fill: white;
     -fx-border-color: transparent;
-    -fx-effect: dropshadow(gaussian, rgba(124,58,237,0.30), 8, 0.15, 0, 3);
+    -fx-effect: dropshadow(gaussian, rgba(26,74,122,0.30), 8, 0.15, 0, 3);
 }
 
 /* ═══════ API NOTE ═══════ */
@@ -175,9 +175,9 @@
 
 /* ═══════ CRYPTO SECTION ═══════ */
 .payCryptoCard {
-    -fx-background-color: rgba(124,58,237,0.05);
+    -fx-background-color: rgba(26,74,122,0.05);
     -fx-background-radius: 14;
-    -fx-border-color: rgba(124,58,237,0.15);
+    -fx-border-color: rgba(26,74,122,0.15);
     -fx-border-radius: 14;
     -fx-padding: 16 18 16 18;
 }
@@ -185,29 +185,29 @@
 .payCryptoAddress {
     -fx-font-family: "Consolas", "Courier New", monospace;
     -fx-font-size: 11.5;
-    -fx-text-fill: #4c1d95;
+    -fx-text-fill: #0b2550;
 }
 
 .payCryptoAmount {
-    -fx-text-fill: #7c3aed;
+    -fx-text-fill: #1a4a7a;
     -fx-font-weight: 900;
     -fx-font-size: 20;
     -fx-padding: 4 0 4 0;
 }
 
 .payCopyBtn {
-    -fx-background-color: rgba(124,58,237,0.12);
+    -fx-background-color: rgba(26,74,122,0.12);
     -fx-background-radius: 10;
-    -fx-border-color: rgba(124,58,237,0.25);
+    -fx-border-color: rgba(26,74,122,0.25);
     -fx-border-radius: 10;
-    -fx-text-fill: #5b21b6;
+    -fx-text-fill: #0b2550;
     -fx-font-weight: 900;
     -fx-font-size: 11;
     -fx-padding: 8 12 8 12;
     -fx-cursor: hand;
 }
 .payCopyBtn:hover {
-    -fx-background-color: rgba(124,58,237,0.20);
+    -fx-background-color: rgba(26,74,122,0.20);
 }
 
 /* ═══════ ERROR ═══════ */

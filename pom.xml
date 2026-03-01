@@ -58,6 +58,8 @@
             <artifactId>pdfbox</artifactId>
             <version>2.0.31</version>
         </dependency>
+
+        <!-- Pas de dépendances externes pour le calendrier — 100% gratuit via export ICS (RFC 5545) -->
     </dependencies>
 
     <build>

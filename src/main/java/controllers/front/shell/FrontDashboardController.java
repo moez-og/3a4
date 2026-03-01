@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import controllers.front.evenements.EvenementDetailsController;
+import controllers.front.evenements.EvenementsController;
 import controllers.front.evenements.PaiementController;
 
 public class FrontDashboardController implements ShellNavigator {
@@ -139,7 +140,11 @@ public class FrontDashboardController implements ShellNavigator {
     public void showEvents() {
         navEvents.setSelected(true);
         setHeader("Événements", "Agenda · inscriptions · infos");
-        ensureLoadedAndShow(ROUTE_EVENTS, ViewPaths.FRONT_EVENEMENTS);
+        Object ctrl = ensureLoadedAndShow(ROUTE_EVENTS, ViewPaths.FRONT_EVENEMENTS);
+        // Toujours rafraîchir les cartes pour refléter l'état réel (paiement, inscription…)
+        if (ctrl instanceof controllers.front.evenements.EvenementsController ec) {
+            ec.refreshCards();
+        }
     }
 
     @FXML
@@ -538,6 +543,11 @@ public class FrontDashboardController implements ShellNavigator {
         navEvents.setSelected(true);
         setHeader("Paiement", "Finaliser votre paiement");
 
+        // ── Invalider le cache de la liste événements pour forcer le rafraîchissement
+        //    après le paiement (sinon le tag reste "En attente de paiement") ──
+        viewCache.remove(ROUTE_EVENTS);
+        controllerCache.remove(ROUTE_EVENTS);
+
         try {
             URL url = getClass().getResource(ViewPaths.FRONT_PAIEMENT);
             if (url == null) throw new IllegalStateException("FXML introuvable: " + ViewPaths.FRONT_PAIEMENT);
@@ -566,6 +576,11 @@ public class FrontDashboardController implements ShellNavigator {
     private void showEvenementDetails(int id) {
         navEvents.setSelected(true);
         setHeader("Événements", "Détails de l'événement");
+
+        // ── Invalider le cache de la liste événements pour forcer le rafraîchissement
+        //    quand on revient (état inscription/paiement peut avoir changé) ──
+        viewCache.remove(ROUTE_EVENTS);
+        controllerCache.remove(ROUTE_EVENTS);
 
         try {
             URL url = getClass().getResource(ViewPaths.FRONT_EVENEMENT_DETAILS); // ex: "/views/front/evenements/EvenementDetailsView.fxml"

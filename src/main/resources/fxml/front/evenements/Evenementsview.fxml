@@ -43,12 +43,13 @@
             </HBox>
 
             <!-- ═══════ STATS BAR ═══════ -->
-            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="evStatsBar">
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="evStatsBar">
                 <Label fx:id="countLabel" text="0 événement(s)" styleClass="evCountBadge"/>
                 <Label fx:id="inscritLabel" text="—" styleClass="evInscritBadge"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="✓ Mes inscriptions" onAction="#showMesInscriptions" styleClass="evGhostBtn"/>
-                <Button text="Tous" onAction="#showAll" styleClass="evGhostBtnActive"/>
+                <Button fx:id="btnAll" text="Tous" onAction="#showAll" styleClass="evStatsBtn evStatsBtnActive"/>
+                <Button fx:id="btnInscrits" text="✓ Mes inscriptions" onAction="#showMesInscriptions" styleClass="evStatsBtn"/>
+                <Button fx:id="btnRecommandes" text="🤖 Recommandés" onAction="#showRecommandes" styleClass="evStatsBtn"/>
                 <Button fx:id="btnToggleCalendar" text="📅 Calendrier" onAction="#onToggleCalendar" styleClass="evCalToggleBtn"/>
             </HBox>
 
@@ -84,18 +85,38 @@
                 </VBox>
             </VBox>
 
-            <!-- ═══════ SECTION CALENDRIER (cachée par défaut) ═══════ -->
-            <VBox fx:id="calendarSection" spacing="12" visible="false" managed="false" styleClass="evCalSection">
-                <HBox spacing="12" alignment="CENTER_LEFT" styleClass="evCalNavBar">
-                    <Button text="← Retour" onAction="#onRetourFromCalendar" styleClass="evCalNavBtn"/>
+            <!-- ═══════ SECTION CALENDRIER — Modern Blue (cachée par défaut) ═══════ -->
+            <VBox fx:id="calendarSection" spacing="0" visible="false" managed="false" styleClass="evCalSection">
+
+                <!-- Top Bar: Back + View Toggles + Month Nav + Today -->
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="evCalTopBar">
+                    <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                    <Button text="← Retour" onAction="#onRetourFromCalendar"
+                            styleClass="evCalBackBtn"/>
+                    <HBox spacing="0" styleClass="evCalViewToggle">
+                        <Button fx:id="btnFrontViewMonth" text="Mois" onAction="#onViewMonth"
+                                styleClass="evCalTogBtn"/>
+                        <Button fx:id="btnFrontViewWeek" text="Semaine" onAction="#onViewWeek"
+                                styleClass="evCalTogBtn"/>
+                        <Button fx:id="btnFrontViewDay" text="Jour" onAction="#onViewDay"
+                                styleClass="evCalTogBtn"/>
+                    </HBox>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="◀" onAction="#onPrevMonth" styleClass="evCalNavBtn"/>
-                    <Label fx:id="calMonthLabel" text="" styleClass="evCalMonthTitle"/>
-                    <Button text="▶" onAction="#onNextMonth" styleClass="evCalNavBtn"/>
+                    <Button text="‹" onAction="#onPrevMonth" styleClass="evCalArrowBtn"/>
+                    <Label fx:id="calMonthLabel" text="" styleClass="evCalTitle"/>
+                    <Button text="›" onAction="#onNextMonth" styleClass="evCalArrowBtn"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Aujourd'hui" onAction="#onCalendarToday" styleClass="evCalTodayBtn"/>
+                    <Button text="Aujourd'hui" onAction="#onCalendarToday" styleClass="evCalTodayPill"/>
                 </HBox>
-                <VBox fx:id="calendarContainer" styleClass="evCalContainer"/>
+
+                <!-- Calendar Grid + Detail Side Panel -->
+                <HBox VBox.vgrow="ALWAYS" spacing="0">
+                    <VBox fx:id="calendarContainer" HBox.hgrow="ALWAYS"
+                          styleClass="evCalGridWrap"/>
+                    <VBox fx:id="calFrontDetailPanel" prefWidth="300" minWidth="280"
+                          visible="false" managed="false"
+                          styleClass="evCalDetailPanel"/>
+                </HBox>
             </VBox>
 
         </VBox>
