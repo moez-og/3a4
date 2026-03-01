@@ -1,6 +1,5 @@
 package controllers.front.home;
 
-import controllers.front.shell.FrontDashboardController;
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.fxml.FXML;
@@ -15,11 +14,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
-import utils.ui.ShellNavigator;
 
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class FrontHomeController {
@@ -32,12 +28,6 @@ public class FrontHomeController {
     @FXML private StackPane recoSpotCard;
     @FXML private StackPane recoOfferCard;
     @FXML private StackPane recoSortieCard;
-
-    private ShellNavigator navigator;
-
-    public void setNavigator(ShellNavigator navigator) {
-        this.navigator = navigator;
-    }
 
     private record City(String name, String meta, String imagePath) {}
 
@@ -95,8 +85,11 @@ public class FrontHomeController {
         card.setMinHeight(270);
 
         String bgStyle = resolveBgStyle(c.imagePath);
-        if (!bgStyle.isEmpty()) card.setStyle(bgStyle);
+        if (!bgStyle.isEmpty()) {
+            card.setStyle(bgStyle);
+        }
 
+        // ✅ Clip arrondi réel = images vraiment cintrées (propre)
         applyRoundedClip(card, CARD_RADIUS);
 
         VBox overlay = new VBox(4);
@@ -117,18 +110,12 @@ public class FrontHomeController {
         installHoverScale(card);
 
         card.setCursor(Cursor.HAND);
-        card.setOnMouseClicked(e -> goLieuxCity(c.name));
+        card.setOnMouseClicked(e -> info(
+                "Ville sélectionnée",
+                "Explorer: " + c.name + "\n(Ici tu branches la page Lieux/Recherche filtrée)"
+        ));
 
         return card;
-    }
-
-    private void goLieuxCity(String city) {
-        if (navigator == null) {
-            info("Navigation", "Navigator non injecté.");
-            return;
-        }
-        String v = enc(city);
-        navigator.navigate(FrontDashboardController.ROUTE_LIEUX_FILTER_PREFIX + "ville=" + v + ";q=" + v);
     }
 
     private void installHoverScale(StackPane card) {
@@ -166,76 +153,49 @@ public class FrontHomeController {
         }
     }
 
-    private String enc(String s) {
-        return URLEncoder.encode(s == null ? "" : s.trim(), StandardCharsets.UTF_8);
-    }
-
     /* ===== Actions HERO ===== */
 
     @FXML
     private void explore() {
-        if (navigator == null) return;
-
         String q = heroSearchField == null ? "" : heroSearchField.getText().trim();
         if (q.isEmpty()) {
-            navigator.navigate(FrontDashboardController.ROUTE_LIEUX);
+            info("Recherche", "Entre un mot-clé dans la barre de recherche.");
             return;
         }
-        navigator.navigate(FrontDashboardController.ROUTE_LIEUX_FILTER_PREFIX + "q=" + enc(q));
+        info("Recherche", "Recherche: " + q + "\n(Brancher recherche globale ici)");
     }
 
-    /* ===== Chips -> filtrage direct vers Lieux ===== */
-    @FXML private void chipCafes() {
-        if (navigator == null) return;
-        navigator.navigate(FrontDashboardController.ROUTE_LIEUX_FILTER_PREFIX + "cat=" + enc("CAFE") + ";q=" + enc("cafe"));
-    }
-    @FXML private void chipRestaurants() {
-        if (navigator == null) return;
-        navigator.navigate(FrontDashboardController.ROUTE_LIEUX_FILTER_PREFIX + "cat=" + enc("RESTAURANT") + ";q=" + enc("restaurant"));
-    }
-    @FXML private void chipMusees() {
-        if (navigator == null) return;
-        navigator.navigate(FrontDashboardController.ROUTE_LIEUX_FILTER_PREFIX + "cat=" + enc("MUSEE") + ";q=" + enc("musee"));
-    }
-    @FXML private void chipPlages() {
-        if (navigator == null) return;
-        navigator.navigate(FrontDashboardController.ROUTE_LIEUX_FILTER_PREFIX + "cat=" + enc("PLAGE") + ";q=" + enc("plage"));
-    }
-    @FXML private void chipSorties() {
-        if (navigator == null) return;
-        navigator.navigate(FrontDashboardController.ROUTE_SORTIES);
-    }
+    @FXML private void chipCafes() { info("Catégorie", "Filtre: Cafés"); }
+    @FXML private void chipRestaurants() { info("Catégorie", "Filtre: Restaurants"); }
+    @FXML private void chipMusees() { info("Catégorie", "Filtre: Musées"); }
+    @FXML private void chipPlages() { info("Catégorie", "Filtre: Plages"); }
+    @FXML private void chipSorties() { info("Catégorie", "Filtre: Sorties"); }
 
     @FXML
     private void seeAllCities() {
-        if (navigator == null) return;
-        navigator.navigate(FrontDashboardController.ROUTE_LIEUX);
+        info("Villes", "Afficher toutes les villes (brancher une page dédiée).");
     }
 
     @FXML
     private void refreshReco() {
-        // UI statique pour l’instant (pas de service reco)
-        // On peut ajouter une logique DB ensuite.
+        info("Recommandations", "Actualisation (brancher service de recommandations).");
     }
 
     /* ===== Reco actions ===== */
 
     @FXML
     private void openRecoSpotClick(MouseEvent e) {
-        if (navigator == null) return;
-        navigator.navigate(FrontDashboardController.ROUTE_LIEUX_FILTER_PREFIX + "q=" + enc("cafe"));
+        info("Spot populaire", "Ouvrir les lieux recommandés (brancher la liste filtrée / détails).");
     }
 
     @FXML
     private void openRecoOfferClick(MouseEvent e) {
-        if (navigator == null) return;
-        navigator.navigate(FrontDashboardController.ROUTE_OFFRES);
+        info("Offre du moment", "Ouvrir la section Offres (brancher liste + détails).");
     }
 
     @FXML
     private void openRecoSortieClick(MouseEvent e) {
-        if (navigator == null) return;
-        navigator.navigate(FrontDashboardController.ROUTE_SORTIES);
+        info("Sortie recommandée", "Ouvrir la section Sorties (brancher liste + participation).");
     }
 
     @FXML private void openRecoSpotAction() { openRecoSpotClick(null); }

@@ -35,7 +35,7 @@ public class UserDashboardController {
     @FXML private TextField searchField;
     @FXML private Label totalUsersLabel;
     @FXML private Label activeUsersLabel; // ici = nb admins
-    @FXML private Label adminsLabel;      // ici = nb partenaires
+    @FXML private Label adminsLabel;      // ici = nb visiteurs
     @FXML private HBox usersRow;
     @FXML private Pagination usersPagination;
 
@@ -48,8 +48,7 @@ public class UserDashboardController {
     private ObservableList<User> usersList = FXCollections.observableArrayList();
     private ObservableList<User> filteredUsersList = FXCollections.observableArrayList();
 
-    // 2 cards par page (comme sur le design du screenshot)
-    private final int pageSize = 2;
+    private final int pageSize = 3;
 
     private User selectedUser;
     private Parent selectedCard;
@@ -76,7 +75,7 @@ public class UserDashboardController {
                 ObservableList<User> all = FXCollections.observableArrayList(users);
 
                 long nbAdmins = users.stream().filter(u -> "admin".equalsIgnoreCase(u.getRole())).count();
-                long nbVisiteurs = users.stream().filter(u -> "partenaire".equalsIgnoreCase(u.getRole())).count();
+                long nbVisiteurs = users.stream().filter(u -> "visiteur".equalsIgnoreCase(u.getRole())).count();
 
                 Platform.runLater(() -> {
                     usersList.setAll(all);
@@ -180,15 +179,13 @@ public class UserDashboardController {
     }
 
     private void selectUserCard(User user, Parent card) {
-        // retire l'état sélectionné sur l'ancienne card
         if (selectedCard != null) {
-            selectedCard.getStyleClass().remove("selected");
+            selectedCard.setStyle("-fx-background-color: #ffffff; -fx-background-radius: 16; -fx-border-color: #e1e6ef; -fx-border-radius: 16;");
         }
         selectedUser = user;
         selectedCard = card;
 
-        // ajoute l'état sélectionné (CSS)
-        card.getStyleClass().add("selected");
+        card.setStyle("-fx-background-color: #f8fbff; -fx-background-radius: 16; -fx-border-color: #4a6fa5; -fx-border-radius: 16; -fx-border-width: 2;");
 
         if (editBtn != null) editBtn.setDisable(false);
         if (deleteBtn != null) deleteBtn.setDisable(false);
@@ -395,7 +392,7 @@ public class UserDashboardController {
 
     private ComboBox<String> createRoleCombo() {
         ComboBox<String> cb = new ComboBox<>();
-        cb.getItems().addAll("admin", "partenaire", "abonne");
+        cb.getItems().addAll("admin", "visiteur", "abonne");
         cb.setPromptText("Rôle");
         cb.setValue("abonne");
         cb.setStyle("-fx-font-size: 12; -fx-padding: 8 10; -fx-background-color: white; -fx-background-radius: 10; -fx-border-color: #e1e6ef; -fx-border-radius: 10;");

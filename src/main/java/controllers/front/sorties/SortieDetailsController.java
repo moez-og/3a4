@@ -4,8 +4,6 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -15,9 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -60,11 +56,7 @@ public class SortieDetailsController {
     @FXML private FlowPane questionsPane;
     @FXML private Label questionsEmpty;
 
-    @FXML private FlowPane acceptedPane;
-    @FXML private Label acceptedEmpty;
-
     @FXML private Button btnParticiper;
-    @FXML private Button btnRequests;
     @FXML private Button btnEdit;
     @FXML private Button btnDelete;
 
@@ -271,7 +263,6 @@ public class SortieDetailsController {
                 return;
             }
             render(current);
-            renderAcceptedParticipants();
             applyControls();
         } catch (Exception e) {
             error("Erreur", "Chargement impossible", safe(e.getMessage()));
@@ -351,50 +342,11 @@ public class SortieDetailsController {
         }
     }
 
-    private void renderAcceptedParticipants() {
-        if (acceptedPane == null || current == null) return;
-
-        acceptedPane.getChildren().clear();
-
-        List<ParticipationSortie> parts;
-        try {
-            parts = participationService.getByAnnonce(current.getId());
-        } catch (Exception e) {
-            parts = List.of();
-        }
-
-        for (ParticipationSortie p : parts) {
-            if (!isAccepted(p)) continue;
-
-            String name = "Utilisateur #" + p.getUserId();
-            try {
-                User u = userService.trouverParId(p.getUserId());
-                if (u != null) {
-                    String full = (safe(u.getPrenom()) + " " + safe(u.getNom())).trim();
-                    if (!full.isEmpty()) name = full;
-                }
-            } catch (Exception ignored) {}
-
-            String places = p.getNbPlaces() > 1 ? (" (" + p.getNbPlaces() + " places)") : "";
-            Label chip = new Label("👤 " + name + places);
-            chip.getStyleClass().add("qChip");
-            chip.setPadding(new Insets(8, 10, 8, 10));
-            acceptedPane.getChildren().add(chip);
-        }
-
-        boolean empty = acceptedPane.getChildren().isEmpty();
-        if (acceptedEmpty != null) {
-            acceptedEmpty.setVisible(empty);
-            acceptedEmpty.setManaged(empty);
-        }
-    }
-
     private void applyControls() {
         boolean owner = (currentUser != null && current != null && current.getUserId() == currentUser.getId());
 
         if (btnEdit != null) { btnEdit.setVisible(owner); btnEdit.setManaged(owner); }
         if (btnDelete != null) { btnDelete.setVisible(owner); btnDelete.setManaged(owner); }
-        if (btnRequests != null) { btnRequests.setVisible(owner); btnRequests.setManaged(owner); }
 
         boolean canParticipate = (currentUser != null && current != null
                 && !owner
@@ -411,141 +363,14 @@ public class SortieDetailsController {
                 } catch (Exception ignored) {}
 
                 if (ex != null) {
-                    btnParticiper.setDisable(false);
-                    btnParticiper.setText("Gérer participation");
+                    btnParticiper.setDisable(true);
+                    btnParticiper.setText("Demande envoyée");
                 } else {
                     btnParticiper.setDisable(false);
                     btnParticiper.setText("Participer");
                 }
             }
         }
-    }
-
-    @FXML
-    private void openRequests() {
-        if (current == null || currentUser == null) return;
-        boolean owner = current.getUserId() == currentUser.getId();
-        if (!owner) return;
-
-        List<ParticipationSortie> parts;
-        try {
-            parts = participationService.getByAnnonce(current.getId());
-        } catch (Exception e) {
-            error("Erreur", "Chargement impossible", safe(e.getMessage()));
-            return;
-        }
-
-        List<ParticipationSortie> pending = parts.stream()
-                .filter(p -> isPending(p))
-                .toList();
-
-        Stage dialog = new Stage();
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        if (heroImage != null && heroImage.getScene() != null) {
-            dialog.initOwner(heroImage.getScene().getWindow());
-        }
-        dialog.setTitle("Demandes de participation");
-
-        VBox root = new VBox(10);
-        root.setPadding(new Insets(14));
-
-        Label h = new Label("Demandes en attente");
-        h.setStyle("-fx-font-weight: 800; -fx-font-size: 14px;");
-        root.getChildren().add(h);
-
-        if (pending.isEmpty()) {
-            Label empty = new Label("Aucune demande en attente.");
-            empty.setStyle("-fx-text-fill: rgba(15,42,68,0.65);");
-            root.getChildren().add(empty);
-        } else {
-            for (ParticipationSortie p : pending) {
-                root.getChildren().add(requestRow(p));
-            }
-        }
-
-        Button close = new Button("Fermer");
-        close.setOnAction(e -> dialog.close());
-        root.getChildren().add(close);
-
-        dialog.setScene(new Scene(root, 560, 520));
-        dialog.showAndWait();
-    }
-
-    private Node requestRow(ParticipationSortie p) {
-        VBox box = new VBox(6);
-        box.setPadding(new Insets(10));
-        box.setStyle("-fx-background-color: rgba(15,42,68,0.04); -fx-background-radius: 14;");
-
-        String name = "Utilisateur #" + p.getUserId();
-        try {
-            User u = userService.trouverParId(p.getUserId());
-            if (u != null) {
-                String full = (safe(u.getPrenom()) + " " + safe(u.getNom())).trim();
-                if (!full.isEmpty()) name = full;
-            }
-        } catch (Exception ignored) {}
-
-        Label title = new Label(name + " — " + Math.max(1, p.getNbPlaces()) + " place(s)");
-        title.setStyle("-fx-font-weight: 800;");
-
-        String comment = safe(p.getCommentaire()).trim();
-        Label sub = new Label(comment.isEmpty() ? "" : comment);
-        sub.setWrapText(true);
-        sub.setStyle("-fx-text-fill: rgba(15,42,68,0.75);");
-        sub.setVisible(!comment.isEmpty());
-        sub.setManaged(!comment.isEmpty());
-
-        Button accept = new Button("Accepter");
-        Button refuse = new Button("Refuser");
-
-        accept.setOnAction(e -> {
-            try {
-                int accepted = participationService.countAcceptedPlaces(current.getId());
-                int remaining = Math.max(0, current.getNbPlaces() - accepted);
-                if (p.getNbPlaces() > remaining) {
-                    error("Places insuffisantes", "Impossible d'accepter",
-                            "Places restantes: " + remaining + ". Demandées: " + p.getNbPlaces());
-                    return;
-                }
-
-                participationService.updateStatus(p.getId(), "CONFIRMEE");
-                info("Acceptée", "La demande a été acceptée.");
-                load();
-                box.setDisable(true);
-                box.setOpacity(0.55);
-            } catch (Exception ex) {
-                error("Erreur", "Action impossible", safe(ex.getMessage()));
-            }
-        });
-
-        refuse.setOnAction(e -> {
-            try {
-                participationService.updateStatus(p.getId(), "REFUSEE");
-                info("Refusée", "La demande a été refusée.");
-                load();
-                box.setDisable(true);
-                box.setOpacity(0.55);
-            } catch (Exception ex) {
-                error("Erreur", "Action impossible", safe(ex.getMessage()));
-            }
-        });
-
-        HBox actions = new HBox(10, accept, refuse);
-        actions.setAlignment(Pos.CENTER_RIGHT);
-
-        box.getChildren().addAll(title, sub, actions);
-        return box;
-    }
-
-    private boolean isAccepted(ParticipationSortie p) {
-        if (p == null) return false;
-        String s = safe(p.getStatut()).trim().toUpperCase();
-        return s.equals("ACCEPTEE") || s.equals("CONFIRMEE");
-    }
-
-    private boolean isPending(ParticipationSortie p) {
-        if (p == null) return false;
-        return "EN_ATTENTE".equalsIgnoreCase(safe(p.getStatut()).trim());
     }
 
     private void info(String title, String msg) {

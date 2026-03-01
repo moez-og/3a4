@@ -1,35 +1,28 @@
 package utils.ui;
 
-/**
- * Simple in-memory context for passing the selected offer/lieu between front views.
- *
- * This is intentionally minimal: values are consumed (read+cleared) to avoid stale state.
- */
 public final class FrontOfferContext {
+    private FrontOfferContext() {}
 
     private static Integer selectedLieuId;
     private static Integer selectedOffreId;
 
-    private FrontOfferContext() {
-    }
-
-    public static void setSelectedLieuId(Integer lieuId) {
-        selectedLieuId = lieuId;
+    public static void setSelectedLieuId(Integer id) {
+        selectedLieuId = id;
     }
 
     public static Integer consumeSelectedLieuId() {
-        Integer v = selectedLieuId;
+        Integer tmp = selectedLieuId;
         selectedLieuId = null;
-        return v;
+        return tmp;
     }
 
-    public static void setSelectedOffreId(Integer offreId) {
-        selectedOffreId = offreId;
+    public static void setSelectedOffreId(Integer id) {
+        selectedOffreId = id;
     }
 
     public static Integer consumeSelectedOffreId() {
-        Integer v = selectedOffreId;
+        Integer tmp = selectedOffreId;
         selectedOffreId = null;
-        return v;
+        return tmp;
     }
 }

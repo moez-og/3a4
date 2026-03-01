@@ -1,7 +1,6 @@
 package services.sorties;
 
 import models.sorties.ParticipationSortie;
-import services.common.ServiceBase;
 import utils.Mydb;
 import utils.json.JsonStringArray;
 
@@ -9,7 +8,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParticipationSortieService implements ServiceBase {
+public class ParticipationSortieService {
 
     private final Connection cnx;
 
@@ -83,87 +82,6 @@ public class ParticipationSortieService implements ServiceBase {
         } catch (SQLException e) {
             throw new RuntimeException("ParticipationSortieService.updateStatus: " + e.getMessage(), e);
         }
-    }
-
-    public void updatePendingRequest(ParticipationSortie p) {
-        if (p == null) throw new IllegalArgumentException("Participation null");
-        if (p.getId() <= 0) throw new IllegalArgumentException("ID participation invalide");
-
-        String sql = """
-                UPDATE %s
-                SET contact_prefer=?, contact_value=?, commentaire=?, nb_places=?, reponses_json=?
-                WHERE id=? AND UPPER(statut)='EN_ATTENTE'
-                """.formatted(TABLE);
-
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, safeDefault(p.getContactPrefer(), "EMAIL"));
-            ps.setString(2, safeReq(p.getContactValue(), "Contact"));
-            ps.setString(3, emptyToNull(p.getCommentaire()));
-            ps.setInt(4, Math.max(1, p.getNbPlaces()));
-            ps.setString(5, JsonStringArray.toJson(p.getReponses()));
-            ps.setInt(6, p.getId());
-            int n = ps.executeUpdate();
-            if (n <= 0) {
-                throw new SQLException("Aucune demande EN_ATTENTE à modifier");
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("ParticipationSortieService.updatePendingRequest: " + e.getMessage(), e);
-        }
-    }
-
-    public void deleteById(int id) {
-        String sql = "DELETE FROM " + TABLE + " WHERE id=?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("ParticipationSortieService.deleteById: " + e.getMessage(), e);
-        }
-    }
-
-    public long countAll() {
-        String sql = "SELECT COUNT(*) AS c FROM " + TABLE;
-        try (PreparedStatement ps = cnx.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getLong("c");
-        } catch (SQLException e) {
-            throw new RuntimeException("ParticipationSortieService.countAll: " + e.getMessage(), e);
-        }
-        return 0;
-    }
-
-    public long countByStatus(String statut) {
-        String sql = "SELECT COUNT(*) AS c FROM " + TABLE + " WHERE UPPER(statut)=UPPER(?)";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            ps.setString(1, safeDefault(statut, ""));
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getLong("c");
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("ParticipationSortieService.countByStatus: " + e.getMessage(), e);
-        }
-        return 0;
-    }
-
-    public long countByStatuses(String... statuts) {
-        if (statuts == null || statuts.length == 0) return 0;
-        StringBuilder in = new StringBuilder();
-        for (int i = 0; i < statuts.length; i++) {
-            if (i > 0) in.append(",");
-            in.append("?");
-        }
-        String sql = "SELECT COUNT(*) AS c FROM " + TABLE + " WHERE UPPER(statut) IN (" + in + ")";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
-            for (int i = 0; i < statuts.length; i++) {
-                ps.setString(i + 1, safeDefault(statuts[i], "").trim().toUpperCase());
-            }
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getLong("c");
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("ParticipationSortieService.countByStatuses: " + e.getMessage(), e);
-        }
-        return 0;
     }
 
     public List<ParticipationSortie> getByAnnonce(int annonceId) {

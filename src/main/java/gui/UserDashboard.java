@@ -63,7 +63,7 @@ public class UserDashboard extends StackPane {
         String r = u.getRole();
         if (r == null) return false;
         String rr = r.trim().toLowerCase();
-        return rr.equals("admin") || rr.equals("partenaire") || rr.contains("admin");
+        return rr.equals("admin") || rr.contains("admin");
     }
 
     public void showOn(Stage stage, String title) {

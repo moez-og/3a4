@@ -1,9 +1,10 @@
 package models.offres;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Offre {
-
     private int id;
     private int user_id;
     private int event_id;
@@ -15,8 +16,24 @@ public class Offre {
     private Date date_debut;
     private Date date_fin;
     private String statut;
+    private List<CodePromo> codePromos = new ArrayList<>();
 
     public Offre() {
+    }
+
+    public Offre(int id, int user_id, int event_id, int lieu_id, String titre, String description, String type,
+                 float pourcentage, Date date_debut, Date date_fin, String statut) {
+        this.id = id;
+        this.user_id = user_id;
+        this.event_id = event_id;
+        this.lieu_id = lieu_id;
+        this.titre = titre;
+        this.description = description;
+        this.type = type;
+        this.pourcentage = pourcentage;
+        this.date_debut = date_debut;
+        this.date_fin = date_fin;
+        this.statut = statut;
     }
 
     public int getId() {
@@ -105,5 +122,13 @@ public class Offre {
 
     public void setStatut(String statut) {
         this.statut = statut;
+    }
+
+    public List<CodePromo> getCodePromos() {
+        return codePromos;
+    }
+
+    public void setCodePromos(List<CodePromo> codePromos) {
+        this.codePromos = codePromos;
     }
 }

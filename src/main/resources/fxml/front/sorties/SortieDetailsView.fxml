@@ -29,9 +29,6 @@
         <HBox spacing="10" alignment="CENTER_RIGHT">
             <Button text="Copier infos" onAction="#copyInfos" styleClass="ghostBtn"/>
 
-            <Button fx:id="btnRequests" text="Demandes" onAction="#openRequests"
-                    styleClass="ghostBtn" visible="false" managed="false"/>
-
             <!-- ✅ NOUVEAU -->
             <Button fx:id="btnParticiper" text="Participer" onAction="#participer"
                     styleClass="primaryBtn" visible="false" managed="false"/>
@@ -87,13 +84,6 @@
                             <Label fx:id="questionsEmpty" text="Aucune question."
                                    styleClass="detailsHint" visible="false" managed="false"/>
                             <FlowPane fx:id="questionsPane" hgap="10" vgap="10" prefWrapLength="760"/>
-                        </VBox>
-
-                        <VBox spacing="10" styleClass="detailsCard">
-                            <Label text="Participants acceptés" styleClass="detailsSectionTitle"/>
-                            <Label fx:id="acceptedEmpty" text="Aucun participant accepté."
-                                   styleClass="detailsHint" visible="false" managed="false"/>
-                            <FlowPane fx:id="acceptedPane" hgap="10" vgap="10" prefWrapLength="760"/>
                         </VBox>
 
                     </VBox>

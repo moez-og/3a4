@@ -80,35 +80,6 @@ public final class TestDbUtils {
     }
 
     /**
-     * Retourne un user_id différent de excludeId; sinon crée un user minimal.
-     */
-    public static int ensureUserOtherThan(Connection cnx, int excludeId) throws SQLException {
-        try (PreparedStatement ps = cnx.prepareStatement("SELECT id FROM user WHERE id<>? LIMIT 1")) {
-            ps.setInt(1, excludeId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1);
-            }
-        }
-
-        Map<String, Object> values = new LinkedHashMap<>();
-        if (hasColumn(cnx, "user", "nom")) values.put("nom", "TestNom2");
-        if (hasColumn(cnx, "user", "prenom")) values.put("prenom", "TestPrenom2");
-        if (hasColumn(cnx, "user", "email")) values.put("email", "test2_" + System.currentTimeMillis() + "@example.com");
-
-        if (hasColumn(cnx, "user", "password_hash")) values.put("password_hash", "hashed");
-        if (hasColumn(cnx, "user", "password")) values.put("password", "password");
-
-        if (hasColumn(cnx, "user", "role")) values.put("role", "abonne");
-        if (hasColumn(cnx, "user", "telephone")) values.put("telephone", "11111111");
-
-        if (hasColumn(cnx, "user", "imageUrl")) values.put("imageUrl", "default.png");
-        if (hasColumn(cnx, "user", "image_url")) values.put("image_url", "default.png");
-
-        if (hasColumn(cnx, "user", "date_creation")) values.put("date_creation", new Timestamp(System.currentTimeMillis()));
-        return insertAndReturnId(cnx, "user", values);
-    }
-
-    /**
      * Crée une offre minimale et retourne son id (car souvent Lieu.id_offre est NOT NULL).
      * Ce code s’adapte aux colonnes existantes.
      */
@@ -147,33 +118,6 @@ public final class TestDbUtils {
             ps.executeUpdate();
         } catch (SQLException ignored) {
         }
-    }
-
-    /**
-     * Crée une annonce_sortie minimale et retourne son id (adaptatif au schéma).
-     */
-    public static int createAnnonceSortie(Connection cnx, int userId) throws SQLException {
-        Map<String, Object> values = new LinkedHashMap<>();
-
-        if (hasColumn(cnx, "annonce_sortie", "user_id")) values.put("user_id", userId);
-        if (hasColumn(cnx, "annonce_sortie", "titre")) values.put("titre", "SortieTest_" + System.currentTimeMillis());
-        if (hasColumn(cnx, "annonce_sortie", "description")) values.put("description", "desc test");
-        if (hasColumn(cnx, "annonce_sortie", "ville")) values.put("ville", "Tunis");
-        if (hasColumn(cnx, "annonce_sortie", "lieu_texte")) values.put("lieu_texte", "Centre");
-        if (hasColumn(cnx, "annonce_sortie", "point_rencontre")) values.put("point_rencontre", "Point A");
-        if (hasColumn(cnx, "annonce_sortie", "type_activite")) values.put("type_activite", "Marche");
-
-        Timestamp dt = Timestamp.valueOf(java.time.LocalDateTime.now().plusDays(1));
-        if (hasColumn(cnx, "annonce_sortie", "date_sortie")) values.put("date_sortie", dt);
-
-        if (hasColumn(cnx, "annonce_sortie", "budget_max")) values.put("budget_max", 0);
-        if (hasColumn(cnx, "annonce_sortie", "nb_places")) values.put("nb_places", 5);
-        if (hasColumn(cnx, "annonce_sortie", "image_url")) values.put("image_url", null);
-
-        if (hasColumn(cnx, "annonce_sortie", "statut")) values.put("statut", "OUVERTE");
-        if (hasColumn(cnx, "annonce_sortie", "questions_json")) values.put("questions_json", "[]");
-
-        return insertAndReturnId(cnx, "annonce_sortie", values);
     }
 
     private static int insertAndReturnId(Connection cnx, String table, Map<String, Object> values) throws SQLException {

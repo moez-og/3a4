@@ -1,7 +1,6 @@
 package services.users;
 
 import models.users.User;
-import services.common.CrudService;
 import utils.Mydb;
 import utils.PasswordUtil;
 
@@ -13,7 +12,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserService implements CrudService<User, Integer> {
+public class UserService {
     private Connection connection;
 
     public UserService() {
@@ -179,52 +178,5 @@ public class UserService implements CrudService<User, Integer> {
      */
     public boolean emailExiste(String email) throws SQLException {
         return trouverParEmail(email) != null;
-    }
-
-    // ===== Generic CRUD (wrappers) =====
-
-    @Override
-    public List<User> getAll() {
-        try {
-            return obtenirTous();
-        } catch (SQLException e) {
-            throw new RuntimeException("UserService.getAll: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public User getById(Integer id) {
-        try {
-            return trouverParId(id);
-        } catch (SQLException e) {
-            throw new RuntimeException("UserService.getById: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void add(User entity) {
-        try {
-            ajouter(entity);
-        } catch (SQLException e) {
-            throw new RuntimeException("UserService.add: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void update(User entity) {
-        try {
-            modifier(entity);
-        } catch (SQLException e) {
-            throw new RuntimeException("UserService.update: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void delete(Integer id) {
-        try {
-            supprimer(id);
-        } catch (SQLException e) {
-            throw new RuntimeException("UserService.delete: " + e.getMessage(), e);
-        }
     }
 }
