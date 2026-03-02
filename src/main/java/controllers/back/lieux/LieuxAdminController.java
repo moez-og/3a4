@@ -270,14 +270,14 @@ public class LieuxAdminController {
         dialog.setResizable(true);
         dialog.centerOnScreen();
 
-        // Charger les offres (avec fallback si liaison non supportée)
+        // Charger les offres
         try {
             OffreService offreService = new OffreService();
             List<Offre> offres;
-            if (offreService.supportsLieuAssociation()) {
+            try {
                 offres = offreService.obtenirOffresParLieu(lieu.getId());
-            } else {
-                info.setText("Info : la BD ne relie pas les offres aux lieux (affichage de toutes les offres). ");
+            } catch (Exception e) {
+                info.setText("Info : affichage de toutes les offres (liaison lieu non disponible).");
                 info.setVisible(true);
                 info.setManaged(true);
                 offres = offreService.obtenirToutes();
