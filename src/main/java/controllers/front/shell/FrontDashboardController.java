@@ -6,6 +6,7 @@ package controllers.front.shell;
 import controllers.front.evenements.EvenementDetailsController;
 import controllers.front.lieux.LieuDetailsController;
 import controllers.front.lieux.LieuxController;
+import controllers.front.sorties.GroupeChatController;
 import controllers.front.sorties.SortieDetailsController;
 import controllers.front.sorties.SortiesController;
 import controllers.common.notifications.NotificationsCenterController;
@@ -32,8 +33,11 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import models.notifications.Notification;
 import models.notifications.NotificationType;
+import models.sorties.AnnonceSortie;
 import models.users.User;
 import services.notifications.NotificationService;
+import services.sorties.AnnonceSortieService;
+import services.sorties.ChatService;
 import utils.ui.ShellNavigator;
 import utils.ui.ViewPaths;
 
@@ -99,6 +103,8 @@ public class FrontDashboardController implements ShellNavigator {
     private boolean dark = false;
 
     private final NotificationService notificationService = new NotificationService();
+    private final AnnonceSortieService annonceSortieService = new AnnonceSortieService();
+    private final ChatService chatService = new ChatService();
     private Timeline notifPoller;
 
     public void setPrimaryStage(Stage stage) {
@@ -405,8 +411,71 @@ public class FrontDashboardController implements ShellNavigator {
         int sortieId = extractSortieId(n);
         if (sortieId <= 0) return;
 
+        if (t == NotificationType.CHAT_MESSAGE) {
+            openChatWindow(sortieId);
+            return;
+        }
+
         boolean openRequests = (t == NotificationType.PARTICIPATION_REQUESTED || t == NotificationType.PARTICIPATION_CANCELLED);
         navigate((openRequests ? ROUTE_SORTIE_REQUESTS_PREFIX : ROUTE_SORTIE_DETAILS_PREFIX) + sortieId);
+    }
+
+    private void openChatWindow(int annonceId) {
+        if (currentUser == null || currentUser.getId() <= 0) {
+            info("Chat", "Connecte-toi pour ouvrir le chat.");
+            return;
+        }
+        if (annonceId <= 0) return;
+
+        try {
+            chatService.ensureSchema();
+        } catch (Exception ignored) {
+        }
+
+        try {
+            if (!chatService.canAccess(annonceId, currentUser.getId())) {
+                info("Chat", "Accès réservé aux membres acceptés.");
+                return;
+            }
+        } catch (Exception ignored) {
+        }
+
+        AnnonceSortie annonce;
+        try {
+            annonce = annonceSortieService.getById(annonceId);
+        } catch (Exception e) {
+            annonce = null;
+        }
+        if (annonce == null) {
+            info("Chat", "Sortie introuvable.");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/front/sorties/GroupeChatView.fxml"));
+            Parent chatRoot = loader.load();
+
+            GroupeChatController ctrl = loader.getController();
+            ctrl.setContext(currentUser, annonce);
+
+            Stage chatStage = new Stage();
+            chatStage.initOwner(resolveStage());
+            chatStage.setTitle("Chat — " + safe(annonce.getTitre()));
+            chatStage.setResizable(true);
+
+            Scene scene = new Scene(chatRoot, 680, 600);
+            try {
+                var url = getClass().getResource("/styles/sorties/chat.css");
+                if (url != null) scene.getStylesheets().add(url.toExternalForm());
+            } catch (Exception ignored) {
+            }
+
+            chatStage.setScene(scene);
+            chatStage.setOnCloseRequest(e -> ctrl.stopPolling());
+            chatStage.show();
+        } catch (Exception e) {
+            error("Chat", "Impossible d'ouvrir le chat : " + safe(e.getMessage()));
+        }
     }
 
     private int extractSortieId(Notification n) {

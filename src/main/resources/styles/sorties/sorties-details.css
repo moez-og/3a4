@@ -101,6 +101,22 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 8, 0.18, 0, 2);
 }
 
+/* Chat unread badge on the 💬 button */
+.chatUnreadBadge{
+    -fx-background-color: rgba(201,146,15,0.95);
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 10px;
+    -fx-padding: 1 6;
+    -fx-background-radius: 999;
+    -fx-min-width: 18px;
+    -fx-min-height: 18px;
+    -fx-alignment: CENTER;
+    -fx-translate-x: 6px;
+    -fx-translate-y: -6px;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.18), 10, 0.16, 0, 2);
+}
+
 /* Cards */
 .detailsCard, .sideCard{
     -fx-background-color: rgba(255,255,255,0.92);

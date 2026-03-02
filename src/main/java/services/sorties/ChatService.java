@@ -45,8 +45,20 @@ public class ChatService {
                     KEY idx_chat_poll (poll_id)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 """;
+
+        String ddlReadState = """
+                CREATE TABLE IF NOT EXISTS chat_read_state (
+                    annonce_id            INT       NOT NULL,
+                    user_id               INT       NOT NULL,
+                    last_read_message_id  INT       NOT NULL DEFAULT 0,
+                    updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (annonce_id, user_id),
+                    KEY idx_chat_read_user (user_id)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                """;
         try (Statement st = cnx.createStatement()) {
             st.execute(ddl);
+            st.execute(ddlReadState);
 
             // Upgrade léger (si la table existait déjà avant l'ajout des colonnes)
             ensureColumn("chat_message", "message_type",
@@ -60,6 +72,77 @@ public class ChatService {
         } catch (SQLException e) {
             System.err.println("[ChatService] Schema init failed: " + e.getMessage());
         }
+    }
+
+    /**
+     * Nombre de messages non lus pour un utilisateur dans un chat.
+     * Non lus = messages avec id > last_read_message_id et envoyés par quelqu'un d'autre.
+     */
+    public long getUnreadCount(int annonceId, int userId) {
+        if (annonceId <= 0) throw new IllegalArgumentException("annonceId invalide");
+        if (userId <= 0) throw new IllegalArgumentException("userId invalide");
+
+        int lastRead = 0;
+        String sqlRead = "SELECT last_read_message_id FROM chat_read_state WHERE annonce_id=? AND user_id=?";
+        try (PreparedStatement ps = cnx.prepareStatement(sqlRead)) {
+            ps.setInt(1, annonceId);
+            ps.setInt(2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) lastRead = rs.getInt(1);
+            }
+        } catch (SQLException ignored) {
+        }
+
+        String sqlCount = "SELECT COUNT(*) FROM chat_message WHERE annonce_id=? AND id>? AND sender_id<>?";
+        try (PreparedStatement ps = cnx.prepareStatement(sqlCount)) {
+            ps.setInt(1, annonceId);
+            ps.setInt(2, lastRead);
+            ps.setInt(3, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            System.err.println("[ChatService] getUnreadCount: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public int getLatestMessageId(int annonceId) {
+        if (annonceId <= 0) throw new IllegalArgumentException("annonceId invalide");
+        String sql = "SELECT COALESCE(MAX(id),0) FROM chat_message WHERE annonce_id=?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, annonceId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        } catch (SQLException ignored) {
+        }
+        return 0;
+    }
+
+    public void markReadUpTo(int annonceId, int userId, int messageId) {
+        if (annonceId <= 0) throw new IllegalArgumentException("annonceId invalide");
+        if (userId <= 0) throw new IllegalArgumentException("userId invalide");
+        if (messageId <= 0) return;
+
+        String sql = """
+                INSERT INTO chat_read_state (annonce_id, user_id, last_read_message_id)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE
+                    last_read_message_id = GREATEST(last_read_message_id, VALUES(last_read_message_id))
+                """;
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, annonceId);
+            ps.setInt(2, userId);
+            ps.setInt(3, messageId);
+            ps.executeUpdate();
+        } catch (SQLException ignored) {
+        }
+    }
+
+    public void markAllRead(int annonceId, int userId) {
+        int latest = getLatestMessageId(annonceId);
+        markReadUpTo(annonceId, userId, latest);
     }
 
     private void ensureColumn(String table, String column, String alterSql) {

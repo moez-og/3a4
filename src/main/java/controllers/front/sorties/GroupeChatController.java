@@ -157,6 +157,7 @@ public class GroupeChatController {
             }
             updateMembersLabel(msgs);
             scrollToBottom();
+            markReadAsync();
         } catch (Exception e) {
             System.err.println("[Chat] loadMessages: " + e.getMessage());
         }
@@ -173,11 +174,24 @@ public class GroupeChatController {
                         lastMessageId = Math.max(lastMessageId, m.getId());
                     }
                     scrollToBottom();
+                    markReadAsync();
                 });
             }
         } catch (Exception e) {
             System.err.println("[Chat] poll: " + e.getMessage());
         }
+    }
+
+    private void markReadAsync() {
+        if (currentUser == null || annonce == null) return;
+        int upTo = lastMessageId;
+        if (upTo <= 0) return;
+        new Thread(() -> {
+            try {
+                chatService.markReadUpTo(annonce.getId(), currentUser.getId(), upTo);
+            } catch (Exception ignored) {
+            }
+        }, "chat-mark-read").start();
     }
 
     private void refreshPollCardsAsync() {

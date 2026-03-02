@@ -15,6 +15,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -31,6 +33,7 @@ import models.users.User;
 import services.sorties.AnnonceSortieService;
 import services.sorties.ParticipationSortieService;
 import services.users.UserService;
+import services.sorties.ChatService;
 import utils.ui.ShellNavigator;
 
 import java.io.File;
@@ -89,6 +92,8 @@ public class SortieDetailsController {
     @FXML private Button btnDelete;
     @FXML private Button btnChat;
 
+    @FXML private Label chatUnreadBadge;
+
     private Stage primaryStage;
     private ShellNavigator navigator;
     private User currentUser;
@@ -97,10 +102,14 @@ public class SortieDetailsController {
     private AnnonceSortie current;
 
     private boolean pendingOpenRequests = false;
+    private boolean pendingOpenChat = false;
 
     private final AnnonceSortieService service = new AnnonceSortieService();
     private final UserService userService = new UserService();
     private final ParticipationSortieService participationService = new ParticipationSortieService();
+    private final ChatService chatService = new ChatService();
+
+    private Timeline chatUnreadPoller;
 
     private final Rectangle heroClip = new Rectangle();
 
@@ -131,8 +140,20 @@ public class SortieDetailsController {
         }
     }
 
+    /**
+     * Used by the notifications center to open the dedicated chat window.
+     * Safe to call before or after {@link #setSortieId(int)}.
+     */
+    public void openChatFromOutside() {
+        pendingOpenChat = true;
+        if (current != null) {
+            Platform.runLater(this::openChat);
+        }
+    }
+
     @FXML
     private void initialize() {
+        try { chatService.ensureSchema(); } catch (Exception ignored) {}
         setupHeroCover();
 
         if (root != null) {
@@ -318,6 +339,7 @@ public class SortieDetailsController {
 
     @FXML
     private void goBack() {
+        stopChatUnreadPolling();
         if (navigator != null) {
             navigator.navigate("sorties");
             return;
@@ -675,9 +697,12 @@ public class SortieDetailsController {
         // Bouton Chat : visible si membre accepté OU créateur
         if (btnChat != null) {
             boolean showChat = currentUser != null && current != null &&
-                    new services.sorties.ChatService().canAccess(current.getId(), currentUser.getId());
+                    chatService.canAccess(current.getId(), currentUser.getId());
             btnChat.setVisible(showChat);
             btnChat.setManaged(showChat);
+
+            if (showChat) startChatUnreadPolling();
+            else stopChatUnreadPolling();
         }
 
         // Demandes intégrées
@@ -974,9 +999,63 @@ public class SortieDetailsController {
             chatStage.setScene(scene);
             chatStage.setOnCloseRequest(e -> ctrl.stopPolling());
             chatStage.show();
+
+            // Consider chat as read when the user opens it.
+            new Thread(() -> {
+                try { chatService.markAllRead(current.getId(), currentUser.getId()); } catch (Exception ignored) {}
+                Platform.runLater(this::updateChatUnreadBadgeAsync);
+            }, "chat-mark-all-read").start();
         } catch (Exception ex) {
             error("Chat", "Ouverture impossible", "Impossible d'ouvrir le chat : " + ex.getMessage());
         }
+    }
+
+    private void startChatUnreadPolling() {
+        stopChatUnreadPolling();
+        if (currentUser == null || currentUser.getId() <= 0) return;
+        if (current == null) return;
+        if (chatUnreadBadge == null) return;
+
+        updateChatUnreadBadgeAsync();
+        chatUnreadPoller = new Timeline(new KeyFrame(javafx.util.Duration.seconds(4), e -> updateChatUnreadBadgeAsync()));
+        chatUnreadPoller.setCycleCount(Timeline.INDEFINITE);
+        chatUnreadPoller.play();
+    }
+
+    private void stopChatUnreadPolling() {
+        if (chatUnreadPoller != null) {
+            try { chatUnreadPoller.stop(); } catch (Exception ignored) {}
+            chatUnreadPoller = null;
+        }
+        setChatBadgeValue(0);
+    }
+
+    private void updateChatUnreadBadgeAsync() {
+        if (chatUnreadBadge == null) return;
+        if (currentUser == null || currentUser.getId() <= 0) { setChatBadgeValue(0); return; }
+        if (current == null || current.getId() <= 0) { setChatBadgeValue(0); return; }
+
+        int annonceId = current.getId();
+        int userId = currentUser.getId();
+        new Thread(() -> {
+            long c;
+            try {
+                c = chatService.getUnreadCount(annonceId, userId);
+            } catch (Exception e) {
+                c = 0;
+            }
+            long finalC = c;
+            Platform.runLater(() -> setChatBadgeValue(finalC));
+        }, "chat-unread-poll").start();
+    }
+
+    private void setChatBadgeValue(long count) {
+        if (chatUnreadBadge == null) return;
+        long v = Math.max(0, count);
+        boolean show = v > 0;
+        chatUnreadBadge.setText(v > 99 ? "99+" : String.valueOf(v));
+        chatUnreadBadge.setVisible(show);
+        chatUnreadBadge.setManaged(show);
     }
 
 

@@ -32,8 +32,14 @@
 
             <Button fx:id="btnRequests" text="Demandes" onAction="#openRequests"
                     styleClass="ghostBtn" visible="false" managed="false"/>
-            <Button fx:id="btnChat" text="💬 Chat" onAction="#openChat"
+                <StackPane alignment="CENTER">
+                <Button fx:id="btnChat" text="💬 Chat" onAction="#openChat"
                     styleClass="primaryBtn" visible="false" managed="false"/>
+                <Label fx:id="chatUnreadBadge" text=""
+                       styleClass="chatUnreadBadge"
+                       visible="false" managed="false" mouseTransparent="true"
+                       StackPane.alignment="TOP_RIGHT"/>
+                </StackPane>
 
             <!-- ✅ NOUVEAU -->
             <Button fx:id="btnParticiper" text="Participer" onAction="#participer"
