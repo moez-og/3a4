@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+  Carte utilisateur (style Dashboard) :
+  - Image en haut
+  - Infos en bas sur fond blanc
+  - Badge rôle à droite
+  - Bordure + ombre
+  L'état sélectionné est géré par CSS via la classe .selected sur la racine.
+-->
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controllers.back.users.UserCardController"
+           styleClass="user-card"
+           minWidth="260" prefWidth="320" maxWidth="360"
+           prefHeight="360">
+
+    <children>
+        <VBox spacing="0" styleClass="user-card-container">
+
+            <!-- Image (clippée dans le controller pour arrondir les coins du haut) -->
+            <StackPane fx:id="imageWrapper" styleClass="user-card-imageWrapper">
+                <ImageView fx:id="userImageView"
+                           fitHeight="175"
+                           preserveRatio="false"
+                           smooth="true" />
+            </StackPane>
+
+            <!-- Infos -->
+            <VBox spacing="8" styleClass="user-card-body">
+                <padding>
+                    <Insets top="12" right="14" bottom="14" left="14"/>
+                </padding>
+
+                <HBox alignment="CENTER_LEFT" spacing="8">
+                    <Label fx:id="nameLabel" text="Nom Prenom" styleClass="user-card-name"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="roleLabel" text="ABONNE" styleClass="user-card-badge"/>
+                </HBox>
+
+                <Label fx:id="emailLabel" text="email@example.com" wrapText="true" styleClass="user-card-email"/>
+                <Label fx:id="phoneLabel" text="Tel: -" styleClass="user-card-phone"/>
+            </VBox>
+
+        </VBox>
+    </children>
+</StackPane>

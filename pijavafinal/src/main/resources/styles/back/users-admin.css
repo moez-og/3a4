@@ -1,0 +1,65 @@
+/* =========================
+   USERS - CARDS (Back)
+   Inspiré du style global base-layout.css
+========================= */
+
+.user-card {
+    -fx-cursor: hand;
+}
+
+.user-card-container {
+    -fx-background-color: rgba(255,255,255,0.98);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(22,58,92,0.12);
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 18, 0.18, 0, 6);
+}
+
+/* état sélectionné */
+.user-card.selected .user-card-container {
+    -fx-border-color: #4a6fa5;
+    -fx-border-width: 2;
+    -fx-background-color: #f8fbff;
+}
+
+.user-card-imageWrapper {
+    -fx-background-color: #eef3f9;
+    -fx-background-radius: 16 16 0 0;
+}
+
+.user-card-body {
+    -fx-background-color: transparent;
+}
+
+.user-card-name {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 13.5;
+    -fx-font-weight: 900;
+}
+
+.user-card-badge {
+    -fx-text-fill: white;
+    -fx-font-size: 10;
+    -fx-font-weight: 900;
+    -fx-padding: 4 10 4 10;
+    -fx-background-radius: 999;
+    -fx-background-color: #d08a2a;
+}
+
+/* variantes badge (optionnel) */
+.user-card-badge.badge-admin { -fx-background-color: #d08a2a; }
+.user-card-badge.badge-partenaire { -fx-background-color: #2b73c2; }
+.user-card-badge.badge-abonne { -fx-background-color: #d08a2a; }
+
+.user-card-email {
+    -fx-text-fill: #2b73c2;
+    -fx-font-size: 11.5;
+    -fx-font-weight: 700;
+}
+
+.user-card-phone {
+    -fx-text-fill: rgba(22,58,92,0.62);
+    -fx-font-size: 11;
+    -fx-font-weight: 700;
+}

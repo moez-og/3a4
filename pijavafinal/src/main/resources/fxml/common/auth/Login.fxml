@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.effect.DropShadow?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="root"
+           fx:controller="controllers.common.auth.LoginController"
+           prefWidth="900.0" prefHeight="700.0">
+
+    <children>
+        <!-- Background -->
+        <ImageView fx:id="bgImage" preserveRatio="false" smooth="true">
+            <image>
+                <Image url="@/images/logo/bg.png"/>
+            </image>
+        </ImageView>
+
+        <VBox StackPane.alignment="BOTTOM_RIGHT" spacing="0">
+            <padding>
+                <Insets top="0" right="40" bottom="60" left="0"/>
+            </padding>
+
+            <children>
+                <VBox fx:id="mainForm" spacing="18" alignment="TOP_CENTER"
+                      prefWidth="420.0" maxHeight="580.0" fillWidth="false"
+                      style="-fx-background-color: transparent; -fx-background-radius: 20; -fx-border-radius: 20;">
+                    <padding>
+                        <Insets top="50" right="45" bottom="45" left="45"/>
+                    </padding>
+                    <effect>
+                        <DropShadow radius="25.0" offsetY="10.0"/>
+                    </effect>
+
+                    <children>
+                        <VBox fx:id="logoBox" spacing="8" alignment="CENTER">
+                            <children>
+                                <ImageView fitWidth="60.0" fitHeight="60.0" preserveRatio="true">
+                                    <image>
+                                        <Image url="@/images/logo/logo.png"/>
+                                    </image>
+                                </ImageView>
+                            </children>
+                        </VBox>
+
+                        <Label text="Welcome Traveler" textFill="#4b5f73">
+                            <font>
+                                <Font name="Segoe UI Bold" size="28"/>
+                            </font>
+                        </Label>
+
+                        <Label text="Sign in to continue exploring&#10;the world's greatest destinations"
+                               style="-fx-font-size: 13; -fx-text-fill: #7f8c8d; -fx-line-spacing: 4;"
+                               wrapText="true" alignment="CENTER"/>
+
+                        <Region prefHeight="1"
+                                style="-fx-background-color: linear-gradient(to right, transparent, #d4af37, transparent);"/>
+
+                        <Label text="Email Address"
+                               style="-fx-font-size: 12; -fx-text-fill: #34495e; -fx-font-weight: bold;"/>
+
+                        <TextField fx:id="emailField" promptText="example@travel.com" prefHeight="45"
+                                   style="-fx-font-size: 13; -fx-padding: 12 15 12 15; -fx-background-color: #ecf0f1; -fx-text-fill: #2c3e50; -fx-border-color: transparent; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-family: 'Segoe UI';"/>
+
+                        <Label text="Password"
+                               style="-fx-font-size: 12; -fx-text-fill: #34495e; -fx-font-weight: bold;"/>
+
+                        <PasswordField fx:id="passwordField" promptText="Enter your password" prefHeight="45"
+                                       style="-fx-font-size: 13; -fx-padding: 12 15 12 15; -fx-background-color: #ecf0f1; -fx-text-fill: #2c3e50; -fx-border-color: transparent; -fx-border-radius: 8; -fx-background-radius: 8; -fx-font-family: 'Segoe UI';"/>
+
+                        <HBox spacing="10" alignment="CENTER_LEFT" prefHeight="30">
+                            <children>
+                                <CheckBox fx:id="rememberCheckBox" text="Remember me"
+                                          style="-fx-font-size: 12; -fx-text-fill: #34495e; -fx-padding: 5;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Hyperlink fx:id="forgotLink" text="Forgot Password?"
+                                           style="-fx-font-size: 12; -fx-text-fill: #c9920f; -fx-underline: true; -fx-padding: 0;"/>
+                            </children>
+                        </HBox>
+
+                        <Button fx:id="loginBtn" text="LOG IN" prefWidth="280" prefHeight="50"
+                                style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: linear-gradient(to right, #d4af37, #c9920f); -fx-background-radius: 10; -fx-cursor: hand; -fx-padding: 0; -fx-effect: dropshadow(gaussian, rgba(212, 175, 55, 0.4), 10, 0, 0, 5);"/>
+
+                        <HBox spacing="8" alignment="CENTER" prefHeight="25">
+                            <children>
+                                <Label text="New to Travel Guide? " style="-fx-font-size: 12; -fx-text-fill: #7f8c8d;"/>
+                                <Hyperlink fx:id="signUpLink" text="Create account"
+                                           style="-fx-font-size: 12; -fx-text-fill: #c9920f; -fx-underline: true; -fx-padding: 0;"/>
+                            </children>
+                        </HBox>
+
+                        <Label text="© 2026 Travel Guide Inc. All rights reserved"
+                               style="-fx-font-size: 10; -fx-text-fill: #bdc3c7;" alignment="CENTER"/>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </children>
+</StackPane>

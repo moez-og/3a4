@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.evenements.EvenementDetailsController"
+      spacing="14"
+      styleClass="evDetailsRoot"
+      stylesheets="@/styles/evenements/evenements-view.css">
+
+    <padding>
+        <Insets top="14" right="14" bottom="18" left="14"/>
+    </padding>
+
+    <!-- ═══════ TOP BAR ═══════ -->
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <Button text="← Retour" onAction="#goBack" styleClass="evBackBtn"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <!-- Bouton inscription principal (top) -->
+        <Button fx:id="inscriptionBtn" text="✓ S'inscrire"
+                onAction="#toggleInscription" styleClass="evPrimaryBtn"/>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                styleClass="evDetailsScroll">
+        <content>
+            <VBox spacing="14">
+
+                <!-- ═══════ IMAGE HERO ═══════ -->
+                <ImageView fx:id="image"
+                           fitWidth="980" fitHeight="300"
+                           preserveRatio="false"
+                           styleClass="evDetailsHeroImg"/>
+
+                <!-- ═══════ INFOS CARD ═══════ -->
+                <VBox spacing="12" styleClass="evDetailsCard">
+
+                    <!-- Titre + statut + type -->
+                    <HBox alignment="CENTER_LEFT" spacing="12">
+                        <Label fx:id="titre" text="Titre de l'événement" styleClass="evDetailsTitle"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="typeBadge"   text="PUBLIC"  styleClass="evBadgeMuted"/>
+                        <Label fx:id="statutBadge" text="OUVERT"  styleClass="evBadgeOuvert"/>
+                    </HBox>
+
+                    <!-- Dates -->
+                    <HBox spacing="8" alignment="CENTER_LEFT" styleClass="evDetailsRow">
+                        <Label text="📅" styleClass="evDetailsIcon"/>
+                        <Label fx:id="dateDebut" text="—" styleClass="evDetailsLine"/>
+                        <Label text="→" styleClass="evDetailsHint"/>
+                        <Label fx:id="dateFin"   text="—" styleClass="evDetailsLine"/>
+                    </HBox>
+
+                    <!-- Capacité + inscrits -->
+                    <HBox spacing="8" alignment="CENTER_LEFT" styleClass="evDetailsRow">
+                        <Label text="👥" styleClass="evDetailsIcon"/>
+                        <Label fx:id="capaciteInfo"  text="Capacité" styleClass="evDetailsLine"/>
+                        <Label fx:id="inscritsCount" text=""          styleClass="evDetailsHint"/>
+                    </HBox>
+
+                    <!-- Prix -->
+                    <HBox spacing="8" alignment="CENTER_LEFT" styleClass="evDetailsRow">
+                        <Label text="💰" styleClass="evDetailsIcon"/>
+                        <Label fx:id="prixLabel" text="—" styleClass="evDetailsLine"/>
+                    </HBox>
+
+                    <!-- Description -->
+                    <Label fx:id="description" text="" wrapText="true" styleClass="evDetailsDesc"/>
+
+                    <!-- ═══════ WEATHER CARD ═══════ -->
+                    <VBox fx:id="weatherCard" spacing="10" styleClass="evWeatherCard"
+                          visible="false" managed="false">
+                        <!-- Header -->
+                        <HBox alignment="CENTER_LEFT" styleClass="evWeatherHeaderRow">
+                            <Label text="PRÉVISIONS MÉTÉO" styleClass="evWeatherTitle"/>
+                        </HBox>
+                        <!-- Main row: icon + temp | desc + wind/precip -->
+                        <HBox spacing="14" alignment="CENTER_LEFT">
+                            <VBox alignment="CENTER" spacing="2">
+                                <Label fx:id="weatherIcon" text="" styleClass="evWeatherIcon"/>
+                                <Label fx:id="weatherTemp" text="" styleClass="evWeatherTemp"/>
+                            </VBox>
+                            <VBox spacing="4">
+                                <Label fx:id="weatherDesc" text="" styleClass="evWeatherDesc"/>
+                                <Label fx:id="weatherWind" text="" styleClass="evWeatherSub"/>
+                                <Label fx:id="weatherPrecip" text="" styleClass="evWeatherSub"/>
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="weatherAdvice" text="" wrapText="true" styleClass="evWeatherAdvice"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- ═══════ ACTION BAR BAS ═══════ -->
+                    <HBox fx:id="actionBarBottom" spacing="14" alignment="CENTER_LEFT" styleClass="evActionBar">
+                        <Button fx:id="inscriptionBtnBottom" text="✓ S'inscrire"
+                                onAction="#toggleInscription" styleClass="evPrimaryBtn"/>
+                        <Button fx:id="payerBtn" text="💳 Payer"
+                                onAction="#handlePayer" styleClass="evGoldBtn"
+                                visible="false" managed="false"/>
+                        <Button fx:id="desinscrireBtn" text="Se désinscrire"
+                                onAction="#handleDesinscrire" styleClass="evDangerBtn"
+                                visible="false" managed="false"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="messageLabel" text="" visible="false" managed="false"
+                               styleClass="evMessageLabel"/>
+                    </HBox>
+                </VBox>
+
+                <!-- ═══════ PARTICIPANTS CARD ═══════ -->
+                <VBox spacing="12" styleClass="evParticipantsCard">
+
+                    <HBox alignment="CENTER_LEFT">
+                        <Label fx:id="participantsTitle" text="Participants / 0"
+                               styleClass="evDetailsSubtitle"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="placesRestantes" text="" styleClass="evPlacesLabel"/>
+                    </HBox>
+
+                    <!-- Barre de progression -->
+                    <VBox spacing="4">
+                        <HBox alignment="CENTER_LEFT" spacing="8">
+                            <Label text="Places occupées" styleClass="evDetailsHint"/>
+                            <Region HBox.hgrow="ALWAYS"/>
+                            <Label fx:id="tauxLabel" text="0%" styleClass="evDetailsHint"/>
+                        </HBox>
+                        <HBox styleClass="evProgressTrack" minHeight="8" maxHeight="8">
+                            <Region fx:id="progressBar" styleClass="evProgressFill"
+                                    minHeight="8" maxHeight="8" prefWidth="0"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Liste participants -->
+                    <VBox fx:id="participantsList" spacing="8"/>
+
+                    <Label fx:id="participantsEmpty"
+                           text="Aucun participant pour le moment."
+                           styleClass="evDetailsHint"
+                           visible="false" managed="false"/>
+                </VBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+</VBox>

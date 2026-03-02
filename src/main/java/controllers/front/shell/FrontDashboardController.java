@@ -1,11 +1,12 @@
 package controllers.front.shell;
 
+import controllers.front.lieux.LieuDetailsController;
+import controllers.front.lieux.LieuxController;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -21,12 +22,16 @@ import utils.ui.ShellNavigator;
 import utils.ui.ViewPaths;
 
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import controllers.front.evenements.EvenementDetailsController;
+import controllers.front.evenements.EvenementsController;
+import controllers.front.evenements.PaiementController;
 
 public class FrontDashboardController implements ShellNavigator {
 
-    // Routes stables (utilisées par l'accueil + autres pages)
     public static final String ROUTE_HOME = "home";
     public static final String ROUTE_SORTIES = "sorties";
     public static final String ROUTE_LIEUX = "lieux";
@@ -34,6 +39,14 @@ public class FrontDashboardController implements ShellNavigator {
     public static final String ROUTE_EVENTS = "events";
     public static final String ROUTE_HELP = "help";
     public static final String ROUTE_PROFIL = "profil";
+    public static final String ROUTE_EVENEMENT_DETAILS_PREFIX = "evenement-details:";
+    public static final String ROUTE_PAIEMENT_PREFIX = "paiement:";
+
+// "lieu-details:12"
+    public static final String ROUTE_LIEU_DETAILS_PREFIX = "lieu-details:";
+
+    // "lieux-filter:ville=Tunis;cat=CAFE;q=cafe"
+    public static final String ROUTE_LIEUX_FILTER_PREFIX = "lieux-filter:";
 
     @FXML private StackPane root;
     @FXML private StackPane dynamicContent;
@@ -54,7 +67,6 @@ public class FrontDashboardController implements ShellNavigator {
     @FXML private Label userRole;
     @FXML private Label avatarLetter;
 
-    // drawer
     @FXML private StackPane overlay;
     @FXML private VBox accountDrawer;
     @FXML private Label avatarLetterLarge;
@@ -62,7 +74,9 @@ public class FrontDashboardController implements ShellNavigator {
     @FXML private Label drawerEmail;
 
     private final ToggleGroup navGroup = new ToggleGroup();
+
     private final Map<String, Node> viewCache = new HashMap<>();
+    private final Map<String, Object> controllerCache = new HashMap<>();
 
     private Stage primaryStage;
     private User currentUser;
@@ -100,49 +114,102 @@ public class FrontDashboardController implements ShellNavigator {
     public void showAccueil() {
         navAccueil.setSelected(true);
         setHeader("Accueil", "Vue d’ensemble des gestions");
-        loadAndSet(ROUTE_HOME, ViewPaths.FRONT_HOME);
+        ensureLoadedAndShow(ROUTE_HOME, ViewPaths.FRONT_HOME);
     }
 
     @FXML
     public void showSorties() {
         navSorties.setSelected(true);
         setHeader("Sorties", "Annonces · participations · suivi");
-        loadAndSet(ROUTE_SORTIES, ViewPaths.FRONT_SORTIES);
+        ensureLoadedAndShow(ROUTE_SORTIES, ViewPaths.FRONT_SORTIES);
     }
 
     @FXML
     public void showLieux() {
-        navLieux.setSelected(true);
-        setHeader("Lieux", "Découverte · favoris · détails");
-        loadAndSet(ROUTE_LIEUX, ViewPaths.FRONT_LIEUX);
+        openLieuxPageAndGetController();
     }
 
     @FXML
     public void showOffres() {
         navOffres.setSelected(true);
         setHeader("Offres", "Promos · partenariats · coupons");
-        loadAndSet(ROUTE_OFFRES, ViewPaths.FRONT_OFFRES);
+        ensureLoadedAndShow(ROUTE_OFFRES, ViewPaths.FRONT_OFFRES);
     }
 
     @FXML
     public void showEvents() {
         navEvents.setSelected(true);
         setHeader("Événements", "Agenda · inscriptions · infos");
-        loadAndSet(ROUTE_EVENTS, ViewPaths.FRONT_EVENEMENTS);
+        Object ctrl = ensureLoadedAndShow(ROUTE_EVENTS, ViewPaths.FRONT_EVENEMENTS);
+        // Toujours rafraîchir les cartes pour refléter l'état réel (paiement, inscription…)
+        if (ctrl instanceof controllers.front.evenements.EvenementsController ec) {
+            ec.refreshCards();
+        }
     }
 
     @FXML
     public void showHelp() {
         navHelp.setSelected(true);
         setHeader("Aide", "FAQ · guide · support");
-        loadAndSet(ROUTE_HELP, ViewPaths.FRONT_HELP);
+        ensureLoadedAndShow(ROUTE_HELP, ViewPaths.FRONT_HELP);
     }
 
-    /* ================= ROUTER (pour l’accueil et les pages) ================= */
+    /* ================= ROUTER ================= */
 
     @Override
     public void navigate(String route) {
         if (route == null) return;
+
+        // ✅ Détails lieu
+        if (route.startsWith(ROUTE_LIEU_DETAILS_PREFIX)) {
+            String raw = route.substring(ROUTE_LIEU_DETAILS_PREFIX.length()).trim();
+            try {
+                int id = Integer.parseInt(raw);
+                showLieuDetails(id);
+            } catch (Exception e) {
+                info("Navigation", "ID lieu invalide: " + raw);
+            }
+            return;
+        }
+
+        // ✅ Lieux avec filtre (ville/cat/q)
+        if (route.startsWith(ROUTE_LIEUX_FILTER_PREFIX)) {
+            String payload = route.substring(ROUTE_LIEUX_FILTER_PREFIX.length());
+            Map<String, String> params = parseParams(payload);
+
+            String ville = decode(params.get("ville"));
+            String cat = decode(params.get("cat"));
+            String q = decode(params.get("q"));
+
+            LieuxController lc = openLieuxPageAndGetController();
+            if (lc != null) {
+                lc.applyPreset(ville, cat, q);
+            }
+            return;
+        }
+
+        if (route.startsWith(ROUTE_EVENEMENT_DETAILS_PREFIX)) {
+            String raw = route.substring(ROUTE_EVENEMENT_DETAILS_PREFIX.length()).trim();
+            try {
+                int id = Integer.parseInt(raw);
+                showEvenementDetails(id);
+            } catch (Exception e) {
+                info("Navigation", "ID événement invalide: " + raw);
+            }
+            return;
+        }
+
+        // ✅ Paiement
+        if (route.startsWith(ROUTE_PAIEMENT_PREFIX)) {
+            String raw = route.substring(ROUTE_PAIEMENT_PREFIX.length()).trim();
+            try {
+                int inscriptionId = Integer.parseInt(raw);
+                showPaiement(inscriptionId);
+            } catch (Exception e) {
+                info("Navigation", "ID inscription invalide: " + raw);
+            }
+            return;
+        }
         switch (route) {
             case ROUTE_HOME -> showAccueil();
             case ROUTE_SORTIES -> showSorties();
@@ -155,6 +222,44 @@ public class FrontDashboardController implements ShellNavigator {
         }
     }
 
+    private LieuxController openLieuxPageAndGetController() {
+        navLieux.setSelected(true);
+        setHeader("Lieux", "Découverte · filtres · détails");
+
+        Object controller = ensureLoadedAndShow(ROUTE_LIEUX, ViewPaths.FRONT_LIEUX);
+        if (controller instanceof LieuxController lc) return lc;
+        return null;
+    }
+
+    private void showLieuDetails(int id) {
+        navLieux.setSelected(true);
+        setHeader("Lieux", "Détails du lieu");
+
+        try {
+            URL url = getClass().getResource(ViewPaths.FRONT_LIEU_DETAILS);
+            if (url == null) throw new IllegalStateException("FXML introuvable: " + ViewPaths.FRONT_LIEU_DETAILS);
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Node view = loader.load();
+
+            Object controller = loader.getController();
+            trySetPrimaryStage(controller, resolveStage());
+            trySetCurrentUser(controller, currentUser);
+            trySetNavigator(controller, this);
+
+            if (controller instanceof LieuDetailsController c) {
+                c.setLieuId(id);
+            }
+
+            animateSwap(view);
+
+        } catch (Exception e) {
+            error("Chargement vue",
+                    "Vue: " + ViewPaths.FRONT_LIEU_DETAILS + "\n" +
+                            e.getClass().getSimpleName() + " : " + safe(e.getMessage()));
+        }
+    }
+
     /* ================= SEARCH / ACTIONS ================= */
 
     @FXML
@@ -164,7 +269,8 @@ public class FrontDashboardController implements ShellNavigator {
             info("Recherche", "Entre un mot-clé puis clique sur Go.");
             return;
         }
-        info("Recherche", "Recherche: " + q + "\n(Brancher recherche globale ici)");
+        // pour l'instant on redirige vers Lieux filtré
+        navigate(ROUTE_LIEUX_FILTER_PREFIX + "q=" + q);
     }
 
     @FXML
@@ -238,7 +344,7 @@ public class FrontDashboardController implements ShellNavigator {
     public void showProfil() {
         closeAccount();
         setHeader("Profil", "Informations du compte");
-        loadAndSet(ROUTE_PROFIL, ViewPaths.FRONT_PROFIL);
+        ensureLoadedAndShow(ROUTE_PROFIL, ViewPaths.FRONT_PROFIL);
     }
 
     @FXML public void showSecurity() { info("Sécurité", "Brancher: mot de passe / 2FA / sessions."); }
@@ -252,34 +358,26 @@ public class FrontDashboardController implements ShellNavigator {
         try {
             Stage stage = resolveStage();
             viewCache.clear();
+            controllerCache.clear();
             currentUser = null;
 
             URL url = getClass().getResource(ViewPaths.LOGIN);
             if (url == null) throw new IllegalStateException("FXML introuvable: " + ViewPaths.LOGIN);
 
             FXMLLoader loader = new FXMLLoader(url);
-            Parent loginRoot = loader.load();
-
-            Object controller = loader.getController();
-            trySetPrimaryStage(controller, stage);
-
-            stage.setTitle("Fin Tokhroj - Login");
-            stage.getScene().setRoot(loginRoot);
-            stage.centerOnScreen();
-            stage.show();
-
+            stage.getScene().setRoot(loader.load());
         } catch (Exception e) {
             error("Déconnexion", e.getClass().getSimpleName() + " : " + safe(e.getMessage()));
         }
     }
 
-    /* ================= VIEW LOADING ================= */
+    /* ================= CORE LOADER ================= */
 
-    private void loadAndSet(String key, String fxmlPath) {
+    private Object ensureLoadedAndShow(String key, String fxmlPath) {
         Node cached = viewCache.get(key);
         if (cached != null) {
             animateSwap(cached);
-            return;
+            return controllerCache.get(key);
         }
 
         try {
@@ -292,15 +390,19 @@ public class FrontDashboardController implements ShellNavigator {
             Object controller = loader.getController();
             trySetPrimaryStage(controller, resolveStage());
             trySetCurrentUser(controller, currentUser);
-            trySetNavigator(controller, this); // ✅ injection du navigator
+            trySetNavigator(controller, this);
 
             viewCache.put(key, view);
+            controllerCache.put(key, controller);
+
             animateSwap(view);
+            return controller;
 
         } catch (Exception e) {
             error("Chargement vue",
                     "Vue: " + fxmlPath + "\n" +
                             e.getClass().getSimpleName() + " : " + safe(e.getMessage()));
+            return null;
         }
     }
 
@@ -368,24 +470,56 @@ public class FrontDashboardController implements ShellNavigator {
     }
 
     private void trySetPrimaryStage(Object controller, Stage stage) {
-        if (controller == null || stage == null) return;
-        try { controller.getClass().getMethod("setPrimaryStage", Stage.class).invoke(controller, stage); }
-        catch (Exception ignored) {}
+        try {
+            controller.getClass().getMethod("setPrimaryStage", Stage.class).invoke(controller, stage);
+        } catch (Exception ignored) {}
     }
 
     private void trySetCurrentUser(Object controller, User user) {
-        if (controller == null || user == null) return;
-        try { controller.getClass().getMethod("setCurrentUser", User.class).invoke(controller, user); }
-        catch (Exception ignored) {}
+        try {
+            controller.getClass().getMethod("setCurrentUser", User.class).invoke(controller, user);
+        } catch (Exception ignored) {}
     }
 
-    private void trySetNavigator(Object controller, ShellNavigator navigator) {
-        if (controller == null || navigator == null) return;
-        try { controller.getClass().getMethod("setNavigator", ShellNavigator.class).invoke(controller, navigator); }
-        catch (Exception ignored) {}
+    private void trySetNavigator(Object controller, ShellNavigator nav) {
+        try {
+            controller.getClass().getMethod("setNavigator", ShellNavigator.class).invoke(controller, nav);
+        } catch (Exception ignored) {}
     }
 
-    private String safe(String s) { return s == null ? "" : s; }
+    private Map<String, String> parseParams(String payload) {
+        Map<String, String> out = new HashMap<>();
+        if (payload == null) return out;
+
+        String p = payload.trim();
+        if (p.isEmpty()) return out;
+
+        String[] parts = p.split("[;&]");
+        for (String part : parts) {
+            if (part == null) continue;
+            String s = part.trim();
+            if (s.isEmpty()) continue;
+
+            int idx = s.indexOf('=');
+            if (idx < 0) {
+                out.put(s.toLowerCase(), "");
+                continue;
+            }
+            String k = s.substring(0, idx).trim().toLowerCase();
+            String v = s.substring(idx + 1).trim();
+            out.put(k, v);
+        }
+        return out;
+    }
+
+    private String decode(String raw) {
+        if (raw == null) return null;
+        try {
+            return URLDecoder.decode(raw, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return raw;
+        }
+    }
 
     private void info(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION);
@@ -397,9 +531,79 @@ public class FrontDashboardController implements ShellNavigator {
 
     private void error(String title, String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR);
-        a.setTitle("Erreur");
-        a.setHeaderText(title);
+        a.setTitle(title);
+        a.setHeaderText(null);
         a.setContentText(msg);
         a.showAndWait();
+    }
+
+    private String safe(String s) { return s == null ? "" : s; }
+
+    private void showPaiement(int inscriptionId) {
+        navEvents.setSelected(true);
+        setHeader("Paiement", "Finaliser votre paiement");
+
+        // ── Invalider le cache de la liste événements pour forcer le rafraîchissement
+        //    après le paiement (sinon le tag reste "En attente de paiement") ──
+        viewCache.remove(ROUTE_EVENTS);
+        controllerCache.remove(ROUTE_EVENTS);
+
+        try {
+            URL url = getClass().getResource(ViewPaths.FRONT_PAIEMENT);
+            if (url == null) throw new IllegalStateException("FXML introuvable: " + ViewPaths.FRONT_PAIEMENT);
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Node view = loader.load();
+
+            Object controller = loader.getController();
+            trySetPrimaryStage(controller, resolveStage());
+            trySetCurrentUser(controller, currentUser);
+            trySetNavigator(controller, this);
+
+            if (controller instanceof PaiementController c) {
+                c.setInscriptionId(inscriptionId);
+            }
+
+            animateSwap(view);
+
+        } catch (Exception e) {
+            error("Chargement vue",
+                    "Vue: " + ViewPaths.FRONT_PAIEMENT + "\n" +
+                            e.getClass().getSimpleName() + " : " + safe(e.getMessage()));
+        }
+    }
+
+    private void showEvenementDetails(int id) {
+        navEvents.setSelected(true);
+        setHeader("Événements", "Détails de l'événement");
+
+        // ── Invalider le cache de la liste événements pour forcer le rafraîchissement
+        //    quand on revient (état inscription/paiement peut avoir changé) ──
+        viewCache.remove(ROUTE_EVENTS);
+        controllerCache.remove(ROUTE_EVENTS);
+
+        try {
+            URL url = getClass().getResource(ViewPaths.FRONT_EVENEMENT_DETAILS); // ex: "/views/front/evenements/EvenementDetailsView.fxml"
+            if (url == null) throw new IllegalStateException("FXML introuvable: " + ViewPaths.FRONT_EVENEMENT_DETAILS);
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Node view = loader.load();
+
+            Object controller = loader.getController();
+            trySetPrimaryStage(controller, resolveStage());
+            trySetCurrentUser(controller, currentUser);
+            trySetNavigator(controller, this);
+
+            if (controller instanceof EvenementDetailsController c) {
+                c.setEvenementId(id);
+            }
+
+            animateSwap(view);
+
+        } catch (Exception e) {
+            error("Chargement vue",
+                    "Vue: " + ViewPaths.FRONT_EVENEMENT_DETAILS + "\n" +
+                            e.getClass().getSimpleName() + " : " + safe(e.getMessage()));
+        }
     }
 }

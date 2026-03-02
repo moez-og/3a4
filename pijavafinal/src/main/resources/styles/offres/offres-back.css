@@ -1,0 +1,60 @@
+/* Styles pour l'interface admin des offres */
+
+.offre-card {
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+    -fx-padding: 10;
+    -fx-spacing: 10;
+    -fx-background-color: #ffffff;
+}
+
+.offre-card:hover {
+    -fx-border-color: #f44336;
+    -fx-background-color: #f9f9f9;
+}
+
+.offre-table {
+    -fx-font-size: 12;
+}
+
+.offre-header {
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+.offre-form {
+    -fx-spacing: 10;
+    -fx-padding: 15;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5;
+}
+
+.offre-button-primary {
+    -fx-padding: 8 20;
+    -fx-font-size: 12;
+    -fx-background-color: #f44336;
+    -fx-text-fill: white;
+}
+
+.offre-button-primary:hover {
+    -fx-background-color: #da190b;
+}
+
+.offre-button-danger {
+    -fx-padding: 8 20;
+    -fx-font-size: 12;
+    -fx-background-color: #dc3545;
+    -fx-text-fill: white;
+}
+
+.offre-button-danger:hover {
+    -fx-background-color: #c82333;
+}
+
+.offre-search-field {
+    -fx-padding: 8;
+    -fx-font-size: 12;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 4;
+}

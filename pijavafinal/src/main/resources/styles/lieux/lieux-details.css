@@ -1,0 +1,196 @@
+/* =========================
+   LIEU DETAILS (Front)
+========================= */
+
+.lieuDetailsRoot { -fx-background-color: transparent; }
+
+.detailsScroll { -fx-background-color: transparent; -fx-background: transparent; }
+.detailsScroll .viewport { -fx-background-color: transparent; }
+
+/* Hero image */
+.detailsHeroImg {
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.14), 18, 0.18, 0, 8);
+}
+
+/* Card */
+.detailsCard{
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-padding: 14;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 16, 0.18, 0, 6);
+}
+
+.detailsTitle { -fx-text-fill: #163a5c; -fx-font-size: 22; -fx-font-weight: 900; }
+
+.detailsLine {
+    -fx-text-fill: rgba(22,58,92,0.82);
+    -fx-font-size: 12.5;
+    -fx-font-weight: 800;
+}
+
+.detailsHint {
+    -fx-text-fill: rgba(22,58,92,0.62);
+    -fx-font-size: 11.5;
+    -fx-font-weight: 800;
+}
+
+.detailsDesc{
+    -fx-text-fill: rgba(22,58,92,0.72);
+    -fx-font-size: 12;
+    -fx-font-weight: 700;
+}
+
+.detailsMini{
+    -fx-text-fill: rgba(22,58,92,0.70);
+    -fx-font-size: 11.5;
+    -fx-font-weight: 800;
+}
+
+/* badges */
+.badge{
+    -fx-background-color: rgba(212,175,55,0.22);
+    -fx-border-color: rgba(212,175,55,0.55);
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-padding: 6 12;
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+}
+.badgeMuted{
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-padding: 6 12;
+    -fx-text-fill: rgba(22,58,92,0.72);
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+}
+
+/* buttons */
+.primaryBtn{
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+.primaryBtn:hover{ -fx-background-color: linear-gradient(to right, #e8c547, #d4af37); }
+
+.backLinkBtn{
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(22,58,92,0.86);
+    -fx-font-weight: 900;
+    -fx-cursor: hand;
+}
+.backLinkBtn:hover{ -fx-underline: true; }
+
+/* =========================
+   AVIS
+========================= */
+
+.avisCard{
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 18;
+    -fx-padding: 14;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.08), 14, 0.18, 0, 5);
+}
+
+.avisTitle{
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 16;
+    -fx-font-weight: 900;
+}
+
+.avisAvg{
+    -fx-text-fill: rgba(22,58,92,0.78);
+    -fx-font-size: 12;
+    -fx-font-weight: 900;
+}
+
+.avisSearch{
+    -fx-background-color: rgba(15,23,42,0.05);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 14;
+    -fx-padding: 10 12;
+    -fx-font-weight: 800;
+}
+
+/* item */
+.avisItem{
+    -fx-background-color: rgba(255,255,255,0.96);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 16;
+}
+
+.avisAvatar{
+    -fx-min-width: 42;
+    -fx-min-height: 42;
+    -fx-max-width: 42;
+    -fx-max-height: 42;
+    -fx-background-radius: 999;
+    -fx-background-color: rgba(212,175,55,0.26);
+    -fx-border-color: rgba(212,175,55,0.55);
+    -fx-border-radius: 999;
+}
+
+.avisAvatarTxt{
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+}
+
+.avisAuthor{
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: 900;
+}
+
+.avisMeta{
+    -fx-text-fill: rgba(15,23,42,0.55);
+    -fx-font-weight: 800;
+    -fx-font-size: 11;
+}
+
+.avisStars{
+    -fx-text-fill: #c9920f;
+    -fx-font-weight: 900;
+}
+
+.avisComment{
+    -fx-text-fill: rgba(22,58,92,0.78);
+    -fx-font-weight: 750;
+}
+
+.avisActions .button{
+    -fx-background-radius: 12;
+    -fx-font-weight: 900;
+    -fx-cursor: hand;
+    -fx-padding: 7 10;
+}
+
+.ghostBtn{
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-text-fill: rgba(22,58,92,0.90);
+}
+.ghostBtn:hover{
+    -fx-background-color: rgba(15,23,42,0.10);
+}
+
+.dangerBtn{
+    -fx-background-color: rgba(239,68,68,0.12);
+    -fx-text-fill: #b91c1c;
+    -fx-border-color: rgba(239,68,68,0.35);
+    -fx-border-radius: 12;
+}
+.dangerBtn:hover{
+    -fx-background-color: rgba(239,68,68,0.18);
+}
