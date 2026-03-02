@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -33,6 +34,7 @@ import models.sorties.AnnonceSortie;
 import models.sorties.ParticipationSortie;
 import models.users.User;
 import services.sorties.AnnonceSortieService;
+import services.sorties.ChatService;
 import services.sorties.ParticipationSortieService;
 import services.users.UserService;
 import utils.files.UploadStore;
@@ -75,6 +77,7 @@ public class SortiesAdminController {
     private final AnnonceSortieService service = new AnnonceSortieService();
     private final ParticipationSortieService participationService = new ParticipationSortieService();
     private final UserService userService = new UserService();
+    private final ChatService chatService = new ChatService();
     private final ObservableList<AnnonceSortie> masterList = FXCollections.observableArrayList();
     private final FilteredList<AnnonceSortie> filteredList = new FilteredList<>(masterList, p -> true);
 
@@ -87,6 +90,9 @@ public class SortiesAdminController {
     private int totalPages = 1;
     private List<AnnonceSortie> lastViewList = List.of();
 
+    private final Map<Integer, List<Label>> chatBadgesByAnnonceId = new HashMap<>();
+    private volatile long chatUnreadRefreshToken = 0;
+
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final DecimalFormat MONEY_FMT = new DecimalFormat("0.##");
     private List<String> regionsForVille(String ville) {
@@ -95,6 +101,7 @@ public class SortiesAdminController {
 
     public void setCurrentUser(User u) {
         this.currentUser = u;
+        refreshChatUnreadBadgesAsync();
     }
 
     @FXML
@@ -104,6 +111,7 @@ public class SortiesAdminController {
         setupSortControls();
         setupButtons();
         setupResponsiveTiles();
+        try { chatService.ensureSchema(); } catch (Exception ignored) {}
         loadData();
     }
 
@@ -278,9 +286,12 @@ public class SortiesAdminController {
         int to   = Math.min(list.size(), from + PAGE_SIZE);
 
         cardsPane.getChildren().clear();
+        chatBadgesByAnnonceId.clear();
         for (int i = from; i < to; i++) {
             cardsPane.getChildren().add(createCard(list.get(i)));
         }
+
+        refreshChatUnreadBadgesAsync();
 
         boolean showPager = list.size() > PAGE_SIZE;
         setPaginationVisible(showPager);
@@ -291,6 +302,62 @@ public class SortiesAdminController {
         }
 
         if (cardsScroll != null) cardsScroll.setVvalue(0);
+    }
+
+    private void refreshChatUnreadBadgesAsync() {
+        if (currentUser == null || currentUser.getId() <= 0) return;
+        if (chatBadgesByAnnonceId.isEmpty()) return;
+
+        final long token = ++chatUnreadRefreshToken;
+        final int uid = currentUser.getId();
+        final Map<Integer, List<Label>> snapshot = new HashMap<>(chatBadgesByAnnonceId);
+
+        new Thread(() -> {
+            try { chatService.ensureSchema(); } catch (Exception ignored) {}
+            for (Map.Entry<Integer, List<Label>> e : snapshot.entrySet()) {
+                if (token != chatUnreadRefreshToken) return;
+                int annonceId = e.getKey();
+                List<Label> badges = e.getValue();
+                long count;
+                try {
+                    count = chatService.getUnreadCount(annonceId, uid);
+                } catch (Exception ex) {
+                    count = 0;
+                }
+                long finalCount = count;
+                Platform.runLater(() -> {
+                    if (badges == null) return;
+                    for (Label b : badges) setChatBadgeValue(b, finalCount);
+                });
+            }
+        }, "back-chat-unread-refresh").start();
+    }
+
+    private StackPane wrapChatButtonWithBadge(Button chatButton, int annonceId) {
+        Label badge = new Label();
+        badge.getStyleClass().add("chatUnreadBadge");
+        badge.setVisible(false);
+        badge.setManaged(false);
+        badge.setMouseTransparent(true);
+
+        StackPane wrapper = new StackPane(chatButton, badge);
+        StackPane.setAlignment(badge, Pos.TOP_RIGHT);
+        StackPane.setMargin(badge, new Insets(-6, -6, 0, 0));
+        wrapper.setPickOnBounds(false);
+
+        if (annonceId > 0) {
+            chatBadgesByAnnonceId.computeIfAbsent(annonceId, k -> new ArrayList<>()).add(badge);
+        }
+        return wrapper;
+    }
+
+    private void setChatBadgeValue(Label badge, long count) {
+        if (badge == null) return;
+        long v = Math.max(0, count);
+        boolean show = v > 0;
+        badge.setText(v > 99 ? "99+" : String.valueOf(v));
+        badge.setVisible(show);
+        badge.setManaged(show);
     }
 
     private void setPaginationVisible(boolean visible) {
@@ -413,7 +480,8 @@ public class SortiesAdminController {
 
         Region actSpacer = new Region();
         HBox.setHgrow(actSpacer, Priority.ALWAYS);
-        HBox actions = new HBox(8, quickEdit, quickParts, actSpacer, quickChat, quickDelete);
+        Node chatNode = wrapChatButtonWithBadge(quickChat, a.getId());
+        HBox actions = new HBox(8, quickEdit, quickParts, actSpacer, chatNode, quickDelete);
         actions.setAlignment(Pos.CENTER_LEFT);
         actions.getStyleClass().add("card-actions");
 
@@ -431,6 +499,20 @@ public class SortiesAdminController {
         if (currentUser == null) {
             showError("Chat", "Utilisateur non défini", "Connexion requise.");
             return;
+        }
+
+        // Ouvrir le chat = considérer comme "lu" (badge retombe directement)
+        int annonceId = a.getId();
+        int uid = currentUser.getId();
+        if (annonceId > 0 && uid > 0) {
+            new Thread(() -> {
+                try {
+                    chatService.ensureSchema();
+                    chatService.markAllRead(annonceId, uid);
+                } catch (Exception ignored) {
+                }
+                Platform.runLater(this::refreshChatUnreadBadgesAsync);
+            }, "back-chat-mark-read").start();
         }
 
         try {
@@ -556,9 +638,20 @@ public class SortiesAdminController {
                 "-fx-font-weight: 700; -fx-padding: 9 16; -fx-cursor: hand;");
         btnChat.setOnAction(e -> openChatAdmin(a));
 
+        StackPane chatWrap = wrapChatButtonWithBadge(btnChat, a.getId());
+        try {
+            if (currentUser != null && currentUser.getId() > 0) {
+                chatService.ensureSchema();
+                long unread = chatService.getUnreadCount(a.getId(), currentUser.getId());
+                List<Label> badges = chatBadgesByAnnonceId.get(a.getId());
+                if (badges != null) for (Label b : badges) setChatBadgeValue(b, unread);
+            }
+        } catch (Exception ignored) {
+        }
+
         Region footerSpacer = new Region();
         HBox.setHgrow(footerSpacer, Priority.ALWAYS);
-        HBox footer = new HBox(10, btnDetails, btnChat, footerSpacer, btnClose);
+        HBox footer = new HBox(10, btnDetails, chatWrap, footerSpacer, btnClose);
         footer.setAlignment(Pos.CENTER_RIGHT);
         footer.setPadding(new Insets(12, 16, 12, 16));
         footer.setStyle("-fx-background-color: white; -fx-border-color: #dde3ed; -fx-border-width: 1 0 0 0;");

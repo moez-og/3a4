@@ -2,6 +2,7 @@ package controllers.back.shell;
 
 import controllers.common.notifications.NotificationsCenterController;
 import controllers.front.shell.FrontDashboardController;
+import controllers.front.sorties.GroupeChatController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -28,6 +29,7 @@ import models.notifications.NotificationType;
 import models.sorties.AnnonceSortie;
 import models.users.User;
 import services.sorties.AnnonceSortieService;
+import services.sorties.ChatService;
 import services.sorties.ParticipationSortieService;
 import services.users.UserService;
 import services.notifications.NotificationService;
@@ -73,6 +75,8 @@ public class BackDashboardController {
     private User currentUser;
 
     private final NotificationService notificationService = new NotificationService();
+    private final AnnonceSortieService annonceSortieService = new AnnonceSortieService();
+    private final ChatService chatService = new ChatService();
     private Timeline notifPoller;
 
     private final Map<String, Node> viewCache = new HashMap<>();
@@ -219,6 +223,11 @@ public class BackDashboardController {
         int annonceId = extractSortieId(n);
         if (annonceId <= 0) return;
 
+        if (t == NotificationType.CHAT_MESSAGE) {
+            openChatWindow(annonceId);
+            return;
+        }
+
         // Admin wants to accept/refuse: open Sorties view then open participations.
         if (t == NotificationType.PARTICIPATION_REQUESTED || t == NotificationType.PARTICIPATION_CANCELLED) {
             openSortiesAndParticipations(annonceId);
@@ -227,6 +236,65 @@ public class BackDashboardController {
 
         // Otherwise, just open the sorties list.
         loadAndSetCachedView("sorties", SORTIES_VIEW_PATH);
+    }
+
+    private void openChatWindow(int annonceId) {
+        if (currentUser == null || currentUser.getId() <= 0) {
+            showInfo("Chat", "Connexion requise", "Connecte-toi pour ouvrir le chat.");
+            return;
+        }
+        if (annonceId <= 0) return;
+
+        boolean isAdmin = "admin".equalsIgnoreCase(safe(currentUser.getRole()).trim());
+        try { chatService.ensureSchema(); } catch (Exception ignored) {}
+
+        if (!isAdmin) {
+            try {
+                if (!chatService.canAccess(annonceId, currentUser.getId())) {
+                    showInfo("Chat", "Accès réservé", "Accès réservé aux membres acceptés.");
+                    return;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        AnnonceSortie annonce;
+        try {
+            annonce = annonceSortieService.getById(annonceId);
+        } catch (Exception e) {
+            annonce = null;
+        }
+        if (annonce == null) {
+            showInfo("Chat", "Sortie introuvable", "Impossible de retrouver cette sortie.");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/front/sorties/GroupeChatView.fxml"));
+            Parent chatRoot = loader.load();
+
+            GroupeChatController ctrl = loader.getController();
+            if (isAdmin) ctrl.setContextAdmin(currentUser, annonce);
+            else ctrl.setContext(currentUser, annonce);
+
+            Stage chatStage = new Stage();
+            chatStage.initOwner(resolveStage());
+            chatStage.setTitle("Chat — " + safe(annonce.getTitre()));
+            chatStage.setResizable(true);
+
+            Scene scene = new Scene(chatRoot, 680, 600);
+            try {
+                var url = getClass().getResource("/styles/sorties/chat.css");
+                if (url != null) scene.getStylesheets().add(url.toExternalForm());
+            } catch (Exception ignored) {
+            }
+
+            chatStage.setScene(scene);
+            chatStage.setOnCloseRequest(e -> ctrl.stopPolling());
+            chatStage.show();
+        } catch (Exception e) {
+            showError("Chat", "Ouverture impossible", safe(e.getMessage()));
+        }
     }
 
     private int extractSortieId(Notification n) {
@@ -680,6 +748,14 @@ public class BackDashboardController {
 
     private void showError(String title, String header, String details) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(details);
+        alert.showAndWait();
+    }
+
+    private void showInfo(String title, String header, String details) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(header);
         alert.setContentText(details);
