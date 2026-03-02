@@ -34,6 +34,9 @@ public class FrontDashboardController implements ShellNavigator {
     public static final String ROUTE_EVENTS = "events";
     public static final String ROUTE_HELP = "help";
     public static final String ROUTE_PROFIL = "profil";
+    public static final String ROUTE_LIEU_DETAILS_PREFIX = "lieu-details:";
+    public static final String ROUTE_MES_FAVORIS = "mes-favoris";
+    public static final String ROUTE_NEURO_MODE_PREFIX = "neuro-mode:";
 
     @FXML private StackPane root;
     @FXML private StackPane dynamicContent;
@@ -151,7 +154,16 @@ public class FrontDashboardController implements ShellNavigator {
             case ROUTE_EVENTS -> showEvents();
             case ROUTE_HELP -> showHelp();
             case ROUTE_PROFIL -> showProfil();
-            default -> info("Navigation", "Route inconnue: " + route);
+            case ROUTE_MES_FAVORIS -> showLieux();
+            default -> {
+                if (route.startsWith(ROUTE_LIEU_DETAILS_PREFIX)) {
+                    showLieux();
+                } else if (route.startsWith(ROUTE_NEURO_MODE_PREFIX)) {
+                    showLieux();
+                } else {
+                    info("Navigation", "Route inconnue: " + route);
+                }
+            }
         }
     }
 
