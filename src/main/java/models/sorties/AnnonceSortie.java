@@ -22,7 +22,7 @@ public class AnnonceSortie {
     private int nbPlaces;
 
     private String imageUrl;
-    private String statut;      // OUVERTE | CLOTUREE | ANNULEE
+    private String statut;      // OUVERTE | CLOTUREE | ANNULEE | TERMINEE
 
     private List<String> questions = new ArrayList<>();
 

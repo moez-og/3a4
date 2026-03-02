@@ -6,6 +6,8 @@ package controllers.front.shell;
 import controllers.front.evenements.EvenementDetailsController;
 import controllers.front.lieux.LieuDetailsController;
 import controllers.front.lieux.LieuxController;
+import controllers.front.sorties.SortieDetailsController;
+import controllers.front.sorties.SortiesController;
 import controllers.common.notifications.NotificationsCenterController;
 import javafx.animation.KeyFrame;
 import javafx.animation.FadeTransition;
@@ -28,6 +30,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import models.notifications.Notification;
+import models.notifications.NotificationType;
 import models.users.User;
 import services.notifications.NotificationService;
 import utils.ui.ShellNavigator;
@@ -52,6 +56,10 @@ public class FrontDashboardController implements ShellNavigator {
     public static final String ROUTE_LIEU_DETAILS_PREFIX = "lieu-details:";
     public static final String ROUTE_EVENEMENT_DETAILS_PREFIX = "evenement-details:";
     public static final String ROUTE_LIEUX_FILTER_PREFIX = "lieux-filter:";
+
+    public static final String ROUTE_SORTIE_DETAILS_PREFIX = "sortie-details:";
+    public static final String ROUTE_SORTIE_REQUESTS_PREFIX = "sortie-requests:";
+    public static final String ROUTE_SORTIE_EDIT_PREFIX = "sortie-edit:";
 
     @FXML private StackPane root;
     @FXML private StackPane dynamicContent;
@@ -203,6 +211,45 @@ public class FrontDashboardController implements ShellNavigator {
             return;
         }
 
+        if (route.startsWith(ROUTE_SORTIE_DETAILS_PREFIX)) {
+            String raw = route.substring(ROUTE_SORTIE_DETAILS_PREFIX.length()).trim();
+            try {
+                int id = Integer.parseInt(raw);
+                showSortieDetails(id, false);
+            } catch (Exception e) {
+                info("Navigation", "ID sortie invalide: " + raw);
+            }
+            return;
+        }
+
+        if (route.startsWith(ROUTE_SORTIE_REQUESTS_PREFIX)) {
+            String raw = route.substring(ROUTE_SORTIE_REQUESTS_PREFIX.length()).trim();
+            try {
+                int id = Integer.parseInt(raw);
+                showSortieDetails(id, true);
+            } catch (Exception e) {
+                info("Navigation", "ID sortie invalide: " + raw);
+            }
+            return;
+        }
+
+        if (route.startsWith(ROUTE_SORTIE_EDIT_PREFIX)) {
+            String raw = route.substring(ROUTE_SORTIE_EDIT_PREFIX.length()).trim();
+            try {
+                int id = Integer.parseInt(raw);
+
+                navSorties.setSelected(true);
+                setHeader("Sorties", "Modifier l'annonce");
+                Object controller = ensureLoadedAndShow(ROUTE_SORTIES, ViewPaths.FRONT_SORTIES);
+                if (controller instanceof SortiesController sc) {
+                    Platform.runLater(() -> sc.openEditorByAnnonceId(id));
+                }
+            } catch (Exception e) {
+                info("Navigation", "ID sortie invalide: " + raw);
+            }
+            return;
+        }
+
         switch (route) {
             case ROUTE_HOME -> showAccueil();
             case ROUTE_SORTIES -> showSorties();
@@ -282,6 +329,36 @@ public class FrontDashboardController implements ShellNavigator {
         }
     }
 
+    private void showSortieDetails(int id, boolean openRequests) {
+        navSorties.setSelected(true);
+        setHeader("Sorties", "Détails de la sortie");
+
+        try {
+            URL url = getClass().getResource(ViewPaths.FRONT_SORTIE_DETAILS);
+            if (url == null) throw new IllegalStateException("FXML introuvable: " + ViewPaths.FRONT_SORTIE_DETAILS);
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Node view = loader.load();
+
+            Object controller = loader.getController();
+            trySetPrimaryStage(controller, resolveStage());
+            trySetCurrentUser(controller, currentUser);
+            trySetNavigator(controller, this);
+
+            if (controller instanceof SortieDetailsController c) {
+                c.setSortieId(id);
+                if (openRequests) c.openRequestsFromOutside();
+            }
+
+            animateSwap(view);
+
+        } catch (Exception e) {
+            error("Chargement vue",
+                    "Vue: " + ViewPaths.FRONT_SORTIE_DETAILS + "\n" +
+                            e.getClass().getSimpleName() + " : " + safe(e.getMessage()));
+        }
+    }
+
     @FXML
     public void doSearch() {
         String q = safe(searchField.getText()).trim();
@@ -306,6 +383,7 @@ public class FrontDashboardController implements ShellNavigator {
             NotificationsCenterController c = loader.getController();
             c.setCurrentUser(currentUser);
             c.setOnChange(this::refreshUnreadBadgeAsync);
+            c.setOnOpen(this::handleNotificationOpen);
 
             Stage dialog = new Stage();
             dialog.setTitle("Notifications");
@@ -318,6 +396,30 @@ public class FrontDashboardController implements ShellNavigator {
         } catch (Exception e) {
             error("Notifications", "Ouverture impossible: " + safe(e.getMessage()));
         }
+    }
+
+    private void handleNotificationOpen(Notification n) {
+        if (n == null) return;
+
+        NotificationType t = n.getType();
+        int sortieId = extractSortieId(n);
+        if (sortieId <= 0) return;
+
+        boolean openRequests = (t == NotificationType.PARTICIPATION_REQUESTED || t == NotificationType.PARTICIPATION_CANCELLED);
+        navigate((openRequests ? ROUTE_SORTIE_REQUESTS_PREFIX : ROUTE_SORTIE_DETAILS_PREFIX) + sortieId);
+    }
+
+    private int extractSortieId(Notification n) {
+        if (n == null) return -1;
+
+        Integer fromMeta = NotificationsCenterController.extractIntField(n.getMetadataJson(), "sortieId");
+        if (fromMeta != null && fromMeta > 0) return fromMeta;
+
+        // Fallback when entityType is sortie.
+        if (n.getEntityId() > 0 && "sortie".equalsIgnoreCase(safe(n.getEntityType()).trim())) {
+            return n.getEntityId();
+        }
+        return -1;
     }
 
     @FXML
@@ -496,6 +598,13 @@ public class FrontDashboardController implements ShellNavigator {
         if (dynamicContent == null) return;
 
         dynamicContent.getChildren().setAll(node);
+
+        // Keep injected views resizable without forcing the container to grow.
+        // (Never set prefWidth based on parent width: contentSurface has padding and can cause runaway growth.)
+        if (node instanceof javafx.scene.layout.Region r) {
+            r.setMinSize(0, 0);
+            r.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        }
 
         node.setOpacity(0);
         node.setTranslateY(8);

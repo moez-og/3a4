@@ -57,6 +57,20 @@
             <version>5.10.1</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- JavaMail — envoi d'emails SMTP -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+
+        <!-- Twilio SDK — envoi de SMS -->
+        <dependency>
+            <groupId>com.twilio.sdk</groupId>
+            <artifactId>twilio</artifactId>
+            <version>10.1.0</version>
+        </dependency>
     </dependencies>
 
     <build>

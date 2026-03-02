@@ -21,14 +21,6 @@ public class LieuService implements CrudService<Lieu, Integer> {
 
     private final Connection cnx;
 
-    // Dossier de destination pour les images uploadées (relatif à resources)
-    // Adaptez ce chemin selon votre environnement
-    private static final String IMAGES_LIEUX_DIR;
-
-    static {
-        IMAGES_LIEUX_DIR = getImagesLieuxDir();
-    }
-
     public LieuService() {
         cnx = Mydb.getInstance().getConnection();
     }

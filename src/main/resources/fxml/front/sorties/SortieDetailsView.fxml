@@ -12,11 +12,12 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/21"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="controllers.front.sorties.SortieDetailsController"
-      spacing="14"
-      styleClass="sortieDetailsRoot"
-      stylesheets="@/styles/sorties/sorties-details.css">
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:id="root"
+    fx:controller="controllers.front.sorties.SortieDetailsController"
+    spacing="14"
+    styleClass="sortieDetailsRoot"
+    stylesheets="@/styles/sorties/sorties-details.css">
 
     <padding>
         <Insets top="14" right="14" bottom="18" left="14"/>
@@ -31,6 +32,8 @@
 
             <Button fx:id="btnRequests" text="Demandes" onAction="#openRequests"
                     styleClass="ghostBtn" visible="false" managed="false"/>
+            <Button fx:id="btnChat" text="💬 Chat" onAction="#openChat"
+                    styleClass="primaryBtn" visible="false" managed="false"/>
 
             <!-- ✅ NOUVEAU -->
             <Button fx:id="btnParticiper" text="Participer" onAction="#participer"
@@ -43,9 +46,11 @@
         </HBox>
     </HBox>
 
-    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="detailsScroll">
+    <ScrollPane fx:id="detailsScroll" fitToWidth="true" fitToHeight="true"
+                hbarPolicy="NEVER" vbarPolicy="ALWAYS" styleClass="detailsScroll"
+                VBox.vgrow="ALWAYS">
         <content>
-            <VBox spacing="14">
+            <VBox fx:id="contentBox" spacing="14" minWidth="0">
 
                 <!-- HERO (responsive) -->
                 <StackPane fx:id="heroBox" styleClass="detailsHero"
@@ -54,12 +59,12 @@
                                preserveRatio="true"
                                smooth="true"
                                cache="true"
-                               styleClass="detailsHeroImg"/>
+                               styleClass="detailsHeroImg heroImage"/>
 
-                    <VBox spacing="10" styleClass="heroOverlay" StackPane.alignment="BOTTOM_LEFT">
-                        <Label fx:id="title" text="Titre" styleClass="detailsTitle" wrapText="true"/>
+                    <VBox spacing="10" styleClass="heroGlass" StackPane.alignment="BOTTOM_LEFT" minWidth="0" maxWidth="720">
+                        <Label fx:id="title" text="Titre" styleClass="detailsTitle" wrapText="true" minWidth="0"/>
 
-                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="heroChips">
+                        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="heroMeta">
                             <Label fx:id="chipStatut" text="OUVERTE" styleClass="statusChip status-ouverte"/>
                             <Label fx:id="chipActivite" text="Activité" styleClass="badge"/>
                             <Label fx:id="dateText" text="📅 —" styleClass="detailsHint"/>
@@ -67,9 +72,9 @@
                     </VBox>
                 </StackPane>
 
-                <HBox spacing="14" alignment="TOP_LEFT">
+                <HBox fx:id="mainRow" spacing="14" alignment="TOP_LEFT" minWidth="0">
 
-                    <VBox spacing="14" HBox.hgrow="ALWAYS">
+                    <VBox fx:id="leftCol" spacing="14" HBox.hgrow="ALWAYS" minWidth="0">
 
                         <VBox spacing="10" styleClass="detailsCard">
                             <Label text="Localisation" styleClass="detailsSectionTitle"/>
@@ -85,61 +90,75 @@
                         <VBox spacing="10" styleClass="detailsCard">
                             <Label text="Questions" styleClass="detailsSectionTitle"/>
                             <Label fx:id="questionsEmpty" text="Aucune question."
-                                   styleClass="detailsHint" visible="false" managed="false"/>
+                                   styleClass="detailsMuted" visible="false" managed="false"/>
                             <FlowPane fx:id="questionsPane" hgap="10" vgap="10" prefWrapLength="760"/>
                         </VBox>
 
                         <VBox spacing="10" styleClass="detailsCard">
                             <Label text="Participants acceptés" styleClass="detailsSectionTitle"/>
                             <Label fx:id="acceptedEmpty" text="Aucun participant accepté."
-                                   styleClass="detailsHint" visible="false" managed="false"/>
+                                   styleClass="detailsMuted" visible="false" managed="false"/>
                             <FlowPane fx:id="acceptedPane" hgap="10" vgap="10" prefWrapLength="760"/>
+                        </VBox>
+
+                        <!-- Demandes (intégré dans la page, pas de fenêtre séparée) -->
+                        <VBox fx:id="pendingSection" spacing="10" styleClass="detailsCard" visible="false" managed="false">
+                            <HBox alignment="CENTER_LEFT" spacing="10">
+                                <Label text="Demandes en attente" styleClass="detailsSectionTitle"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="Rafraîchir" onAction="#refreshPending" styleClass="ghostBtn"/>
+                            </HBox>
+
+                            <Label fx:id="pendingEmpty" text="Aucune demande en attente."
+                                   styleClass="detailsMuted" visible="false" managed="false"/>
+
+                            <VBox fx:id="pendingList" spacing="10"/>
                         </VBox>
 
                     </VBox>
 
-                    <VBox spacing="14" prefWidth="360">
+                    <VBox fx:id="sideCol" spacing="14" prefWidth="360" minWidth="0" maxWidth="360">
                         <VBox spacing="12" styleClass="sideCard">
                             <Label text="Résumé" styleClass="detailsSectionTitle"/>
 
                             <VBox spacing="10" styleClass="infoList">
                                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
                                     <Label text="🗓" styleClass="infoIcon"/>
-                                    <VBox spacing="2">
+                                    <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
                                         <Label text="Date" styleClass="infoK"/>
-                                        <Label fx:id="infoDate" text="—" styleClass="infoV"/>
+                                        <Label fx:id="infoDate" text="—" styleClass="infoV" wrapText="true" minWidth="0"/>
                                     </VBox>
                                 </HBox>
 
                                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
                                     <Label text="💰" styleClass="infoIcon"/>
-                                    <VBox spacing="2">
+                                    <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
                                         <Label text="Budget" styleClass="infoK"/>
-                                        <Label fx:id="infoBudget" text="—" styleClass="infoV"/>
+                                        <Label fx:id="infoBudget" text="—" styleClass="infoV" wrapText="true" minWidth="0"/>
                                     </VBox>
                                 </HBox>
 
                                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
                                     <Label text="👥" styleClass="infoIcon"/>
-                                    <VBox spacing="2">
+                                    <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
                                         <Label text="Places" styleClass="infoK"/>
-                                        <Label fx:id="infoPlaces" text="—" styleClass="infoV"/>
+                                        <Label fx:id="infoPlaces" text="—" styleClass="infoV" wrapText="true" minWidth="0"/>
                                     </VBox>
                                 </HBox>
 
                                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
                                     <Label text="✅" styleClass="infoIcon"/>
-                                    <VBox spacing="2">
+                                    <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
                                         <Label text="Statut" styleClass="infoK"/>
-                                        <Label fx:id="infoStatut" text="—" styleClass="infoV"/>
+                                        <Label fx:id="infoStatut" text="—" styleClass="detailsStatusChip statusChip" wrapText="false" minWidth="0"/>
                                     </VBox>
                                 </HBox>
 
                                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="infoRow">
                                     <Label text="👤" styleClass="infoIcon"/>
-                                    <VBox spacing="2">
+                                    <VBox spacing="2" HBox.hgrow="ALWAYS" minWidth="0">
                                         <Label text="Organisateur" styleClass="infoK"/>
-                                        <Label fx:id="infoOrganisateur" text="—" styleClass="infoV"/>
+                                        <Label fx:id="infoOrganisateur" text="—" styleClass="infoV" wrapText="true" minWidth="0"/>
                                     </VBox>
                                 </HBox>
                             </VBox>

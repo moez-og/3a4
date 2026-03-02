@@ -5,7 +5,6 @@ import models.sorties.AnnonceSortie;
 import models.notifications.Notification;
 import models.notifications.NotificationType;
 import services.notifications.NotificationService;
-import services.sorties.AnnonceSortieService;
 import services.common.ServiceBase;
 import utils.Mydb;
 import utils.json.JsonStringArray;
@@ -19,6 +18,7 @@ public class ParticipationSortieService implements ServiceBase {
     private final Connection cnx;
     private final NotificationService notificationService = new NotificationService();
     private final AnnonceSortieService annonceSortieService = new AnnonceSortieService();
+    private final NotificationEmailSmsService emailSmsService = new NotificationEmailSmsService();
 
     // ✅ NOM TABLE EXACT
     private static final String TABLE = "participation_annonce";
@@ -111,10 +111,87 @@ public class ParticipationSortieService implements ServiceBase {
             ps.setInt(2, id);
             ps.executeUpdate();
 
+            // Keep annonce status consistent globally (home/list/details/admin).
+            // If capacity is full -> CLOTUREE. If places free again -> OUVERTE.
+            // Never override ANNULEE.
+            boolean oldAccepted = isAcceptedStatus(oldStatus);
+            boolean newAccepted = isAcceptedStatus(newStatus);
+            if (oldAccepted || newAccepted) {
+                reconcileAnnonceStatusByCapacity(before.getAnnonceId());
+            }
+
             // Notifier le participant (accept/refus). senderId est optionnel => null.
             createParticipationDecisionNotification(before, newStatus);
+
+            // ✅ Envoi email / SMS au participant (acceptation OU refus)
+            String statusUpper = safeDefault(newStatus, "").trim().toUpperCase();
+            boolean isAccepted = isAcceptedStatus(newStatus);
+            boolean isRefused  = statusUpper.equals("REFUSEE") || statusUpper.equals("REFUSÉE");
+
+            if (isAccepted || isRefused) {
+                try {
+                    AnnonceSortie annonce = annonceSortieService.getById(before.getAnnonceId());
+                    if (annonce != null) {
+                        emailSmsService.envoyerNotification(before, annonce, isAccepted);
+                    } else {
+                        System.err.println("[NotifService] Annonce introuvable pour ID=" + before.getAnnonceId());
+                    }
+                } catch (Exception e) {
+                    System.err.println("[NotifService] ❌ Erreur lors de l'envoi : " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException("ParticipationSortieService.updateStatus: " + e.getMessage(), e);
+        }
+    }
+
+    private boolean isAcceptedStatus(String statut) {
+        String s = safeDefault(statut, "").trim().toUpperCase();
+        return s.equals("CONFIRMEE") || s.equals("ACCEPTEE");
+    }
+
+    private void reconcileAnnonceStatusByCapacity(int annonceId) {
+        if (annonceId <= 0) return;
+
+        String sqlInfo = "SELECT nb_places, statut FROM annonce_sortie WHERE id=? LIMIT 1";
+        int capacity = 0;
+        String currentStatus = "";
+
+        try (PreparedStatement ps = cnx.prepareStatement(sqlInfo)) {
+            ps.setInt(1, annonceId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return;
+                capacity = rs.getInt("nb_places");
+                currentStatus = safeDefault(rs.getString("statut"), "").trim().toUpperCase();
+            }
+        } catch (SQLException e) {
+            // Don't fail the whole updateStatus for a secondary consistency update.
+            return;
+        }
+
+        if (currentStatus.equals("ANNULEE") || currentStatus.equals("ANNULÉE")) return;
+        if (capacity <= 0) return;
+
+        int accepted = 0;
+        try {
+            accepted = countAcceptedPlaces(annonceId);
+        } catch (Exception ignored) {
+        }
+
+        String desired = (accepted >= capacity) ? "CLOTUREE" : "OUVERTE";
+        if (desired.equals(currentStatus)) return;
+
+        // Only toggle between OUVERTE <-> CLOTUREE here.
+        if (!(currentStatus.equals("OUVERTE") || currentStatus.equals("CLOTUREE"))) return;
+
+        String sqlUpd = "UPDATE annonce_sortie SET statut=? WHERE id=? AND UPPER(statut)=?";
+        try (PreparedStatement ps = cnx.prepareStatement(sqlUpd)) {
+            ps.setString(1, desired);
+            ps.setInt(2, annonceId);
+            ps.setString(3, currentStatus);
+            ps.executeUpdate();
+        } catch (SQLException ignored) {
         }
     }
 

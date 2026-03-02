@@ -45,6 +45,8 @@
     <h3>Sélection de Localisation</h3>
     <p>Cliquez sur la carte pour choisir une localisation</p>
 
+    <p id="status" style="color:#6b7280; font-size:11px; font-weight:700;">—</p>
+
     <div class="coordinates">
         <div>Latitude: <span id="lat">-</span></div>
         <div>Longitude: <span id="lng">-</span></div>
@@ -62,6 +64,21 @@
     let selectedLocation = null;
     let marker = null;
     let selectedAddress = "";
+    let lastAddressParts = [];
+
+    // preview marker used when JavaFX changes ville/région (does not commit)
+    let previewMarker = null;
+
+    // Robustness: debounce + cache for Nominatim (avoid rate limits)
+    const geocodeCache = new Map();
+    let lastCenterQuery = "";
+    let centerTimer = null;
+
+    function setStatus(msg) {
+        const el = document.getElementById("status");
+        if (!el) return;
+        el.textContent = (msg || "—").toString();
+    }
 
     const map = L.map("map").setView([33.8869, 9.5375], 7);
 
@@ -73,16 +90,124 @@
 
     async function reverseGeocode(lat, lng) {
         try {
-            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+            const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
             const res = await fetch(url, {
                 headers: { "Accept-Language": "fr" }
             });
             const data = await res.json();
-            return data && data.display_name ? data.display_name : "";
+            return data || null;
         } catch (e) {
-            return "";
+            return null;
         }
     }
+
+    function normalizeStr(s) {
+        return (s == null ? "" : String(s)).replace(/\s+/g, " ").trim();
+    }
+
+    function buildAddressParts(data) {
+        const addr = (data && data.address) ? data.address : {};
+        // In Tunisia, governorate often comes as "state"
+        const state = normalizeStr(addr.state || addr.region || "");
+        const city = normalizeStr(addr.city || addr.town || addr.village || "");
+        const district = normalizeStr(
+            addr.suburb || addr.city_district || addr.neighbourhood || addr.quarter || addr.hamlet || ""
+        );
+        const county = normalizeStr(addr.county || "");
+        const postcode = normalizeStr(addr.postcode || "");
+        return [state, city, district, county, postcode];
+    }
+
+    // JavaFX can read this after a click (engine.executeScript)
+    window.getLastAddressParts = function() {
+        try { return JSON.stringify(lastAddressParts || []); }
+        catch (e) { return "[]"; }
+    };
+
+    async function geocode(query) {
+        const q = (query || "").trim();
+        if (!q) return null;
+
+        const key = q.toLowerCase();
+        const cached = geocodeCache.get(key);
+        if (cached) return cached;
+
+        try {
+            // Tunisia bias for robust centering
+            const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&q=${encodeURIComponent(q)}&limit=1&countrycodes=tn&addressdetails=1`;
+            const res = await fetch(url, { headers: { "Accept-Language": "fr" } });
+            const data = await res.json();
+            if (!Array.isArray(data) || data.length === 0) return null;
+            const item = data[0];
+            const lat = parseFloat(item.lat);
+            const lng = parseFloat(item.lon);
+            if (!isFinite(lat) || !isFinite(lng)) return null;
+            const out = { lat, lng, label: item.display_name || "" };
+            geocodeCache.set(key, out);
+            // simple bound to avoid unbounded memory
+            if (geocodeCache.size > 40) {
+                const firstKey = geocodeCache.keys().next().value;
+                geocodeCache.delete(firstKey);
+            }
+            return out;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function setMapCenterByQuery(query) {
+        const hit = await geocode(query);
+        if (!hit) return false;
+        // Zoom "ville/quartier" raisonnable
+        map.setView([hit.lat, hit.lng], 13);
+        return true;
+    }
+
+    function setPreviewMarker(lat, lng, label) {
+        try {
+            if (previewMarker) {
+                map.removeLayer(previewMarker);
+                previewMarker = null;
+            }
+            previewMarker = L.circleMarker([lat, lng], {
+                radius: 8,
+                color: "#1e3a5f",
+                weight: 2,
+                fillColor: "#3b82f6",
+                fillOpacity: 0.35,
+                interactive: false,
+            }).addTo(map);
+            if (label) {
+                previewMarker.bindTooltip(label, { permanent: false, direction: "top", opacity: 0.9 });
+            }
+        } catch (e) {}
+    }
+
+    // Expose une API simple pour JavaFX (engine.executeScript)
+    window.setSearchQuery = function(q) {
+        const next = (q || "").toString().trim();
+        if (!next) return;
+        if (next === lastCenterQuery) return;
+
+        lastCenterQuery = next;
+        if (centerTimer) clearTimeout(centerTimer);
+
+        setStatus("Centrage…");
+        centerTimer = setTimeout(async () => {
+            try {
+                const hit = await geocode(next);
+                if (!hit) {
+                    setStatus("Centrage impossible (réseau / requête)");
+                    return;
+                }
+                map.setView([hit.lat, hit.lng], 13);
+                setPreviewMarker(hit.lat, hit.lng, "Aperçu: " + next);
+                setStatus("Centré sur: " + next);
+            } catch (e) {
+                setStatus("Centrage impossible (erreur)");
+            }
+        }, 550);
+    };
 
     function publishToJavaFX(lat, lng, address) {
         // IMPORTANT: on encode une info stable pour JavaFX via document.title
@@ -97,6 +222,10 @@
         const lng = e.latlng.lng;
 
         if (marker) map.removeLayer(marker);
+        if (previewMarker) {
+            map.removeLayer(previewMarker);
+            previewMarker = null;
+        }
 
         marker = L.marker([lat, lng]).addTo(map)
             .bindPopup(`<b>Position sélectionnée</b><br>Lat: ${lat.toFixed(4)}<br>Lng: ${lng.toFixed(4)}`)
@@ -108,8 +237,12 @@
         selectedLocation = { latitude: lat, longitude: lng };
 
         // Reverse geocode (adresse)
-        selectedAddress = await reverseGeocode(lat, lng);
+        setStatus("Recherche d'adresse…");
+        const rev = await reverseGeocode(lat, lng);
+        selectedAddress = (rev && rev.display_name) ? normalizeStr(rev.display_name) : "";
+        lastAddressParts = buildAddressParts(rev);
         document.getElementById("addr").textContent = selectedAddress ? ("Adresse: " + selectedAddress) : "Adresse: -";
+        setStatus(selectedAddress ? "Adresse trouvée" : "Adresse introuvable");
 
         // On publie immédiatement à JavaFX (même sans Valider)
         publishToJavaFX(lat, lng, selectedAddress);
@@ -129,8 +262,13 @@
             map.removeLayer(marker);
             marker = null;
         }
+        if (previewMarker) {
+            map.removeLayer(previewMarker);
+            previewMarker = null;
+        }
         selectedLocation = null;
         selectedAddress = "";
+        lastAddressParts = [];
         document.getElementById("lat").textContent = "-";
         document.getElementById("lng").textContent = "-";
         document.getElementById("addr").textContent = "Adresse: -";
@@ -142,8 +280,19 @@
             const lat = position.coords.latitude;
             const lng = position.coords.longitude;
             map.setView([lat, lng], 12);
-        });
+        }, function() {
+            // ignore
+        }, { enableHighAccuracy: false, timeout: 3500 });
     }
+
+    // Si le HTML est chargé avec un paramètre ?q=..., centrer la map automatiquement
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const q = params.get("q");
+        if (q && q.trim()) {
+            setMapCenterByQuery(q.trim());
+        }
+    } catch (e) {}
 </script>
 </body>
 </html>

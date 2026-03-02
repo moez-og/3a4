@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.sorties.GroupeChatController"
+      styleClass="chatRoot"
+      spacing="0"
+      prefWidth="680" prefHeight="600">
+
+    <!-- Header -->
+    <VBox styleClass="chatHeader" spacing="4">
+        <padding><Insets top="14" right="16" bottom="10" left="16"/></padding>
+        <Label fx:id="lblTitre" text="💬 Chat de groupe" styleClass="chatTitle" wrapText="true"/>
+        <HBox spacing="12" alignment="CENTER_LEFT">
+            <Label fx:id="lblAccess" text="" styleClass="chatAccessLabel"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnNewPoll" text="📊 Sondage" onAction="#openCreatePoll" styleClass="chatHeaderBtn"/>
+            <Label fx:id="lblMembers" text="" styleClass="chatMembersLabel"/>
+        </HBox>
+    </VBox>
+
+    <!-- Zone épinglée (sondages) -->
+    <VBox fx:id="pinnedBox" styleClass="chatPinnedBox" spacing="8" visible="false" managed="false">
+        <padding><Insets top="8" right="12" bottom="8" left="12"/></padding>
+    </VBox>
+
+    <!-- Zone messages -->
+    <ScrollPane fx:id="scrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
+                styleClass="chatScroll" hbarPolicy="NEVER">
+        <VBox fx:id="messagesBox" spacing="6" styleClass="chatMessagesBox">
+            <padding><Insets top="10" right="8" bottom="10" left="8"/></padding>
+        </VBox>
+    </ScrollPane>
+
+    <!-- Saisie -->
+    <HBox styleClass="chatInputBar" spacing="8" alignment="CENTER">
+        <padding><Insets top="10" right="12" bottom="10" left="12"/></padding>
+        <TextField fx:id="tfMessage" HBox.hgrow="ALWAYS"
+                   promptText="Écrire un message..."
+                   styleClass="chatInput"/>
+        <Button fx:id="btnSend" text="Envoyer" onAction="#sendMessage"
+                styleClass="chatSendBtn"/>
+    </HBox>
+
+</VBox>

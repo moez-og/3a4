@@ -18,10 +18,13 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import models.notifications.Notification;
+import models.notifications.NotificationType;
 import models.sorties.AnnonceSortie;
 import models.users.User;
 import services.sorties.AnnonceSortieService;
@@ -75,6 +78,8 @@ public class BackDashboardController {
     private final Map<String, Node> viewCache = new HashMap<>();
     private final Map<String, Object> controllerCache = new HashMap<>();
 
+    private String currentViewKey = "";
+
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
     }
@@ -97,6 +102,7 @@ public class BackDashboardController {
 
     @FXML
     public void showDashboard() {
+        currentViewKey = "dashboard";
         setActive(btnDashboard);
         setHeader("Dashboard", "Vue d’ensemble");
 
@@ -107,6 +113,7 @@ public class BackDashboardController {
 
     @FXML
     public void showUsers() {
+        currentViewKey = "users";
         if (!checkAuthorization("admin")) {
             showError("Accès refusé", "Espace réservé aux admins", "");
             return;
@@ -118,6 +125,7 @@ public class BackDashboardController {
 
     @FXML
     public void showSorties() {
+        currentViewKey = "sorties";
         setActive(btnSorties);
         setHeader("Gestion des Sorties", "Catalogue, annonces, participations");
         loadAndSetCachedView("sorties", SORTIES_VIEW_PATH);
@@ -125,6 +133,7 @@ public class BackDashboardController {
 
     @FXML
     public void showLieux() {
+        currentViewKey = "lieux";
         setActive(btnLieux);
         setHeader("Gestion des Lieux", "Catalogue, recherche, ajout, modification et suppression");
         loadAndSetCachedView("lieux", LIEUX_VIEW_PATH);
@@ -132,6 +141,7 @@ public class BackDashboardController {
 
     @FXML
     public void showOffres() {
+        currentViewKey = "offres";
         setActive(btnOffres);
         setHeader("Gestion des Offres", "Promos, partenariats, coupons");
         loadAndSetCachedView("offres", OFFRES_VIEW_PATH);
@@ -139,6 +149,7 @@ public class BackDashboardController {
 
     @FXML
     public void showEvents() {
+        currentViewKey = "events";
         setActive(btnEvents);
         setHeader("Gestion des Événements", "Agenda, inscriptions, gestion");
         loadAndSetCachedView("events", EVENTS_VIEW_PATH);
@@ -186,6 +197,7 @@ public class BackDashboardController {
             NotificationsCenterController c = loader.getController();
             c.setCurrentUser(currentUser);
             c.setOnChange(this::refreshUnreadBadgeAsync);
+            c.setOnOpen(this::handleNotificationOpen);
 
             Stage dialog = new Stage();
             dialog.setTitle("Notifications");
@@ -197,6 +209,51 @@ public class BackDashboardController {
             refreshUnreadBadgeAsync();
         } catch (Exception e) {
             showError("Notifications", "Ouverture impossible", safe(e.getMessage()));
+        }
+    }
+
+    private void handleNotificationOpen(Notification n) {
+        if (n == null) return;
+        NotificationType t = n.getType();
+
+        int annonceId = extractSortieId(n);
+        if (annonceId <= 0) return;
+
+        // Admin wants to accept/refuse: open Sorties view then open participations.
+        if (t == NotificationType.PARTICIPATION_REQUESTED || t == NotificationType.PARTICIPATION_CANCELLED) {
+            openSortiesAndParticipations(annonceId);
+            return;
+        }
+
+        // Otherwise, just open the sorties list.
+        loadAndSetCachedView("sorties", SORTIES_VIEW_PATH);
+    }
+
+    private int extractSortieId(Notification n) {
+        if (n == null) return -1;
+
+        Integer fromMeta = NotificationsCenterController.extractIntField(n.getMetadataJson(), "sortieId");
+        if (fromMeta != null && fromMeta > 0) return fromMeta;
+
+        if (n.getEntityId() > 0 && "sortie".equalsIgnoreCase(safe(n.getEntityType()).trim())) {
+            return n.getEntityId();
+        }
+        return -1;
+    }
+
+    private void openSortiesAndParticipations(int annonceId) {
+        loadAndSetCachedView("sorties", SORTIES_VIEW_PATH);
+
+        Object controller = controllerCache.get("sorties");
+        if (controller == null) return;
+
+        try {
+            // Prefer the public helper if present.
+            Method m = controller.getClass().getMethod("openParticipationsByAnnonceId", int.class);
+            m.invoke(controller, annonceId);
+        } catch (NoSuchMethodException ignored) {
+        } catch (Exception e) {
+            showError("Notifications", "Navigation impossible", safe(e.getMessage()));
         }
     }
 
@@ -499,7 +556,19 @@ public class BackDashboardController {
 
     private void setContent(Node node) {
         if (dynamicContent == null) return;
-        dynamicContent.getChildren().setAll(node);
+
+        Node content = node;
+        if (content != null && "dashboard".equalsIgnoreCase(safe(currentViewKey))) {
+            ScrollPane sp = new ScrollPane(content);
+            sp.setFitToWidth(true);
+            sp.setFitToHeight(false);
+            sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            sp.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+            sp.getStyleClass().add("dashboardScroll");
+            content = sp;
+        }
+
+        dynamicContent.getChildren().setAll(content);
     }
 
     private void refreshHeaderUser() {
@@ -569,6 +638,7 @@ public class BackDashboardController {
     }
 
     private void loadAndSetCachedView(String cacheKey, String fxmlPath) {
+        currentViewKey = safe(cacheKey);
         Node cached = viewCache.get(cacheKey);
         if (cached != null) {
             Object controller = controllerCache.get(cacheKey);

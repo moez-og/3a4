@@ -66,7 +66,9 @@ public class AdminOffreController {
 
     private User currentUser;
     private Node selectedCard;
+    @SuppressWarnings("unused")
     private Offre selectedOffre;
+    @SuppressWarnings("unused")
     private CodePromo selectedPromo;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");

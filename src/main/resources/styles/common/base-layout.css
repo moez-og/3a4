@@ -180,3 +180,13 @@
     -fx-border-radius: 18;
     -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 18, 0.18, 0, 6);
 }
+
+/* Dashboard: avoid 'zoom' feel by allowing vertical scroll for large charts */
+.dashboardScroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+.dashboardScroll > .viewport {
+    -fx-background-color: transparent;
+}

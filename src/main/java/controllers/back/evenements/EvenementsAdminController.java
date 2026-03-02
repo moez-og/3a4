@@ -39,14 +39,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
 public class EvenementsAdminController {
-
-    private static final DateTimeFormatter DATE_FMT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @FXML private VBox panelEvents;
     @FXML private VBox panelInscriptions;

@@ -46,6 +46,7 @@ public class LoginApp extends Application {
         }
     }
 
+    @SuppressWarnings("unused")
     private StackPane createRootWithGradient() {
         StackPane root = new StackPane();
 
@@ -83,6 +84,7 @@ public class LoginApp extends Application {
         root.setBackground(new Background(new BackgroundFill(gradient, CornerRadii.EMPTY, Insets.EMPTY)));
     }
 
+    @SuppressWarnings("unused")
     private VBox createLoginForm() {
         VBox mainForm = new VBox(18);
         mainForm.setPrefWidth(420);

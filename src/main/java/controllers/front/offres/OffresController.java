@@ -42,6 +42,7 @@ public class OffresController {
     @FXML private Button btnGetPromo;
     @FXML private ImageView qrImageView;
 
+    @SuppressWarnings("unused")
     private ShellNavigator navigator;
     private User currentUser;
     private OffreService offreService;

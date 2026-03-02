@@ -5,7 +5,6 @@ import models.notifications.NotificationType;
 import utils.Mydb;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

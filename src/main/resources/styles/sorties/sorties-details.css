@@ -62,15 +62,14 @@
     -fx-background-radius: 18;
     -fx-border-radius: 18;
 
-    /* Dark glass = lisible sur toute image */
-    -fx-background-color: rgba(8,12,20,0.34);
-    -fx-border-color: rgba(255,255,255,0.18);
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 18, 0.18, 0, 6);
+    /* No glass frame (text directly on hero image) */
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: null;
 
     -fx-max-width: 720px;
-    -fx-min-width: 460px;
-    -fx-translate-x: 14px;
-    -fx-translate-y: -12px;
+    -fx-translate-x: 0px;
+    -fx-translate-y: 0px;
 }
 
 .detailsTitle{
@@ -165,4 +164,13 @@
 .qChip:hover{
     -fx-background-color: rgba(59,130,246,0.12);
     -fx-border-color: rgba(59,130,246,0.25);
+}
+
+/* Status chip in the Summary card (must stay styled even though details CSS defines infoV colors) */
+.detailsStatusChip{
+    -fx-padding: 6 10;
+    -fx-background-radius: 999;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-text-fill: white;
 }

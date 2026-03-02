@@ -29,9 +29,9 @@
     <ScrollPane fitToWidth="true" prefHeight="540"
                 style="-fx-background-color: transparent;" hbarPolicy="NEVER">
         <content>
-            <VBox fx:id="listBox" spacing="0">
+            <VBox fx:id="listBox" spacing="10">
                 <padding>
-                    <Insets top="4" right="2" bottom="4" left="2"/>
+                    <Insets top="6" right="2" bottom="6" left="2"/>
                 </padding>
             </VBox>
         </content>

@@ -195,6 +195,7 @@
 .status-ouverte{ -fx-background-color: linear-gradient(to right, #16a34a, #22c55e); }
 .status-cloturee{ -fx-background-color: linear-gradient(to right, #64748b, #94a3b8); }
 .status-annulee{ -fx-background-color: linear-gradient(to right, #dc2626, #ef4444); }
+.status-terminee{ -fx-background-color: linear-gradient(to right, #1e3a5f, #3b82f6); }
 
 .cardTitle{ -fx-font-size: 16px; -fx-font-weight: 900; -fx-text-fill: #0f2a44; }
 .cardMeta{ -fx-text-fill: rgba(15,42,68,0.70); -fx-font-weight: 800; }
@@ -317,6 +318,45 @@
 }
 .combo-box-popup .list-cell:hover{ -fx-background-color: rgba(59,130,246,0.10); }
 .combo-box-popup .list-cell:selected{ -fx-background-color: rgba(15,42,68,0.14); }
+
+/* ===== Activity picker (catalogue) ===== */
+
+.activityPicker{
+    -fx-background-color: rgba(232,238,245,0.40);
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: rgba(30,58,95,0.12);
+    -fx-padding: 10;
+}
+
+.activityPicker .activityList{
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(30,58,95,0.16);
+    -fx-border-width: 1;
+    -fx-padding: 6;
+}
+
+.activityPicker .activityList .list-cell{
+    -fx-background-color: transparent;
+    -fx-background-radius: 12;
+    -fx-padding: 9 10;
+    -fx-text-fill: rgba(15,42,68,0.92);
+    -fx-font-weight: 900;
+}
+.activityPicker .activityList .list-cell:hover{
+    -fx-background-color: rgba(59,130,246,0.10);
+}
+.activityPicker .activityList .list-cell:selected{
+    -fx-background-color: rgba(59,130,246,0.18);
+    -fx-text-fill: #0f2a44;
+}
+
+.activityOtherField{
+    -fx-min-height: 42px;
+    -fx-pref-height: 42px;
+}
 
 .date-picker-popup{
     -fx-background-color: white;

@@ -7,14 +7,15 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 
 <ScrollPane xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="controllers.front.sorties.SortiesController"
+            fx:id="sortiesScroll"
             fitToWidth="true"
             hbarPolicy="NEVER"
             vbarPolicy="ALWAYS"
@@ -64,10 +65,19 @@
                     <Label fx:id="countLabel" text="" styleClass="countLabel"/>
                 </HBox>
 
-                <FlowPane fx:id="cardsPane"
+                <TilePane fx:id="cardsPane"
                           hgap="14" vgap="14"
-                          prefWrapLength="1100"
+                          alignment="TOP_CENTER"
+                          prefColumns="3"
                           styleClass="cardsPane"/>
+
+                                <!-- Pagination (6 sorties / page) -->
+                                <HBox fx:id="paginationBar" spacing="10" alignment="CENTER"
+                                            visible="false" managed="false">
+                                        <Button fx:id="btnPrevPage" text="← Précédent" onAction="#prevPage" styleClass="ghostBtn"/>
+                                        <Label fx:id="pageLabel" text="Page 1/1" styleClass="countLabel"/>
+                                        <Button fx:id="btnNextPage" text="Suivant →" onAction="#nextPage" styleClass="ghostBtn"/>
+                                </HBox>
 
                 <Label fx:id="stateLabel"
                        text=""

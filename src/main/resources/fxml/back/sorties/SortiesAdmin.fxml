@@ -66,11 +66,19 @@
                 <TilePane fx:id="cardsPane"
                           hgap="14"
                           vgap="14"
-                          prefColumns="1"
+                          prefColumns="3"
                           tileAlignment="TOP_LEFT"
                           styleClass="cards-pane"/>
             </content>
         </ScrollPane>
+
+          <!-- Pagination (6 annonces / page) -->
+        <HBox fx:id="paginationBar" spacing="10" alignment="CENTER"
+              visible="false" managed="false">
+            <Button fx:id="btnPrevPage" text="← Précédent" onAction="#prevPage" styleClass="ghostBtn"/>
+            <Label fx:id="pageLabel" text="Page 1/1" styleClass="kpi-sub"/>
+            <Button fx:id="btnNextPage" text="Suivant →" onAction="#nextPage" styleClass="ghostBtn"/>
+        </HBox>
 
         <Region prefHeight="2"/>
     </VBox>

@@ -28,7 +28,27 @@ public class AnnonceSortieService implements CrudService<AnnonceSortie, Integer>
     public List<AnnonceSortie> getAll() {
         String sql = """
                 SELECT id, user_id, titre, description, ville, lieu_texte, point_rencontre,
-                       type_activite, date_sortie, budget_max, nb_places, image_url, statut, questions_json
+                       type_activite, date_sortie, budget_max, nb_places, image_url,
+                       CASE
+                           WHEN UPPER(statut) IN ('ANNULEE','ANNULÉE')
+                           THEN 'ANNULEE'
+
+                           WHEN date_sortie IS NOT NULL
+                                AND date_sortie < CURRENT_TIMESTAMP
+                           THEN 'TERMINEE'
+
+                           WHEN UPPER(statut) = 'OUVERTE'
+                                AND nb_places > 0
+                                AND nb_places <= (
+                                    SELECT COALESCE(SUM(p.nb_places),0)
+                                    FROM participation_annonce p
+                                    WHERE p.annonce_id = annonce_sortie.id
+                                      AND UPPER(p.statut) IN ('CONFIRMEE','ACCEPTEE')
+                                )
+                           THEN 'CLOTUREE'
+                           ELSE statut
+                       END AS statut,
+                       questions_json
                 FROM annonce_sortie
                 ORDER BY date_sortie DESC, id DESC
                 """;
@@ -48,7 +68,27 @@ public class AnnonceSortieService implements CrudService<AnnonceSortie, Integer>
     public List<AnnonceSortie> getByUserId(int userId) {
         String sql = """
                 SELECT id, user_id, titre, description, ville, lieu_texte, point_rencontre,
-                       type_activite, date_sortie, budget_max, nb_places, image_url, statut, questions_json
+                       type_activite, date_sortie, budget_max, nb_places, image_url,
+                       CASE
+                           WHEN UPPER(statut) IN ('ANNULEE','ANNULÉE')
+                           THEN 'ANNULEE'
+
+                           WHEN date_sortie IS NOT NULL
+                                AND date_sortie < CURRENT_TIMESTAMP
+                           THEN 'TERMINEE'
+
+                           WHEN UPPER(statut) = 'OUVERTE'
+                                AND nb_places > 0
+                                AND nb_places <= (
+                                    SELECT COALESCE(SUM(p.nb_places),0)
+                                    FROM participation_annonce p
+                                    WHERE p.annonce_id = annonce_sortie.id
+                                      AND UPPER(p.statut) IN ('CONFIRMEE','ACCEPTEE')
+                                )
+                           THEN 'CLOTUREE'
+                           ELSE statut
+                       END AS statut,
+                       questions_json
                 FROM annonce_sortie
                 WHERE user_id = ?
                 ORDER BY date_sortie DESC, id DESC
@@ -69,7 +109,27 @@ public class AnnonceSortieService implements CrudService<AnnonceSortie, Integer>
     public AnnonceSortie getById(int id) {
         String sql = """
                 SELECT id, user_id, titre, description, ville, lieu_texte, point_rencontre,
-                       type_activite, date_sortie, budget_max, nb_places, image_url, statut, questions_json
+                       type_activite, date_sortie, budget_max, nb_places, image_url,
+                       CASE
+                           WHEN UPPER(statut) IN ('ANNULEE','ANNULÉE')
+                           THEN 'ANNULEE'
+
+                           WHEN date_sortie IS NOT NULL
+                                AND date_sortie < CURRENT_TIMESTAMP
+                           THEN 'TERMINEE'
+
+                           WHEN UPPER(statut) = 'OUVERTE'
+                                AND nb_places > 0
+                                AND nb_places <= (
+                                    SELECT COALESCE(SUM(p.nb_places),0)
+                                    FROM participation_annonce p
+                                    WHERE p.annonce_id = annonce_sortie.id
+                                      AND UPPER(p.statut) IN ('CONFIRMEE','ACCEPTEE')
+                                )
+                           THEN 'CLOTUREE'
+                           ELSE statut
+                       END AS statut,
+                       questions_json
                 FROM annonce_sortie
                 WHERE id = ?
                 """;

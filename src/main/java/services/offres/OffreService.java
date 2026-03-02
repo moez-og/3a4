@@ -42,7 +42,6 @@ public class OffreService {
 
     private final String lieuPkCol;
     private final Set<String> offreColsLower;
-    private final Set<String> lieuColsLower;
 
     public OffreService() {
         this.connection = Mydb.getInstance().getConnection();
@@ -51,8 +50,6 @@ public class OffreService {
             this.lieuTable = resolveExistingTable("lieu", "lieux");
 
             this.offreColsLower = listColumnsLower(offreTable);
-            this.lieuColsLower = listColumnsLower(lieuTable);
-
             this.offreIdCol = resolveExistingColumn(offreTable, "id", "id_offre", "offre_id");
             this.offreUserIdCol = resolveExistingColumnOrNull(offreTable, "user_id", "id_user", "utilisateur_id", "id_utilisateur");
             this.offreEventIdCol = resolveExistingColumnOrNull(offreTable, "event_id", "id_event", "evenement_id", "id_evenement");
