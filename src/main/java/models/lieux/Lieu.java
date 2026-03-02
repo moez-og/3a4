@@ -33,6 +33,11 @@ public class Lieu {
 
     public Lieu() {}
 
+    public Lieu(int id, String nom) {
+        this.id = id;
+        this.nom = nom;
+    }
+
     public Lieu(int idOffre, String nom, String ville, String adresse, String categorie,
                 Double latitude, Double longitude, String type, String imageUrl) {
         this.idOffre = idOffre;
@@ -99,4 +104,9 @@ public class Lieu {
 
     public List<String> getImagesPaths() { return imagesPaths; }
     public void setImagesPaths(List<String> imagesPaths) { this.imagesPaths = imagesPaths != null ? imagesPaths : new ArrayList<>(); }
+
+    @Override
+    public String toString() {
+        return nom == null ? "" : nom;
+    }
 }

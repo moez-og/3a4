@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.lieux.ChatbotController"
+      stylesheets="@/styles/lieux/chatbot.css"
+      styleClass="chatRoot"
+      spacing="0"
+      minHeight="-1"
+      prefHeight="-1"
+      maxHeight="Infinity">
+
+    <!-- ══════════════════ SIDEBAR HISTORIQUE ══════════════════ -->
+    <VBox styleClass="historySidebar" spacing="0" minWidth="220" maxWidth="220" minHeight="0" prefHeight="-1" maxHeight="Infinity">
+        <padding><Insets top="0" right="0" bottom="0" left="0"/></padding>
+
+        <!-- Header sidebar -->
+        <HBox styleClass="historyHeader" alignment="CENTER_LEFT" spacing="8">
+            <padding><Insets top="16" right="14" bottom="16" left="14"/></padding>
+            <Label text="💬" style="-fx-font-size:16px;"/>
+            <Label text="Historique" styleClass="historyHeaderTitle"/>
+            <Region HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <!-- Bouton Nouvelle conversation -->
+        <HBox style="-fx-padding:0 10 10 10;">
+            <Button text="+ Nouvelle conversation"
+                    onAction="#startNewChat"
+                    styleClass="newChatBtn"
+                    fx:id="newChatBtn"
+                    maxWidth="Infinity"
+                    HBox.hgrow="ALWAYS"/>
+        </HBox>
+
+        <!-- Liste des conversations -->
+        <ScrollPane fx:id="historyScroll"
+                    fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    styleClass="historyScrollPane"
+                    VBox.vgrow="ALWAYS">
+            <content>
+                <VBox fx:id="historySidebar" styleClass="historyList" spacing="6">
+                    <padding><Insets top="4" right="8" bottom="8" left="8"/></padding>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </VBox>
+
+    <!-- ══════════════════ ZONE PRINCIPALE ══════════════════ -->
+    <VBox styleClass="chatMain" spacing="0" HBox.hgrow="ALWAYS" minHeight="0" prefHeight="-1" maxHeight="Infinity">
+
+        <!-- Header chat -->
+        <HBox styleClass="chatHeader" alignment="CENTER_LEFT" spacing="14">
+            <padding><Insets top="14" right="20" bottom="14" left="20"/></padding>
+
+            <StackPane>
+                <Label text="✦" styleClass="chatHeaderAvatarBox,chatHeaderIcon"/>
+                <Region styleClass="chatOnlineDot"
+                        StackPane.alignment="BOTTOM_RIGHT"
+                        translateX="2" translateY="2"/>
+            </StackPane>
+
+            <VBox spacing="2">
+                <Label text=" FIN TOKHREJ AI Guide" styleClass="chatHeaderTitle"/>
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <Label text="●" style="-fx-text-fill:#22c55e; -fx-font-size:8px;"/>
+                    <Label text="En ligne · Groq LLaMA 3 + Whisper" styleClass="chatHeaderSub"/>
+                </HBox>
+            </VBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <Label fx:id="statusLabel" text="⟳ Réflexion..."
+                   styleClass="chatStatus" visible="false" managed="false"/>
+
+            <Button text="Effacer" onAction="#clearHistory" styleClass="chatClearBtn"/>
+        </HBox>
+
+        <!-- Zone messages -->
+        <ScrollPane fx:id="messagesScroll"
+                    styleClass="chatScroll"
+                    fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    VBox.vgrow="ALWAYS">
+            <content>
+                <VBox fx:id="messagesBox" styleClass="chatMessages" spacing="10">
+                    <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+                </VBox>
+            </content>
+        </ScrollPane>
+
+        <!-- Barre input + micro -->
+        <HBox styleClass="chatInputBar" spacing="8" alignment="CENTER">
+            <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+
+            <!-- Bouton micro -->
+            <Button fx:id="voiceBtn"
+                    text="🎤"
+                    onAction="#toggleVoice"
+                    styleClass="chatVoiceBtn"/>
+
+            <TextField fx:id="inputField"
+                       promptText="Entrez votre message ou cliquez sur 🎤..."
+                       styleClass="chatInput"
+                       HBox.hgrow="ALWAYS"/>
+
+            <Button fx:id="sendBtn"
+                    text="Envoyer ➤"
+                    onAction="#sendMessage"
+                    styleClass="chatSendBtn"/>
+        </HBox>
+    </VBox>
+
+</HBox>

@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:id="root"
+      fx:controller="controllers.front.gamification.GamificationController"
+      spacing="0"
+      stylesheets="@/styles/gamification/gamification.css"
+      styleClass="gamifRoot">
+
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                styleClass="gamifScroll" VBox.vgrow="ALWAYS">
+        <content>
+            <VBox spacing="20">
+                <padding><Insets top="20" right="20" bottom="24" left="20"/></padding>
+
+                <!-- ══ CARTE PROFIL GAMIFICATION ══ -->
+                <HBox spacing="20" styleClass="profilCard" alignment="CENTER_LEFT">
+                    <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+
+                    <VBox alignment="CENTER" spacing="4" styleClass="niveauBlock">
+                        <Label fx:id="lblNiveauEmoji" text="🥉" styleClass="niveauEmoji"/>
+                        <Label fx:id="lblNiveau" text="BRONZE" styleClass="niveauLabel"/>
+                    </VBox>
+
+                    <Separator orientation="VERTICAL" styleClass="sep"/>
+
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label fx:id="lblPoints" text="0 pts" styleClass="pointsLabel"/>
+                        <Label fx:id="lblRang" text="Non classé" styleClass="rangLabel"/>
+                        <Label fx:id="lblPointsManquants" text="" styleClass="progressHint"/>
+                        <ProgressBar fx:id="progressNiveau" progress="0" maxWidth="Infinity" styleClass="niveauProgress"/>
+                    </VBox>
+
+                    <VBox alignment="CENTER" spacing="2" styleClass="badgesCountBlock">
+                        <Label fx:id="lblNbBadges" text="0" styleClass="badgesCountBig"/>
+                        <Label fx:id="lblTotalBadges" text="/ 0 badges" styleClass="badgesCountSub"/>
+                        <Label text="badges obtenus" styleClass="badgesCountSub"/>
+                    </VBox>
+                </HBox>
+
+                <!-- ══ ONGLETS ══ -->
+                <TabPane fx:id="tabPane" styleClass="gamifTabs" tabClosingPolicy="UNAVAILABLE">
+
+                    <!-- ── BADGES ── -->
+                    <Tab text="🏅  Badges">
+                        <content>
+                            <VBox spacing="14">
+                                <padding><Insets top="16" bottom="8"/></padding>
+                                <Label text="Vos badges explorateur" styleClass="sectionTitle"/>
+                                <Label text="Explorez des lieux, laissez des avis et participez à la communauté pour gagner des badges !"
+                                       styleClass="sectionSubtitle" wrapText="true"/>
+                                <FlowPane fx:id="badgesPane" hgap="12" vgap="12" styleClass="badgesFlow"/>
+                            </VBox>
+                        </content>
+                    </Tab>
+
+                    <!-- ── MES OFFRES ── -->
+                    <Tab text="🎁  Mes Offres">
+                        <content>
+                            <VBox spacing="14">
+                                <padding><Insets top="16" bottom="8"/></padding>
+
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label text="Vos récompenses débloquées" styleClass="sectionTitle"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <Label text="Lieux partenaires" styleClass="topBadge"/>
+                                </HBox>
+
+                                <Label text="Chaque badge gagné vous offre une réduction exclusive valable sur tous les lieux partenaires."
+                                       styleClass="sectionSubtitle" wrapText="true"/>
+
+                                <VBox fx:id="mesOffresBox" spacing="10"/>
+                            </VBox>
+                        </content>
+                    </Tab>
+
+                    <!-- ── CLASSEMENT ── -->
+                    <Tab text="🏆  Classement">
+                        <content>
+                            <VBox spacing="10">
+                                <padding><Insets top="16" bottom="8"/></padding>
+                                <HBox alignment="CENTER_LEFT" spacing="12">
+                                    <Label text="Top Explorateurs de la région" styleClass="sectionTitle"/>
+                                    <Region HBox.hgrow="ALWAYS"/>
+                                    <Label text="Top 20" styleClass="topBadge"/>
+                                </HBox>
+                                <Label text="Gagnez des points en explorant des lieux, en laissant des avis et en rejoignant des sorties."
+                                       styleClass="sectionSubtitle" wrapText="true"/>
+                                <VBox fx:id="classementBox" spacing="6" styleClass="classementList"/>
+                            </VBox>
+                        </content>
+                    </Tab>
+
+                    <!-- ── COMMENT GAGNER ── -->
+                    <Tab text="⭐  Comment Gagner">
+                        <content>
+                            <VBox spacing="14">
+                                <padding><Insets top="16" bottom="8"/></padding>
+
+                                <Label text="Gagnez des points de fidélité" styleClass="sectionTitle"/>
+
+                                <VBox spacing="8" styleClass="rewardsGrid">
+                                    <HBox styleClass="rewardRow" spacing="16" alignment="CENTER_LEFT">
+                                        <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                                        <Label text="🗺" styleClass="rewardEmoji"/>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <Label text="Visiter un lieu" styleClass="rewardTitle"/>
+                                            <Label text="Ouvrez la fiche détail d'un lieu" styleClass="rewardDesc"/>
+                                        </VBox>
+                                        <Label text="+5 pts" styleClass="rewardPts"/>
+                                    </HBox>
+                                    <HBox styleClass="rewardRow" spacing="16" alignment="CENTER_LEFT">
+                                        <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                                        <Label text="✍" styleClass="rewardEmoji"/>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <Label text="Laisser un avis" styleClass="rewardTitle"/>
+                                            <Label text="Notez et commentez un lieu" styleClass="rewardDesc"/>
+                                        </VBox>
+                                        <Label text="+15 pts" styleClass="rewardPts"/>
+                                    </HBox>
+                                    <HBox styleClass="rewardRow" spacing="16" alignment="CENTER_LEFT">
+                                        <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                                        <Label text="⭐" styleClass="rewardEmoji"/>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <Label text="Avis jugé utile" styleClass="rewardTitle"/>
+                                            <Label text="La communauté a apprécié votre avis" styleClass="rewardDesc"/>
+                                        </VBox>
+                                        <Label text="+25 pts" styleClass="rewardPts"/>
+                                    </HBox>
+                                    <HBox styleClass="rewardRow" spacing="16" alignment="CENTER_LEFT">
+                                        <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                                        <Label text="❤" styleClass="rewardEmoji"/>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <Label text="Ajouter un favori" styleClass="rewardTitle"/>
+                                            <Label text="Sauvegardez vos lieux préférés" styleClass="rewardDesc"/>
+                                        </VBox>
+                                        <Label text="+3 pts" styleClass="rewardPts"/>
+                                    </HBox>
+                                    <HBox styleClass="rewardRow" spacing="16" alignment="CENTER_LEFT">
+                                        <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                                        <Label text="🤝" styleClass="rewardEmoji"/>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <Label text="Rejoindre une sortie" styleClass="rewardTitle"/>
+                                            <Label text="Participez à des sorties avec d'autres" styleClass="rewardDesc"/>
+                                        </VBox>
+                                        <Label text="+10 pts" styleClass="rewardPts"/>
+                                    </HBox>
+                                    <HBox styleClass="rewardRow" spacing="16" alignment="CENTER_LEFT">
+                                        <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                                        <Label text="🎟" styleClass="rewardEmoji"/>
+                                        <VBox HBox.hgrow="ALWAYS">
+                                            <Label text="S'inscrire à un événement" styleClass="rewardTitle"/>
+                                            <Label text="Participez à des événements locaux" styleClass="rewardDesc"/>
+                                        </VBox>
+                                        <Label text="+8 pts" styleClass="rewardPts"/>
+                                    </HBox>
+                                </VBox>
+
+                                <Label text="Niveaux" styleClass="sectionTitle"/>
+                                <HBox spacing="12">
+                                    <VBox styleClass="niveauCard bronzeCard" alignment="CENTER" spacing="6">
+                                        <padding><Insets top="14" right="14" bottom="14" left="14"/></padding>
+                                        <Label text="🥉" styleClass="niveauCardEmoji"/>
+                                        <Label text="BRONZE" styleClass="niveauCardTitle"/>
+                                        <Label text="0 - 99 pts" styleClass="niveauCardRange"/>
+                                    </VBox>
+                                    <VBox styleClass="niveauCard argentCard" alignment="CENTER" spacing="6">
+                                        <padding><Insets top="14" right="14" bottom="14" left="14"/></padding>
+                                        <Label text="🥈" styleClass="niveauCardEmoji"/>
+                                        <Label text="ARGENT" styleClass="niveauCardTitle"/>
+                                        <Label text="100 - 499 pts" styleClass="niveauCardRange"/>
+                                    </VBox>
+                                    <VBox styleClass="niveauCard orCard" alignment="CENTER" spacing="6">
+                                        <padding><Insets top="14" right="14" bottom="14" left="14"/></padding>
+                                        <Label text="🥇" styleClass="niveauCardEmoji"/>
+                                        <Label text="OR" styleClass="niveauCardTitle"/>
+                                        <Label text="500 - 1499 pts" styleClass="niveauCardRange"/>
+                                    </VBox>
+                                    <VBox styleClass="niveauCard platineCard" alignment="CENTER" spacing="6" HBox.hgrow="ALWAYS">
+                                        <padding><Insets top="14" right="14" bottom="14" left="14"/></padding>
+                                        <Label text="💎" styleClass="niveauCardEmoji"/>
+                                        <Label text="PLATINE" styleClass="niveauCardTitle"/>
+                                        <Label text="1500+ pts" styleClass="niveauCardRange"/>
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+                        </content>
+                    </Tab>
+
+                </TabPane>
+            </VBox>
+        </content>
+    </ScrollPane>
+</VBox>

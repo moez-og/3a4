@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+    NeuroModeView — Vue simplifiée pour le mode neurodiversité
+    ─────────────────────────────────────────────────────────
+    Principes UX :
+    • Très peu de texte, grandes icônes visibles
+    • 3 informations clés : Prix · Localisation · Ambiance
+    • Boutons larges avec labels clairs
+    • Couleurs fortement contrastées (fond blanc, texte très sombre)
+    • Aucune surcharge visuelle
+-->
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.lieux.NeuroModeController"
+      spacing="0"
+      styleClass="neuroRoot"
+      stylesheets="@/styles/front/neuro-mode.css">
+
+    <padding>
+        <Insets top="12" right="14" bottom="16" left="14"/>
+    </padding>
+
+    <!-- ══ TOP BAR simple ══ -->
+    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="neuroTopBar">
+        <Button text="← Retour" onAction="#goBack" styleClass="neuroBackBtn"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="favoriBtn" text="♡" onAction="#toggleFavori" styleClass="neuroFavBtn"/>
+    </HBox>
+
+    <!-- ══ SCROLL ══ -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED"
+                styleClass="neuroScroll" VBox.vgrow="ALWAYS">
+        <content>
+            <VBox spacing="18">
+                <padding><Insets top="12" bottom="12"/></padding>
+
+                <!-- ══ PHOTO HERO (grande, arrondie) ══ -->
+                <StackPane styleClass="neuroImgWrap">
+                    <ImageView fx:id="heroImage"
+                               fitWidth="700" fitHeight="280"
+                               preserveRatio="false"
+                               styleClass="neuroHeroImg"/>
+
+                    <!-- Badge statut OUVERT/FERMÉ — grand et clair -->
+                    <Label fx:id="statusBadge" text=""
+                           styleClass="neuroStatusBadge"
+                           StackPane.alignment="BOTTOM_LEFT"
+                           visible="false" managed="false"/>
+                </StackPane>
+
+                <!-- ══ NOM DU LIEU — très grand ══ -->
+                <VBox spacing="6" styleClass="neuroTitleBlock">
+                    <Label fx:id="lieuIcon" text="📍" styleClass="neuroLieuIcon"/>
+                    <Label fx:id="lieuNom" text="Nom du lieu" wrapText="true"
+                           styleClass="neuroLieuNom"/>
+                    <Label fx:id="lieuCategorie" text="" styleClass="neuroCatBadge"/>
+                </VBox>
+
+                <!-- ══ 3 INFOS CLÉS (visuelles, icônes grandes) ══ -->
+                <HBox spacing="12" alignment="CENTER" styleClass="neuroKeyInfoRow">
+
+                    <!-- Prix -->
+                    <VBox alignment="CENTER" spacing="6" styleClass="neuroKeyCard" HBox.hgrow="ALWAYS">
+                        <Label text="💰" styleClass="neuroKeyIcon"/>
+                        <Label text="Prix" styleClass="neuroKeyLabel"/>
+                        <Label fx:id="keyPrix" text="—" wrapText="true" styleClass="neuroKeyValue"/>
+                    </VBox>
+
+                    <!-- Localisation -->
+                    <VBox alignment="CENTER" spacing="6" styleClass="neuroKeyCard" HBox.hgrow="ALWAYS">
+                        <Label text="📍" styleClass="neuroKeyIcon"/>
+                        <Label text="Lieu" styleClass="neuroKeyLabel"/>
+                        <Label fx:id="keyLieu" text="—" wrapText="true" styleClass="neuroKeyValue"/>
+                    </VBox>
+
+                    <!-- Ambiance -->
+                    <VBox alignment="CENTER" spacing="6" styleClass="neuroKeyCard" HBox.hgrow="ALWAYS">
+                        <Label fx:id="ambianceIcon" text="🏠" styleClass="neuroKeyIcon"/>
+                        <Label text="Ambiance" styleClass="neuroKeyLabel"/>
+                        <Label fx:id="keyAmbiance" text="—" wrapText="true" styleClass="neuroKeyValue"/>
+                    </VBox>
+
+                </HBox>
+
+                <!-- ══ RÉSUMÉ court (optionnel, max 2 lignes) ══ -->
+                <VBox fx:id="resumeBlock" spacing="8" styleClass="neuroResumeBlock"
+                      visible="false" managed="false">
+                    <Label text="ℹ️  En résumé" styleClass="neuroResumeTitle"/>
+                    <Label fx:id="resumeText" text="" wrapText="true"
+                           styleClass="neuroResumeText"/>
+                </VBox>
+
+                <!-- ══ HORAIRES simplifié ══ -->
+                <HBox fx:id="horairesBlock" alignment="CENTER_LEFT" spacing="14"
+                      styleClass="neuroHorairesBlock" visible="false" managed="false">
+                    <Label text="🕐" styleClass="neuroHorairesIcon"/>
+                    <Label fx:id="horairesText" text="" wrapText="true"
+                           styleClass="neuroHorairesText" HBox.hgrow="ALWAYS"/>
+                </HBox>
+
+                <!-- ══ NOTE MOYENNE (grande étoile) ══ -->
+                <HBox fx:id="noteBlock" alignment="CENTER_LEFT" spacing="12"
+                      styleClass="neuroNoteBlock" visible="false" managed="false">
+                    <Label text="⭐" styleClass="neuroNoteIcon"/>
+                    <VBox spacing="2">
+                        <Label fx:id="noteMoyenne" text="" styleClass="neuroNoteMoyenne"/>
+                        <Label fx:id="noteCount"   text="" styleClass="neuroNoteCount"/>
+                    </VBox>
+                </HBox>
+
+                <!-- ══ AVIS SIMPLIFIÉ (max 3, version courte) ══ -->
+                <VBox fx:id="avisSimpleBlock" spacing="10" styleClass="neuroAvisBlock"
+                      visible="false" managed="false">
+                    <Label text="💬  Ce qu'en disent les gens" styleClass="neuroAvisTitle"/>
+                    <VBox fx:id="avisSimpleList" spacing="8"/>
+                    <Button fx:id="voirTousAvisBtn" text="Voir tous les avis →"
+                            onAction="#voirTousAvis" styleClass="neuroLinkBtn"
+                            visible="false" managed="false"/>
+                </VBox>
+
+                <!-- ══ ACTIONS — boutons larges et clairs ══ -->
+                <VBox spacing="12" styleClass="neuroActionsBlock">
+
+                    <!-- Bouton Maps — très visible -->
+                    <Button text="🗺️   Voir sur la carte"
+                            onAction="#openMaps"
+                            styleClass="neuroActionPrimary"
+                            maxWidth="Infinity"/>
+
+                    <!-- Bouton Partager -->
+                    <Button text="⤴   Partager ce lieu"
+                            onAction="#openShare"
+                            styleClass="neuroActionSecondary"
+                            maxWidth="Infinity"/>
+
+                    <!-- Bouton Favoris -->
+                    <Button fx:id="favoriBlockBtn"
+                            text="♡   Ajouter aux favoris"
+                            onAction="#toggleFavori"
+                            styleClass="neuroActionFavori"
+                            maxWidth="Infinity"/>
+
+                    <!-- Bouton Ajouter sortie -->
+                    <Button text="＋   Organiser une sortie ici"
+                            onAction="#openSortieCreate"
+                            styleClass="neuroActionSortie"
+                            maxWidth="Infinity"/>
+
+                </VBox>
+
+                <!-- ══ BOUTON MODE NORMAL ══ -->
+                <HBox alignment="CENTER">
+                    <Button text="🔄  Revenir à la vue complète"
+                            onAction="#switchToNormal"
+                            styleClass="neuroSwitchBtn"/>
+                </HBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</VBox>
