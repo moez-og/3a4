@@ -8,6 +8,9 @@ public enum NotificationType {
     PARTICIPATION_ACCEPTED,
     PARTICIPATION_REFUSED,
 
+    // ===== Chat =====
+    CHAT_MESSAGE,
+
     // ===== Sorties (gestion sortie) =====
     SORTIE_UPDATED,
     SORTIE_CANCELLED,

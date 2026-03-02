@@ -1,11 +1,16 @@
 package services.sorties;
 
 import models.sorties.ChatMessage;
+import models.notifications.Notification;
+import models.notifications.NotificationType;
+import services.notifications.NotificationService;
 import utils.Mydb;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Service de chat de groupe pour une annonce de sortie.
@@ -18,6 +23,7 @@ import java.util.List;
 public class ChatService {
 
     private final Connection cnx = Mydb.getInstance().getConnection();
+    private final NotificationService notificationService = new NotificationService();
 
     // ──────────────────────────────────────────────────────────────────
     //  Init table
@@ -143,7 +149,12 @@ public class ChatService {
 
             ResultSet keys = ps.getGeneratedKeys();
             if (keys.next()) {
-                return getById(keys.getInt(1));
+                int messageId = keys.getInt(1);
+                ChatMessage msg = getById(messageId);
+                if (msg != null) {
+                    createChatMessageNotifications(annonceId, senderId, messageId, msg.getSenderName(), msg.getContent(), false);
+                }
+                return msg;
             }
         } catch (SQLException e) {
             throw new RuntimeException("ChatService.send: " + e.getMessage(), e);
@@ -167,13 +178,124 @@ public class ChatService {
             ps.setInt(4, pollId);
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) return getById(keys.getInt(1));
+                if (keys.next()) {
+                    int messageId = keys.getInt(1);
+                    ChatMessage msg = getById(messageId);
+                    if (msg != null) {
+                        createChatMessageNotifications(annonceId, senderId, messageId, msg.getSenderName(), msg.getContent(), true);
+                    }
+                    return msg;
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException("ChatService.sendPoll: " + e.getMessage(), e);
         }
         throw new RuntimeException("ChatService.sendPoll: no generated key");
     }
+
+    // ──────────────────────────────────────────────────────────────────
+    //  Notifications
+    // ──────────────────────────────────────────────────────────────────
+
+    private void createChatMessageNotifications(int annonceId, int senderId, int messageId, String senderName, String content, boolean isPoll) {
+        try {
+            Set<Integer> receivers = listChatReceivers(annonceId);
+            receivers.remove(senderId);
+            if (receivers.isEmpty()) return;
+
+            String name = safe(senderName).isBlank() ? resolveUserDisplayName(senderId) : safe(senderName).trim();
+            if (name.isBlank()) name = "Utilisateur #" + senderId;
+
+            String title = "Nouveau message";
+            String body;
+            if (isPoll) {
+                body = name + " a partagé un sondage: " + excerpt(safe(content), 80);
+            } else {
+                body = name + " : " + excerpt(safe(content), 90);
+            }
+
+            String meta = "{\"sortieId\":" + annonceId + ",\"chatMessageId\":" + messageId + "}";
+
+            for (int rid : receivers) {
+                Notification n = new Notification();
+                n.setReceiverId(rid);
+                n.setSenderId(senderId);
+                n.setType(NotificationType.CHAT_MESSAGE);
+                n.setTitle(title);
+                n.setBody(body);
+                n.setEntityType("chat");
+                n.setEntityId(annonceId);
+                n.setMetadataJson(meta);
+
+                notificationService.createOrRefreshNotification(n);
+            }
+        } catch (Exception ignored) {
+            // Tolérant: une erreur de notif ne doit pas bloquer l'envoi du message.
+        }
+    }
+
+    private Set<Integer> listChatReceivers(int annonceId) {
+        Set<Integer> out = new HashSet<>();
+
+        String sqlOwner = "SELECT user_id FROM annonce_sortie WHERE id=?";
+        try (PreparedStatement ps = cnx.prepareStatement(sqlOwner)) {
+            ps.setInt(1, annonceId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int oid = rs.getInt(1);
+                    if (!rs.wasNull() && oid > 0) out.add(oid);
+                }
+            }
+        } catch (SQLException ignored) {
+        }
+
+        String sqlMembers = """
+                SELECT user_id FROM participation_annonce
+                WHERE annonce_id=?
+                  AND (
+                           UPPER(statut) LIKE 'CONFIRM%'
+                        OR UPPER(statut) LIKE 'ACCEP%'
+                  )
+                """;
+        try (PreparedStatement ps = cnx.prepareStatement(sqlMembers)) {
+            ps.setInt(1, annonceId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int uid = rs.getInt(1);
+                    if (!rs.wasNull() && uid > 0) out.add(uid);
+                }
+            }
+        } catch (SQLException ignored) {
+        }
+
+        return out;
+    }
+
+    private String resolveUserDisplayName(int userId) {
+        if (userId <= 0) return "";
+        String sql = "SELECT prenom, nom FROM user WHERE id=?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String prenom = safe(rs.getString(1)).trim();
+                    String nom = safe(rs.getString(2)).trim();
+                    String full = (prenom + " " + nom).trim();
+                    return full;
+                }
+            }
+        } catch (SQLException ignored) {
+        }
+        return "";
+    }
+
+    private static String excerpt(String s, int max) {
+        String t = safe(s).replaceAll("\\s+", " ").trim();
+        if (t.length() <= max) return t;
+        return t.substring(0, Math.max(0, max - 1)).trim() + "…";
+    }
+
+    private static String safe(String s) { return s == null ? "" : s; }
 
     // ──────────────────────────────────────────────────────────────────
     //  Charger les messages d'une annonce (avec nom expéditeur)
