@@ -180,3 +180,19 @@
     -fx-border-radius: 18;
     -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 18, 0.18, 0, 6);
 }
+/* ── Bouton Analytics (accent doré) ── */
+.navBtnAnalytics {
+    -fx-background-color: rgba(212,175,55,0.22);
+    -fx-border-color: rgba(212,175,55,0.55);
+    -fx-text-fill: #f5e17a;
+    -fx-font-weight: 900;
+}
+.navBtnAnalytics:hover {
+    -fx-background-color: rgba(212,175,55,0.35);
+    -fx-border-color: rgba(212,175,55,0.75);
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.30), 12, 0.20, 0, 3);
+}
+.navBtnAnalytics.active {
+    -fx-background-color: rgba(212,175,55,0.45);
+    -fx-border-color: rgba(212,175,55,0.90);
+}

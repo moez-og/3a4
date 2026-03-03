@@ -9,15 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * InscriptionService — version mise à jour
- * ═══════════════════════════════════════════════════════
- * CHANGEMENTS vs version originale :
- *
- *  1. updatePaiementFloat(int inscriptionId, float paiement)
- *     Met à jour la colonne paiement avec un float.
- *     Appelé automatiquement après chaque ajout ou suppression
- *     de ticket pour garder : paiement = prix × nbTickets
- * ═══════════════════════════════════════════════════════
+ * InscriptionService — version mise à jour avec nb_tickets et getById
  */
 public class InscriptionService {
 
@@ -29,13 +21,42 @@ public class InscriptionService {
         return ts == null ? null : ts.toLocalDateTime();
     }
 
+    private Inscription mapRow(ResultSet rs) throws SQLException {
+        Inscription i = new Inscription();
+        i.setId(rs.getInt("id"));
+        i.setEventId(rs.getInt("event_id"));
+        i.setUserId(rs.getInt("user_id"));
+        i.setStatut(rs.getString("statut"));
+        i.setPaiement(rs.getString("paiement"));
+        i.setDateCreation(toLDT(rs.getTimestamp("date_creation")));
+        i.setNbTickets(rs.getInt("nb_tickets"));
+        return i;
+    }
+
     // ─────────────────────────────────────────────────────────────
     //  READ
     // ─────────────────────────────────────────────────────────────
 
+    public Inscription getById(int inscriptionId) {
+        String sql = """
+            SELECT id, event_id, user_id, statut, paiement, date_creation, nb_tickets
+            FROM inscription
+            WHERE id = ?
+        """;
+        try (Connection cn = getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            ps.setInt(1, inscriptionId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? mapRow(rs) : null;
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur getById: " + ex.getMessage(), ex);
+        }
+    }
+
     public List<Inscription> getByEventId(int eventId) {
         String sql = """
-            SELECT id, event_id, user_id, statut, paiement, date_creation
+            SELECT id, event_id, user_id, statut, paiement, date_creation, nb_tickets
             FROM inscription
             WHERE event_id = ?
             ORDER BY date_creation DESC
@@ -46,14 +67,7 @@ public class InscriptionService {
             ps.setInt(1, eventId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Inscription i = new Inscription();
-                    i.setId(rs.getInt("id"));
-                    i.setEventId(rs.getInt("event_id"));
-                    i.setUserId(rs.getInt("user_id"));
-                    i.setStatut(rs.getString("statut"));
-                    i.setPaiement(rs.getString("paiement"));
-                    i.setDateCreation(toLDT(rs.getTimestamp("date_creation")));
-                    list.add(i);
+                    list.add(mapRow(rs));
                 }
             }
         } catch (SQLException ex) {
@@ -120,19 +134,24 @@ public class InscriptionService {
     // ─────────────────────────────────────────────────────────────
 
     public int addInscription(int eventId, int userId, float paiement) {
+        return addInscription(eventId, userId, paiement, 1);
+    }
+
+    public int addInscription(int eventId, int userId, float paiement, int nbTickets) {
         if (existsForUser(eventId, userId))
             throw new IllegalStateException("Cet utilisateur est déjà inscrit à cet événement.");
         ensureCapacityAvailable(eventId);
 
         String sql = """
-            INSERT INTO inscription(event_id, user_id, statut, paiement, date_creation)
-            VALUES(?, ?, 'EN_ATTENTE', ?, NOW())
+            INSERT INTO inscription(event_id, user_id, statut, paiement, nb_tickets, date_creation)
+            VALUES(?, ?, 'EN_ATTENTE', ?, ?, NOW())
         """;
         try (Connection cnx = Mydb.getInstance().getConnection();
              PreparedStatement ps = cnx.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, eventId);
             ps.setInt(2, userId);
             ps.setFloat(3, paiement);
+            ps.setInt(4, nbTickets);
             ps.executeUpdate();
             try (var rs = ps.getGeneratedKeys()) {
                 return rs.next() ? rs.getInt(1) : -1;
@@ -160,14 +179,6 @@ public class InscriptionService {
         }
     }
 
-    /**
-     * ✅ NOUVEAU — met à jour paiement (float) dans la base
-     * Signature float pour correspondre exactement à la colonne SQL
-     * et à addInscription(int, int, float).
-     *
-     * Appelé dans le controller après chaque ajout ou suppression
-     * de ticket : paiement = prix_evenement × nb_tickets_inscription
-     */
     public void updatePaiementFloat(int inscriptionId, float paiement) {
         String sql = "UPDATE inscription SET paiement = ? WHERE id = ?";
         try (Connection cn = getConnection();
@@ -214,7 +225,7 @@ public class InscriptionService {
 
     public List<Inscription> searchByUser(int eventId, Integer userId, String statut) {
         String sql = """
-            SELECT id, event_id, user_id, statut, paiement, date_creation
+            SELECT id, event_id, user_id, statut, paiement, date_creation, nb_tickets
             FROM inscription
             WHERE event_id = ?
               AND (? IS NULL OR user_id = ?)
@@ -232,14 +243,7 @@ public class InscriptionService {
             ps.setString(5, st);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    Inscription i = new Inscription();
-                    i.setId(rs.getInt("id"));
-                    i.setEventId(rs.getInt("event_id"));
-                    i.setUserId(rs.getInt("user_id"));
-                    i.setStatut(rs.getString("statut"));
-                    i.setPaiement(rs.getString("paiement"));
-                    i.setDateCreation(toLDT(rs.getTimestamp("date_creation")));
-                    list.add(i);
+                    list.add(mapRow(rs));
                 }
             }
         } catch (SQLException ex) {

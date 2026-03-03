@@ -6,11 +6,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 
-<BorderPane xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="controllers.back.users.UserDashboardController"
-            stylesheets="@/styles/back/users-admin.css"
-            style="-fx-background-color: #f0f4f8;">
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.back.users.UserDashboardController" style="-fx-background-color: #f0f4f8;">
     <top>
         <HBox spacing="20" alignment="CENTER_LEFT" style="-fx-background-color: #f0f4f8;" prefHeight="70">
             <padding>
@@ -27,7 +23,7 @@
     <center>
         <ScrollPane fitToWidth="true">
             <content>
-                <VBox spacing="10" style="-fx-background-color: #f5f7fa;">
+                <VBox spacing="20" style="-fx-background-color: #f5f7fa;">
                     <padding>
                         <Insets top="30" right="30" bottom="30" left="30"/>
                     </padding>
@@ -51,9 +47,9 @@
                                 </VBox>
                                 <VBox spacing="6" HBox.hgrow="ALWAYS" style="-fx-background-color: #e8eef5; -fx-padding: 16; -fx-border-radius: 10; -fx-background-radius: 10;">
                                     <children>
-                                        <Label text="Partenaires" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #7a8fa3;"/>
+                                        <Label text="Visiteurs" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #7a8fa3;"/>
                                         <Label fx:id="adminsLabel" text="0" style="-fx-font-size: 32; -fx-font-weight: bold; -fx-text-fill: #1e3a5f;"/>
-                                        <Label text="Rôle partenaire" style="-fx-font-size: 12; -fx-text-fill: #7a8fa3;"/>
+                                        <Label text="Rôle visiteur" style="-fx-font-size: 12; -fx-text-fill: #7a8fa3;"/>
                                     </children>
                                 </VBox>
                             </children>
@@ -68,10 +64,10 @@
                             </children>
                         </HBox>
 
-                        <!-- Users Cards with Pagination (2 par page, comme sur le screenshot) -->
+                        <!-- Users Cards with Pagination (3 per page, no wrap) -->
                         <VBox spacing="12" VBox.vgrow="ALWAYS">
                             <children>
-                                <HBox fx:id="usersRow" spacing="20" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;"/>
+                                <HBox fx:id="usersRow" spacing="16" alignment="CENTER_LEFT" style="-fx-padding: 6 0 6 0;"/>
                                 <Pagination fx:id="usersPagination" maxPageIndicatorCount="7"/>
                             </children>
                         </VBox>

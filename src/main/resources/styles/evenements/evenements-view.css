@@ -80,35 +80,66 @@
     -fx-padding: 4 0 2 0;
 }
 
+/* ═══════ FILTERS BAR (single line) ═══════ */
+.evFiltersBar {
+    -fx-background-color: rgba(255,255,255,0.80);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 14;
+    -fx-padding: 10 18 10 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.04), 6, 0.1, 0, 2);
+}
+.evFilterLabel {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 12.5;
+    -fx-font-weight: 900;
+    -fx-padding: 0 4 0 0;
+}
+.evFilterSep {
+    -fx-min-width: 1;
+    -fx-pref-width: 1;
+    -fx-min-height: 24;
+    -fx-background-color: rgba(15,23,42,0.12);
+    -fx-background-radius: 1;
+    -fx-padding: 0 6 0 6;
+}
+
 /* ═══════ CHIPS ═══════ */
 .evChipsScroll { -fx-background-color: transparent; }
 .evChipsScroll > .viewport { -fx-background-color: transparent; }
 .evChipsRow { -fx-padding: 2 0 4 0; }
 
 .evChip {
-    -fx-background-color: rgba(15,23,42,0.06);
-    -fx-background-radius: 999;
+    -fx-background-color: rgba(15,23,42,0.05);
+    -fx-background-radius: 10;
     -fx-border-color: rgba(15,23,42,0.10);
-    -fx-border-radius: 999;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
     -fx-text-fill: #163a5c;
     -fx-font-weight: 900;
-    -fx-padding: 8 14 8 14;
+    -fx-font-size: 12px;
+    -fx-padding: 7 14;
     -fx-cursor: hand;
 }
-.evChip:hover { -fx-background-color: rgba(15,23,42,0.10); }
+.evChip:hover {
+    -fx-background-color: rgba(15,23,42,0.09);
+    -fx-border-color: rgba(15,23,42,0.16);
+}
 
 .evChipSelected {
-    -fx-background-color: rgba(11,37,80,0.88) !important;
+    -fx-background-color: linear-gradient(to right, #0b2550, #1a4a7a) !important;
     -fx-text-fill: white !important;
-    -fx-border-color: transparent;
-    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.30), 10, 0.18, 0, 4);
+    -fx-border-color: transparent !important;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.22), 8, 0.14, 0, 3);
 }
 
 .evChipMuted {
-    -fx-background-color: transparent;
+    -fx-background-color: rgba(15,23,42,0.03);
     -fx-border-color: rgba(15,23,42,0.12);
-    -fx-text-fill: rgba(22,58,92,0.70);
-    -fx-font-size: 12;
+    -fx-border-width: 1;
+    -fx-text-fill: rgba(22,58,92,0.60);
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
 }
 
 /* ═══════ CARDS PANE ═══════ */
@@ -212,6 +243,76 @@
 }
 .evGhostBtn:hover { -fx-background-color: rgba(15,23,42,0.09); }
 
+/* ── Tag « Non inscrit » (gris) ── */
+.evNonInscritTag {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 10;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « En attente » (orange) ── */
+.evAttenteTag {
+    -fx-background-color: rgba(245,158,11,0.14);
+    -fx-background-radius: 10;
+    -fx-text-fill: #b45309;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « En attente de paiement » (bleu) ── */
+.evAPayerTag {
+    -fx-background-color: rgba(59,130,246,0.14);
+    -fx-background-radius: 10;
+    -fx-text-fill: #1d4ed8;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « Payé » (vert) ── */
+.evPayeTag {
+    -fx-background-color: rgba(22,163,74,0.14);
+    -fx-background-radius: 10;
+    -fx-text-fill: #15803d;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « Inscrit » (vert clair) ── */
+.evInscritTag {
+    -fx-background-color: rgba(22,163,74,0.10);
+    -fx-background-radius: 10;
+    -fx-text-fill: #16a34a;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « Annulé » (rouge) ── */
+.evAnnuleTag {
+    -fx-background-color: rgba(239,68,68,0.12);
+    -fx-background-radius: 10;
+    -fx-text-fill: #b91c1c;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ── Tag « Complet / Fermé » (gris foncé) ── */
+.evCompletTag {
+    -fx-background-color: rgba(15,23,42,0.10);
+    -fx-background-radius: 10;
+    -fx-text-fill: #475569;
+    -fx-font-weight: 700;
+    -fx-font-size: 11;
+    -fx-padding: 6 12 6 12;
+}
+
 .evGhostBtnActive {
     -fx-background-color: rgba(11,37,80,0.10);
     -fx-background-radius: 14;
@@ -222,6 +323,49 @@
     -fx-padding: 10 14 10 14;
     -fx-cursor: hand;
 }
+
+/* ═══════ STATS BAR — UNIFIED MODE BUTTONS ═══════ */
+.evStatsBtn {
+    -fx-background-color: rgba(15,23,42,0.05);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-padding: 9 16;
+    -fx-cursor: hand;
+}
+.evStatsBtn:hover {
+    -fx-background-color: rgba(15,23,42,0.09);
+    -fx-border-color: rgba(15,23,42,0.16);
+}
+.evStatsBtnActive {
+    -fx-background-color: linear-gradient(to right, #0b2550, #1a4a7a) !important;
+    -fx-text-fill: white !important;
+    -fx-border-color: transparent !important;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.25), 8, 0.15, 0, 3);
+}
+
+/* Calendar toggle — same shape, subtle blue accent */
+.evCalToggleBtn {
+    -fx-background-color: rgba(26,74,122,0.06);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(26,74,122,0.20);
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-text-fill: #1a4a7a;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-padding: 9 16;
+    -fx-cursor: hand;
+}
+.evCalToggleBtn:hover {
+    -fx-background-color: rgba(26,74,122,0.12);
+    -fx-border-color: rgba(26,74,122,0.30);
+}
+
 .evDangerBtn {
     -fx-background-color: rgba(220,38,38,0.10);
     -fx-background-radius: 12;
@@ -383,4 +527,421 @@
     -fx-text-fill: rgba(22,58,92,0.65);
     -fx-font-weight: 700;
     -fx-font-size: 11.5;
+}
+
+/* ═══════ BOUTON AMBRE (EN_ATTENTE) ═══════ */
+.evAmbreBtn {
+    -fx-background-color: rgba(217,119,6,0.15);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(217,119,6,0.40);
+    -fx-border-radius: 14;
+    -fx-text-fill: #92400e;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: default;
+}
+.evAmbreBtn:disabled { -fx-opacity: 0.75; }
+
+/* ═══════ BOUTON DORÉ (PAYER) ═══════ */
+.evGoldBtn {
+    -fx-background-color: linear-gradient(to right, #d97706, #f59e0b);
+    -fx-background-radius: 14;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(217,119,6,0.30), 10, 0.18, 0, 4);
+}
+.evGoldBtn:hover {
+    -fx-background-color: linear-gradient(to right, #b45309, #d97706);
+}
+
+/* ═══════ BOUTON PAYÉ (VERT DÉSACTIVÉ) ═══════ */
+.evPaidBtn {
+    -fx-background-color: rgba(22,163,74,0.18);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(22,163,74,0.40);
+    -fx-border-radius: 14;
+    -fx-text-fill: #15803d;
+    -fx-font-weight: 900;
+    -fx-padding: 10 14 10 14;
+    -fx-cursor: default;
+}
+.evPaidBtn:disabled { -fx-opacity: 0.85; }
+
+/* ═══════ WEATHER CARD (DETAILS PAGE) ═══════ */
+.evWeatherCard {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 14;
+    -fx-border-width: 1;
+    -fx-padding: 14 18 14 18;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.08), 10, 0.12, 0, 3);
+}
+.evWeatherHeaderRow {
+    -fx-padding: 0 0 6 0;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-width: 0 0 1 0;
+}
+.evWeatherTitle {
+    -fx-text-fill: rgba(22,58,92,0.60);
+    -fx-font-size: 10.5;
+    -fx-font-weight: 800;
+    -fx-text-transform: uppercase;
+}
+.evWeatherIcon {
+    -fx-font-size: 32;
+    -fx-padding: 4 0 0 0;
+}
+.evWeatherDesc {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 13.5;
+    -fx-font-weight: 900;
+}
+.evWeatherTemp {
+    -fx-text-fill: #0b2550;
+    -fx-font-size: 22;
+    -fx-font-weight: 900;
+}
+.evWeatherSub {
+    -fx-text-fill: rgba(22,58,92,0.55);
+    -fx-font-size: 11;
+    -fx-font-weight: 700;
+}
+.evWeatherAdvice {
+    -fx-font-size: 11.5;
+    -fx-font-weight: 800;
+    -fx-padding: 6 12 6 12;
+    -fx-background-radius: 999;
+}
+.evWeatherAdviceGood {
+    -fx-text-fill: #15803d;
+    -fx-background-color: rgba(22,163,74,0.10);
+}
+.evWeatherAdviceCaution {
+    -fx-text-fill: #92400e;
+    -fx-background-color: rgba(217,119,6,0.10);
+}
+.evWeatherAdviceBad {
+    -fx-text-fill: #b91c1c;
+    -fx-background-color: rgba(220,38,38,0.08);
+}
+
+/* ═══════ WEATHER ADVICE PILL (EVENT CARDS) ═══════ */
+.evWeatherAdvicePill {
+    -fx-font-size: 11;
+    -fx-font-weight: 800;
+    -fx-padding: 5 12 5 12;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-background-color: rgba(15,23,42,0.04);
+    -fx-text-fill: rgba(22,58,92,0.55);
+}
+.evAdviceGood {
+    -fx-text-fill: #15803d;
+    -fx-background-color: rgba(22,163,74,0.08);
+    -fx-border-color: rgba(22,163,74,0.14);
+}
+.evAdviceCaution {
+    -fx-text-fill: #92400e;
+    -fx-background-color: rgba(217,119,6,0.08);
+    -fx-border-color: rgba(217,119,6,0.14);
+}
+.evAdviceBad {
+    -fx-text-fill: #b91c1c;
+    -fx-background-color: rgba(220,38,38,0.06);
+    -fx-border-color: rgba(220,38,38,0.12);
+}
+.evAdviceNeutral {
+    -fx-text-fill: rgba(22,58,92,0.45);
+    -fx-background-color: rgba(15,23,42,0.03);
+    -fx-border-color: rgba(15,23,42,0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CALENDRIER FRONT — Modern 3-View  (blue cohérent)
+   ═══════════════════════════════════════════════════════════════ */
+
+.evCalSection { -fx-padding: 0; }
+
+/* ── Top bar ── */
+.evCalTopBar {
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 14;
+    -fx-padding: 10 16;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.06), 10, 0.12, 0, 3);
+}
+
+.evCalBackBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 10;
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+.evCalBackBtn:hover { -fx-background-color: rgba(15,23,42,0.11); }
+
+/* ── View toggle (Mois / Semaine / Jour) ── */
+.evCalViewToggle {
+    -fx-background-color: rgba(26,74,122,0.06);
+    -fx-background-radius: 10;
+    -fx-padding: 3;
+}
+
+.evCalTogBtn {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-text-fill: #475569;
+    -fx-font-weight: 800;
+    -fx-font-size: 12px;
+    -fx-padding: 6 14;
+    -fx-cursor: hand;
+}
+.evCalTogBtn:hover {
+    -fx-background-color: rgba(26,74,122,0.10);
+    -fx-text-fill: #1a4a7a;
+}
+.evCalTogActive {
+    -fx-background-color: #1a4a7a !important;
+    -fx-text-fill: white !important;
+    -fx-effect: dropshadow(gaussian, rgba(26,74,122,0.3), 6, 0.15, 0, 2);
+}
+
+/* ── Arrow / nav buttons ── */
+.evCalArrowBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 10;
+    -fx-text-fill: #163a5c;
+    -fx-font-weight: 900;
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+.evCalArrowBtn:hover { -fx-background-color: rgba(15,23,42,0.10); }
+
+/* ── Month title ── */
+.evCalTitle {
+    -fx-text-fill: #163a5c;
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 8;
+}
+
+/* ── Today pill ── */
+.evCalTodayPill {
+    -fx-background-color: linear-gradient(to right, #1a4a7a, #0b2550);
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-padding: 6 16;
+    -fx-cursor: hand;
+}
+.evCalTodayPill:hover {
+    -fx-background-color: linear-gradient(to right, #0b2550, #091e3a);
+}
+
+/* ── Grid wrapper ── */
+.evCalGridWrap {
+    -fx-background-color: rgba(255,255,255,0.94);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.07);
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.08), 12, 0.15, 0, 4);
+}
+
+/* ── Detail side-panel ── */
+.evCalDetailPanel {
+    -fx-background-color: rgba(255,255,255,0.96);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-radius: 16;
+    -fx-padding: 14;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.07), 10, 0.10, 0, 3);
+}
+
+/* ═══════════════════════════════════════════════════
+   MONTH VIEW
+   ═══════════════════════════════════════════════════ */
+
+.evCalMHeader {
+    -fx-background-color: rgba(248,250,252,0.95);
+    -fx-padding: 12 0;
+    -fx-border-color: transparent transparent rgba(15,23,42,0.06) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.evCalDayHdr {
+    -fx-text-fill: rgba(22,58,92,0.50);
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 4 0;
+}
+.evCalDayHdrSun {
+    -fx-text-fill: #1a4a7a;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 4 0;
+}
+
+.evCalMGrid {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* ── Day Cell ── */
+.evCalMCell {
+    -fx-background-color: white;
+    -fx-border-color: rgba(15,23,42,0.05);
+    -fx-border-width: 0 0 1 1;
+    -fx-cursor: hand;
+}
+.evCalMCell:hover {
+    -fx-background-color: rgba(26,74,122,0.03);
+}
+.evCalMCellOutside {
+    -fx-background-color: rgba(248,250,252,0.55);
+    -fx-cursor: default;
+}
+.evCalMCellOutside:hover {
+    -fx-background-color: rgba(248,250,252,0.55);
+}
+.evCalMCellSun {
+    -fx-background-color: rgba(26,74,122,0.02);
+}
+
+/* ── Today ── */
+.evCalMCellToday {
+    -fx-border-color: #1a4a7a rgba(15,23,42,0.05) rgba(15,23,42,0.05) rgba(15,23,42,0.05);
+    -fx-border-width: 2 0 1 1;
+}
+
+.evCalMToday {
+    -fx-background-color: #1a4a7a;
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+    -fx-max-width: 28;
+    -fx-max-height: 28;
+    -fx-alignment: center;
+}
+
+.evCalMDayNum {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: rgba(22,58,92,0.55);
+    -fx-padding: 0;
+}
+
+.evCalMDayMuted {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: rgba(15,23,42,0.20);
+    -fx-padding: 0;
+}
+
+/* ── "+X autres" ── */
+.evCalMore {
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1a4a7a;
+    -fx-padding: 2 6;
+    -fx-cursor: hand;
+}
+.evCalMore:hover {
+    -fx-underline: true;
+    -fx-text-fill: #0b2550;
+}
+
+/* ═══════════════════════════════════════════════════
+   WEEK VIEW
+   ═══════════════════════════════════════════════════ */
+
+.evCalWContainer {
+    -fx-background-color: transparent;
+    -fx-padding: 4 0;
+}
+
+.evCalWDay {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent rgba(15,23,42,0.05) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+.evCalWDay:hover {
+    -fx-background-color: rgba(26,74,122,0.02);
+}
+
+.evCalWDayToday {
+    -fx-background-color: rgba(26,74,122,0.04) !important;
+    -fx-border-color: transparent transparent rgba(26,74,122,0.12) transparent;
+}
+
+/* ═══════════════════════════════════════════════════
+   DAY VIEW
+   ═══════════════════════════════════════════════════ */
+
+.evCalDContainer {
+    -fx-background-color: transparent;
+}
+
+/* ═══════════════════════════════════════════════════
+   RECOMMANDATION IA — Bouton + Bannière + Badges
+   ═══════════════════════════════════════════════════ */
+
+/* Bouton "Recommandés" dans la stats bar */
+.evRecoBtn {
+    -fx-background-color: linear-gradient(to right, #1a4a7a, #0b2550);
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 11.5px;
+    -fx-background-radius: 999;
+    -fx-padding: 7 16;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(26,74,122,0.35), 8, 0.2, 0, 3);
+}
+.evRecoBtn:hover {
+    -fx-background-color: linear-gradient(to right, #0b2550, #091e3a);
+    -fx-effect: dropshadow(gaussian, rgba(26,74,122,0.55), 12, 0.3, 0, 4);
+}
+
+/* Bannière d'analyse IA */
+.evRecoBanner {
+    -fx-background-color: linear-gradient(to right, #EEF3FF, #E0EAFF);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(26,74,122,0.18);
+    -fx-border-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(26,74,122,0.12), 10, 0.1, 0, 4);
+}
+.evRecoTitle {
+    -fx-text-fill: #0b2550;
+    -fx-font-size: 15px;
+    -fx-font-weight: 900;
+}
+.evRecoDesc {
+    -fx-text-fill: #1a4a7a;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-opacity: 0.85;
+}
+
+/* Badge de ranking sur les cartes recommandées */
+.evRecoBadge {
+    -fx-background-color: linear-gradient(to right, #1a4a7a, #0b2550);
+    -fx-text-fill: white;
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+    -fx-background-radius: 999;
+    -fx-padding: 3 12;
+    -fx-alignment: center-left;
+}
+.evRecoBadge.evRecoBadgeTop {
+    -fx-background-color: linear-gradient(to right, #F59E0B, #D97706);
+    -fx-effect: dropshadow(gaussian, rgba(245,158,11,0.4), 8, 0.2, 0, 2);
 }

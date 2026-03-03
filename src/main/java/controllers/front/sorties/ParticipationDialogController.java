@@ -28,9 +28,6 @@ public class ParticipationDialogController {
     @FXML private TextField tfEmail;
     @FXML private TextField tfPhone;
 
-    @FXML private Spinner<Integer> spPlaces;
-
-    @FXML private Button btnDelete;
     @FXML private Button btnSubmit;
 
     @FXML private TextArea taComment;
@@ -43,8 +40,6 @@ public class ParticipationDialogController {
     private Stage dialogStage;
     private User currentUser;
     private AnnonceSortie annonce;
-
-    private ParticipationSortie existing;
 
     private boolean placesAvailable = true;
 
@@ -81,11 +76,6 @@ public class ParticipationDialogController {
         lblError.setVisible(false);
         lblError.setManaged(false);
 
-        if (btnDelete != null) {
-            btnDelete.setVisible(false);
-            btnDelete.setManaged(false);
-        }
-
         applyContactMode();
     }
 
@@ -101,36 +91,20 @@ public class ParticipationDialogController {
         String email = (currentUser == null) ? "" : safe(currentUser.getEmail());
         tfEmail.setText(email);
 
-        existing = null;
-        if (currentUser != null) {
-            try {
-                existing = participationService.getByAnnonceAndUser(annonce.getId(), currentUser.getId());
-            } catch (Exception ignored) {}
-        }
-        if (btnDelete != null) {
-            boolean has = existing != null;
-            btnDelete.setVisible(has);
-            btnDelete.setManaged(has);
-        }
-
         // places restantes (basé sur CONFIRMEE)
         placesAvailable = true;
         if (btnSubmit != null) btnSubmit.setDisable(false);
 
         int total = Math.max(0, annonce.getNbPlaces());
-        int remaining = Integer.MAX_VALUE;
         if (total > 0) {
             int accepted = participationService.countAcceptedPlaces(annonce.getId());
-            remaining = Math.max(0, total - accepted);
+            int remaining = Math.max(0, total - accepted);
             if (remaining <= 0) {
                 placesAvailable = false;
-                // On bloque uniquement la création; si une demande existe, on autorise la suppression.
-                if (existing == null && btnSubmit != null) btnSubmit.setDisable(true);
-                if (existing == null) showError("Aucune place disponible.");
+                if (btnSubmit != null) btnSubmit.setDisable(true);
+                showError("Aucune place disponible.");
             }
         }
-
-        initPlacesSpinner(total, remaining);
 
         // questions
         questionsBox.getChildren().clear();
@@ -141,10 +115,6 @@ public class ParticipationDialogController {
             Label none = new Label("Aucune question.");
             none.getStyleClass().add("hintText");
             questionsBox.getChildren().add(none);
-            if (existing != null) {
-                prefillExisting();
-                applyEditModeUi();
-            }
             return;
         }
 
@@ -167,74 +137,6 @@ public class ParticipationDialogController {
 
             questionsBox.getChildren().add(block);
             answerFields.add(a);
-        }
-
-        if (existing != null) {
-            prefillExisting();
-            applyEditModeUi();
-        }
-    }
-
-    private void initPlacesSpinner(int total, int remaining) {
-        if (spPlaces == null) return;
-        int min = 1;
-        int max;
-        if (total > 0) max = Math.max(1, remaining);
-        else max = 20;
-
-        if (existing != null) {
-            max = Math.max(max, Math.max(1, existing.getNbPlaces()));
-        }
-
-        int value = 1;
-        if (existing != null) value = Math.max(1, existing.getNbPlaces());
-        spPlaces.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, Math.min(value, max)));
-        spPlaces.setEditable(true);
-    }
-
-    private void prefillExisting() {
-        if (existing == null) return;
-
-        boolean phoneMode = "TELEPHONE".equalsIgnoreCase(safe(existing.getContactPrefer()));
-        tbPhone.setSelected(phoneMode);
-        tbEmail.setSelected(!phoneMode);
-        applyContactMode();
-
-        if (phoneMode) {
-            String v = safe(existing.getContactValue()).trim();
-            if (v.startsWith("+216")) v = v.substring(4).trim();
-            tfPhone.setText(v.replaceAll("[^0-9]", ""));
-        }
-
-        taComment.setText(safe(existing.getCommentaire()));
-
-        if (spPlaces != null && spPlaces.getValueFactory() != null) {
-            spPlaces.getValueFactory().setValue(Math.max(1, existing.getNbPlaces()));
-        }
-
-        List<String> reps = existing.getReponses();
-        if (reps != null) {
-            for (int i = 0; i < Math.min(answerFields.size(), reps.size()); i++) {
-                answerFields.get(i).setText(safe(reps.get(i)));
-            }
-        }
-    }
-
-    private void applyEditModeUi() {
-        if (existing == null) return;
-        boolean editable = "EN_ATTENTE".equalsIgnoreCase(safe(existing.getStatut()));
-
-        if (btnSubmit != null) {
-            btnSubmit.setText(editable ? "Mettre à jour" : "Non modifiable");
-            btnSubmit.setDisable(!editable);
-        }
-        if (!editable) {
-            tbEmail.setDisable(true);
-            tbPhone.setDisable(true);
-            tfPhone.setDisable(true);
-            taComment.setDisable(true);
-            if (spPlaces != null) spPlaces.setDisable(true);
-            for (TextArea a : answerFields) a.setDisable(true);
         }
     }
 
@@ -266,20 +168,14 @@ public class ParticipationDialogController {
             return;
         }
 
-        if (existing != null) {
-            if (!"EN_ATTENTE".equalsIgnoreCase(safe(existing.getStatut()))) {
-                showError("Cette participation n'est pas modifiable.");
-                return;
-            }
-        } else {
-            if (participationService.getByAnnonceAndUser(annonce.getId(), currentUser.getId()) != null) {
-                showError("Demande déjà envoyée.");
-                return;
-            }
-            if (!placesAvailable) {
-                showError("Aucune place disponible.");
-                return;
-            }
+        if (participationService.getByAnnonceAndUser(annonce.getId(), currentUser.getId()) != null) {
+            showError("Demande déjà envoyée.");
+            return;
+        }
+
+        if (!placesAvailable) {
+            showError("Aucune place disponible.");
+            return;
         }
 
         boolean emailMode = tbEmail.isSelected();
@@ -298,9 +194,6 @@ public class ParticipationDialogController {
             contactValue = "+216" + digits;
         }
         int nbPlaces = 1;
-        if (spPlaces != null && spPlaces.getValue() != null) {
-            nbPlaces = Math.max(1, spPlaces.getValue());
-        }
         List<String> answers = new ArrayList<>();
         for (TextArea a : answerFields) {
             String s = safe(a.getText()).trim();
@@ -315,7 +208,6 @@ public class ParticipationDialogController {
         }
 
         ParticipationSortie p = new ParticipationSortie();
-        if (existing != null) p.setId(existing.getId());
         p.setAnnonceId(annonce.getId());
         p.setUserId(currentUser.getId());
         p.setStatut("EN_ATTENTE");
@@ -326,30 +218,8 @@ public class ParticipationDialogController {
         p.setReponses(answers);
 
         try {
-            if (existing != null) {
-                participationService.updatePendingRequest(p);
-                info("Demande mise à jour", "Ta participation a été mise à jour (EN_ATTENTE).");
-            } else {
-                participationService.addRequest(p);
-                info("Demande envoyée", "Ta participation est enregistrée (EN_ATTENTE).");
-            }
-            if (onSuccess != null) onSuccess.run();
-            close();
-        } catch (Exception e) {
-            showError(safe(e.getMessage()));
-        }
-    }
-
-    @FXML
-    private void delete() {
-        hideError();
-        if (existing == null) {
-            close();
-            return;
-        }
-        try {
-            participationService.deleteById(existing.getId());
-            info("Participation supprimée", "Ta participation/demande a été supprimée.");
+            participationService.addRequest(p);
+            info("Demande envoyée", "Ta participation est enregistrée (EN_ATTENTE).");
             if (onSuccess != null) onSuccess.run();
             close();
         } catch (Exception e) {

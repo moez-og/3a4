@@ -43,49 +43,80 @@
             </HBox>
 
             <!-- ═══════ STATS BAR ═══════ -->
-            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="evStatsBar">
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="evStatsBar">
                 <Label fx:id="countLabel" text="0 événement(s)" styleClass="evCountBadge"/>
                 <Label fx:id="inscritLabel" text="—" styleClass="evInscritBadge"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="✓ Mes inscriptions" onAction="#showMesInscriptions" styleClass="evGhostBtn"/>
-                <Button text="Tous" onAction="#showAll" styleClass="evGhostBtnActive"/>
+                <Button fx:id="btnAll" text="Tous" onAction="#showAll" styleClass="evStatsBtn evStatsBtnActive"/>
+                <Button fx:id="btnInscrits" text="✓ Mes inscriptions" onAction="#showMesInscriptions" styleClass="evStatsBtn"/>
+                <Button fx:id="btnRecommandes" text="🤖 Recommandés" onAction="#showRecommandes" styleClass="evStatsBtn"/>
+                <Button fx:id="btnToggleCalendar" text="📅 Calendrier" onAction="#onToggleCalendar" styleClass="evCalToggleBtn"/>
             </HBox>
 
-            <!-- ═══════ FILTRE TYPE (PRIVE/PUBLIC) ═══════ -->
-            <VBox spacing="8" styleClass="evSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Type" styleClass="evSectionTitle"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button text="Tous" onAction="#selectAllTypes" styleClass="evChip evChipMuted"/>
-                </HBox>
-                <!-- Les boutons sont construits dynamiquement dans buildTypeChips() -->
-                <HBox fx:id="typesChips" spacing="10" styleClass="evChipsRow"/>
-            </VBox>
+            <!-- ═══════ SECTION CARTES (par défaut) ═══════ -->
+            <VBox fx:id="cardsSection" spacing="10">
 
-            <!-- ═══════ FILTRE STATUT ═══════ -->
-            <VBox spacing="8" styleClass="evSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Statut" styleClass="evSectionTitle"/>
-                    <Region HBox.hgrow="ALWAYS"/>
+                <!-- ═══════ FILTRES TYPE + STATUT (ligne unique) ═══════ -->
+                <HBox spacing="14" alignment="CENTER_LEFT" styleClass="evFiltersBar">
+                    <Label text="Type" styleClass="evFilterLabel"/>
+                    <HBox fx:id="typesChips" spacing="8" alignment="CENTER_LEFT" styleClass="evChipsRow"/>
+                    <Button text="Tous" onAction="#selectAllTypes" styleClass="evChip evChipMuted"/>
+
+                    <Region styleClass="evFilterSep"/>
+
+                    <Label text="Statut" styleClass="evFilterLabel"/>
+                    <HBox fx:id="statutsChips" spacing="8" alignment="CENTER_LEFT" styleClass="evChipsRow"/>
                     <Button text="Tous" onAction="#selectAllStatuts" styleClass="evChip evChipMuted"/>
                 </HBox>
-                <!-- Les boutons sont construits dynamiquement dans buildStatutChips() -->
-                <HBox fx:id="statutsChips" spacing="10" styleClass="evChipsRow"/>
+
+                <!-- ═══════ RÉSULTATS ═══════ -->
+                <VBox spacing="10" styleClass="evSection">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="Résultats" styleClass="evSectionTitle"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="stateLabel" text="" visible="false" managed="false"
+                               styleClass="evStateLabel"/>
+                    </HBox>
+
+                    <FlowPane fx:id="cardsPane"
+                              hgap="14" vgap="14"
+                              prefWrapLength="1100"
+                              styleClass="evCardsPane"/>
+                </VBox>
             </VBox>
 
-            <!-- ═══════ RÉSULTATS ═══════ -->
-            <VBox spacing="10" styleClass="evSection">
-                <HBox alignment="CENTER_LEFT">
-                    <Label text="Résultats" styleClass="evSectionTitle"/>
+            <!-- ═══════ SECTION CALENDRIER — Modern Blue (cachée par défaut) ═══════ -->
+            <VBox fx:id="calendarSection" spacing="0" visible="false" managed="false" styleClass="evCalSection">
+
+                <!-- Top Bar: Back + View Toggles + Month Nav + Today -->
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="evCalTopBar">
+                    <padding><Insets top="12" right="16" bottom="12" left="16"/></padding>
+                    <Button text="← Retour" onAction="#onRetourFromCalendar"
+                            styleClass="evCalBackBtn"/>
+                    <HBox spacing="0" styleClass="evCalViewToggle">
+                        <Button fx:id="btnFrontViewMonth" text="Mois" onAction="#onViewMonth"
+                                styleClass="evCalTogBtn"/>
+                        <Button fx:id="btnFrontViewWeek" text="Semaine" onAction="#onViewWeek"
+                                styleClass="evCalTogBtn"/>
+                        <Button fx:id="btnFrontViewDay" text="Jour" onAction="#onViewDay"
+                                styleClass="evCalTogBtn"/>
+                    </HBox>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="stateLabel" text="" visible="false" managed="false"
-                           styleClass="evStateLabel"/>
+                    <Button text="‹" onAction="#onPrevMonth" styleClass="evCalArrowBtn"/>
+                    <Label fx:id="calMonthLabel" text="" styleClass="evCalTitle"/>
+                    <Button text="›" onAction="#onNextMonth" styleClass="evCalArrowBtn"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button text="Aujourd'hui" onAction="#onCalendarToday" styleClass="evCalTodayPill"/>
                 </HBox>
 
-                <FlowPane fx:id="cardsPane"
-                          hgap="14" vgap="14"
-                          prefWrapLength="1100"
-                          styleClass="evCardsPane"/>
+                <!-- Calendar Grid + Detail Side Panel -->
+                <HBox VBox.vgrow="ALWAYS" spacing="0">
+                    <VBox fx:id="calendarContainer" HBox.hgrow="ALWAYS"
+                          styleClass="evCalGridWrap"/>
+                    <VBox fx:id="calFrontDetailPanel" prefWidth="300" minWidth="280"
+                          visible="false" managed="false"
+                          styleClass="evCalDetailPanel"/>
+                </HBox>
             </VBox>
 
         </VBox>

@@ -1,43 +1,22 @@
 package controllers.back.users;
 
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Rectangle;
 import models.users.User;
 
 import java.net.URL;
-import java.util.ResourceBundle;
 
-public class UserCardController implements Initializable {
+public class UserCardController {
 
     private static final String DEFAULT_AVATAR = "/images/logo/logo.png";
 
-    @FXML private StackPane imageWrapper;
     @FXML private ImageView userImageView;
     @FXML private Label nameLabel;
     @FXML private Label roleLabel;
     @FXML private Label emailLabel;
     @FXML private Label phoneLabel;
-
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // Image responsive (prend la largeur de la card)
-        if (imageWrapper != null && userImageView != null) {
-            userImageView.fitWidthProperty().bind(imageWrapper.widthProperty());
-
-            // Clip sur le wrapper -> coins supérieurs arrondis
-            Rectangle clip = new Rectangle();
-            clip.widthProperty().bind(imageWrapper.widthProperty());
-            clip.heightProperty().bind(imageWrapper.heightProperty());
-            clip.setArcWidth(32);
-            clip.setArcHeight(32);
-            imageWrapper.setClip(clip);
-        }
-    }
 
     public void setUser(User user) {
         if (user == null) {
@@ -67,19 +46,7 @@ public class UserCardController implements Initializable {
         }
 
         nameLabel.setText(safe(user.getPrenom()) + " " + safe(user.getNom()));
-        String role = user.getRole() != null ? user.getRole().trim() : "";
-        roleLabel.setText(role.toUpperCase());
-
-        // Badge couleur selon le rôle (optionnel)
-        // On nettoie d'abord les classes précédentes
-        roleLabel.getStyleClass().removeAll("badge-admin", "badge-partenaire", "badge-abonne");
-        if ("admin".equalsIgnoreCase(role)) {
-            roleLabel.getStyleClass().add("badge-admin");
-        } else if ("partenaire".equalsIgnoreCase(role)) {
-            roleLabel.getStyleClass().add("badge-partenaire");
-        } else {
-            roleLabel.getStyleClass().add("badge-abonne");
-        }
+        roleLabel.setText(user.getRole() != null ? user.getRole().toUpperCase() : "");
         emailLabel.setText(safe(user.getEmail()));
 
         String tel = (user.getTelephone() != null && !user.getTelephone().trim().isEmpty())

@@ -4,14 +4,12 @@ import models.sorties.AnnonceSortie;
 import utils.Mydb;
 import utils.json.JsonStringArray;
 
-import services.common.CrudService;
-
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AnnonceSortieService implements CrudService<AnnonceSortie, Integer> {
+public class AnnonceSortieService {
 
     private final Connection cnx;
 
@@ -125,20 +123,6 @@ public class AnnonceSortieService implements CrudService<AnnonceSortie, Integer>
         } catch (SQLException e) {
             throw new RuntimeException("AnnonceSortieService.delete: " + e.getMessage(), e);
         }
-    }
-
-    // ===== CrudService<Integer> wrappers (keep existing int API) =====
-
-    @Override
-    public AnnonceSortie getById(Integer id) {
-        if (id == null) throw new IllegalArgumentException("id null");
-        return getById(id.intValue());
-    }
-
-    @Override
-    public void delete(Integer id) {
-        if (id == null) throw new IllegalArgumentException("id null");
-        delete(id.intValue());
     }
 
     /* ===================== MAPPING ===================== */

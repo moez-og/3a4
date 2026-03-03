@@ -16,6 +16,9 @@ public class Inscription {
 
     private LocalDateTime dateCreation;
 
+    /** Nombre de tickets demandés (DEFAULT 1 en DB) */
+    private int nbTickets = 1;
+
     public Inscription() {}
 
     public Inscription(int id, int eventId, int userId, String statut, String paiement, LocalDateTime dateCreation) {
@@ -25,6 +28,12 @@ public class Inscription {
         this.statut = statut;
         this.paiement = paiement;
         this.dateCreation = dateCreation;
+    }
+
+    public Inscription(int id, int eventId, int userId, String statut, String paiement,
+                        LocalDateTime dateCreation, int nbTickets) {
+        this(id, eventId, userId, statut, paiement, dateCreation);
+        this.nbTickets = nbTickets;
     }
 
     public int getId() { return id; }
@@ -45,6 +54,9 @@ public class Inscription {
     public LocalDateTime getDateCreation() { return dateCreation; }
     public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
 
+    public int getNbTickets() { return nbTickets; }
+    public void setNbTickets(int nbTickets) { this.nbTickets = nbTickets; }
+
     @Override
     public String toString() {
         return "Inscription{" +
@@ -53,6 +65,7 @@ public class Inscription {
                 ", userId=" + userId +
                 ", statut='" + statut + '\'' +
                 ", paiement='" + paiement + '\'' +
+                ", nbTickets=" + nbTickets +
                 ", dateCreation=" + dateCreation +
                 '}';
     }
