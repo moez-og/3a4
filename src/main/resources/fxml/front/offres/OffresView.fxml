@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
@@ -38,6 +39,7 @@
                 <HBox spacing="10" alignment="CENTER_LEFT" styleClass="offresTools">
                     <ComboBox fx:id="filtreLieuCombo" prefWidth="240" promptText="Filtrer par lieu" styleClass="filterCombo"/>
                     <Button text="Tout afficher" onAction="#onOpenAllOffers" styleClass="ghostBtn"/>
+                    <Button text="Mes réservations" onAction="#onMesReservations" styleClass="ghostBtn"/>
                 </HBox>
             </HBox>
 
@@ -75,10 +77,15 @@
 
                     <Label fx:id="detailTitre" text="Sélectionne une offre" styleClass="cardTitle" wrapText="true"/>
 
+                    <Label fx:id="urgencyBanner" text="🔥 À ne pas rater ! 24h et l'offre est finie !!!" styleClass="urgencyBanner" wrapText="true" visible="false" managed="false"/>
+
                     <VBox spacing="6" styleClass="detailsLines">
                         <Label fx:id="detailLieu" text="Lieu: -" styleClass="cardLine" wrapText="true"/>
                         <Label fx:id="detailType" text="Type: -" styleClass="cardLine" wrapText="true"/>
-                        <Label fx:id="detailPourcentage" text="Réduction: -" styleClass="cardLine" wrapText="true"/>
+                        <HBox spacing="8" alignment="CENTER_LEFT">
+                            <Label fx:id="detailPourcentage" text="Réduction: -" styleClass="cardLine" wrapText="true"/>
+                            <Label fx:id="detailPourcentageNew" text="" styleClass="cardLineUrgent" visible="false" managed="false"/>
+                        </HBox>
                         <Label fx:id="detailDates" text="Validité: -" styleClass="cardLine" wrapText="true"/>
                     </VBox>
 
@@ -87,6 +94,11 @@
                     <Button fx:id="btnGetPromo" text="Obtenir le code promo" onAction="#onGetPromo" styleClass="primaryBtn" disable="true"/>
                     <Label fx:id="promoInfo" text="Aucun code promo généré." styleClass="stateLabel" wrapText="true"/>
                     <ImageView fx:id="qrImageView" fitWidth="210" fitHeight="210" preserveRatio="true" visible="false" managed="false"/>
+
+                    <Separator/>
+
+                    <Button fx:id="btnReserver" text="Réserver pour ce lieu" onAction="#onReserver" styleClass="primaryBtn" disable="true"/>
+                    <Label fx:id="lblReservInfo" text="" styleClass="stateLabel" wrapText="true" visible="false" managed="false"/>
                 </VBox>
             </HBox>
         </VBox>

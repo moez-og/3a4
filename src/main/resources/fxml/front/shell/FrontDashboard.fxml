@@ -18,7 +18,7 @@
            xmlns:fx="http://javafx.com/fxml/1"
            fx:id="root"
            fx:controller="controllers.front.shell.FrontDashboardController"
-           stylesheets="@/styles/front/front-layout.css,@/styles/front/neuro-mode.css"
+           stylesheets="@/styles/front/front-layout.css"
            styleClass="app-root">
 
     <!-- MAIN LAYOUT -->
@@ -54,8 +54,6 @@
                     <ToggleButton fx:id="navOffres" text="Offres" onAction="#showOffres" styleClass="navPill"/>
                     <ToggleButton fx:id="navEvents" text="Événements" onAction="#showEvents" styleClass="navPill"/>
                     <ToggleButton fx:id="navHelp" text="Aide" onAction="#showHelp" styleClass="navPill"/>
-                    <ToggleButton fx:id="navGamif" text="🏆 Classement" onAction="#showGamification" styleClass="navPill,navPillGamif"/>
-                    <ToggleButton fx:id="navChatbot" text="🤖 Assistant" onAction="#showChatbot" styleClass="navPill,navPillChatbot"/>
                 </HBox>
 
                 <Region HBox.hgrow="ALWAYS"/>
@@ -68,13 +66,7 @@
                 </HBox>
 
                 <!-- QUICK ACTIONS -->
-                <!-- BELL with badge -->
-                <StackPane fx:id="bellPane" styleClass="bellPane">
-                    <Button fx:id="btnNotif" text="🔔" onAction="#showNotifications" styleClass="iconBtn"/>
-                    <Label fx:id="notifBadge" text="0" styleClass="notifBadge"
-                           visible="false" managed="false"
-                           StackPane.alignment="TOP_RIGHT"/>
-                </StackPane>
+                <Button fx:id="btnNotif" text="🔔" onAction="#showNotifications" styleClass="iconBtn"/>
                 <Button fx:id="btnTheme" text="🌓" onAction="#toggleTheme" styleClass="iconBtn"/>
 
                 <!-- ACCOUNT -->
@@ -145,14 +137,7 @@
 
             <Label text="Actions rapides" styleClass="drawerSectionTitle"/>
             <Button text="＋ Nouveau (Sortie/Offre/Événement)" onAction="#newAction" styleClass="drawerBtnPrimary"/>
-            <Button text="♥ Mes lieux favoris" onAction="#showMesFavoris" styleClass="drawerBtn"/>
             <Button text="📌 Mes activités" onAction="#showMyActivity" styleClass="drawerBtn"/>
-
-            <Separator styleClass="sep"/>
-
-            <Label text="Accessibilité" styleClass="drawerSectionTitle"/>
-            <ToggleButton fx:id="drawerNeuroToggle" text="🧠 Mode simplifié"
-                          onAction="#toggleNeuroMode" styleClass="drawerBtn"/>
 
             <Region VBox.vgrow="ALWAYS"/>
 

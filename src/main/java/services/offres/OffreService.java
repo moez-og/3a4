@@ -114,18 +114,28 @@ public class OffreService {
         return map;
     }
 
+    /** Statut values considered active regardless of casing or language. */
+    private static final Set<String> ACTIVE_STATUTS = new HashSet<>(Arrays.asList(
+            "active", "actif", "actif(ve)", "disponible", "valide",
+            "en cours", "ouvert", "ouverte", "published", "activé", "activee"
+    ));
+
     public List<Offre> obtenirOffresDisponibles() throws SQLException {
-        LocalDate today = LocalDate.now();
         List<Offre> all = obtenirToutes();
         List<Offre> filtered = new ArrayList<>();
 
         for (Offre offre : all) {
-            String statut = safe(offre.getStatut()).trim().toLowerCase();
-            LocalDate start = offre.getDate_debut() != null ? offre.getDate_debut().toLocalDate() : null;
-            LocalDate end = offre.getDate_fin() != null ? offre.getDate_fin().toLocalDate() : null;
+            // Case-insensitive; empty statut treated as active
+            String statut = safe(offre.getStatut()).trim().toLowerCase(Locale.ROOT);
+            boolean statusOk = statut.isEmpty() || ACTIVE_STATUTS.contains(statut);
 
-            boolean statusOk = "active".equals(statut);
-            boolean dateOk = start != null && end != null && !today.isBefore(start) && !today.isAfter(end);
+            // Null boundary = no constraint on that side
+            LocalDate start = offre.getDate_debut() != null ? offre.getDate_debut().toLocalDate() : null;
+            LocalDate end   = offre.getDate_fin()   != null ? offre.getDate_fin().toLocalDate()   : null;
+            LocalDate today = LocalDate.now();
+            boolean dateOk = (start == null || !today.isBefore(start))
+                          && (end   == null || !today.isAfter(end));
+
             if (statusOk && dateOk) {
                 filtered.add(offre);
             }

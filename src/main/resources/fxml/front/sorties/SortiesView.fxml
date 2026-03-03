@@ -1,15 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Label?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
-    <center>
-        <VBox alignment="CENTER" spacing="10" style="-fx-padding: 20;">
-            <Label text="Sorties View" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
-            <Label text="Contenu pour la gestion des sorties" style="-fx-font-size: 14;"/>
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.front.sorties.SortiesController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="ALWAYS"
+            stylesheets="@/styles/sorties/sorties-front.css"
+            styleClass="sortiesScroll">
+
+    <content>
+        <VBox spacing="16" styleClass="sortiesRoot">
+            <padding>
+                <Insets top="14" right="14" bottom="18" left="14"/>
+            </padding>
+
+            <!-- HERO -->
+            <HBox spacing="14" alignment="CENTER_LEFT" styleClass="sortiesHero">
+                <VBox spacing="4">
+                    <Label text="Sorties" styleClass="sortiesTitle"/>
+                    <Label text="Découvrir, créer et gérer des annonces de sorties" styleClass="sortiesSubtitle"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="searchBox">
+                    <Label text="🔎" styleClass="searchIcon"/>
+                    <TextField fx:id="searchField" promptText="Rechercher (titre, ville, lieu, activité…)" styleClass="searchField"/>
+                    <Button text="Réinitialiser" onAction="#resetFilters" styleClass="ghostBtn"/>
+                </HBox>
+            </HBox>
+
+            <!-- FILTERS -->
+            <HBox spacing="12" alignment="CENTER_LEFT" styleClass="filtersRow">
+                <ComboBox fx:id="villeFilter" prefWidth="180" styleClass="filterCombo"/>
+                <ComboBox fx:id="actFilter" prefWidth="190" styleClass="filterCombo"/>
+                <ComboBox fx:id="statutFilter" prefWidth="160" styleClass="filterCombo"/>
+                <ToggleButton fx:id="toggleMine" text="Mes annonces" styleClass="toggleChip"/>
+                <ToggleButton fx:id="toggleOpenOnly" text="Ouvertes" styleClass="toggleChip"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button fx:id="btnCreate" text="+ Créer" onAction="#createAnnonce" styleClass="primaryBtn"/>
+            </HBox>
+
+            <!-- LIST -->
+            <VBox spacing="10" styleClass="sortiesSection">
+                <HBox alignment="CENTER_LEFT">
+                    <Label text="Résultats" styleClass="sectionTitle"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="countLabel" text="" styleClass="countLabel"/>
+                </HBox>
+
+                <FlowPane fx:id="cardsPane"
+                          hgap="14" vgap="14"
+                          prefWrapLength="1100"
+                          styleClass="cardsPane"/>
+
+                <Label fx:id="stateLabel"
+                       text=""
+                       visible="false"
+                       managed="false"
+                       styleClass="stateLabel"/>
+            </VBox>
         </VBox>
-    </center>
-</BorderPane>
+    </content>
+</ScrollPane>

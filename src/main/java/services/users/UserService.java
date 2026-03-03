@@ -181,21 +181,6 @@ public class UserService implements CrudService<User, Integer> {
         return trouverParEmail(email) != null;
     }
 
-    public void mettreAJourMotDePasseParEmail(String email, String nouveauPasswordHash) throws SQLException {
-        if (connection == null) {
-            throw new SQLException("Connexion à la base de données indisponible");
-        }
-        String sql = "UPDATE user SET password_hash = ? WHERE email = ?";
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, nouveauPasswordHash);
-            ps.setString(2, email);
-            int updated = ps.executeUpdate();
-            if (updated == 0) {
-                throw new SQLException("Aucun utilisateur trouvé pour cet email");
-            }
-        }
-    }
-
     // ===== Generic CRUD (wrappers) =====
 
     @Override

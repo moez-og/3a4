@@ -79,6 +79,18 @@
 }
 .btn-pill:hover{ -fx-background-color: #24476f; }
 
+.card-btn-analyse{
+    -fx-background-color: linear-gradient(to right, #6d28d9, #7c3aed);
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-padding: 10 18;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(109,40,217,0.40), 10, 0.2, 0, 3);
+}
+.card-btn-analyse:hover{ -fx-background-color: linear-gradient(to right, #7c3aed, #8b5cf6); }
+
 /* Cards grid */
 .cards-scroll{
     -fx-background-color: transparent;

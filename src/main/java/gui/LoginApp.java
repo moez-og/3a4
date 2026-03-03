@@ -1,7 +1,6 @@
 package gui;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -18,28 +17,16 @@ import javafx.scene.paint.Stop;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import controllers.common.auth.LoginController;
 import services.users.UserService;
 import models.users.User;
-import utils.voice.FarahVoiceAssistant;
-import utils.voice.TombariVoiceAssistant;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.util.Optional;
 
 public class LoginApp extends Application {
 
-    private static final String CMD_NAVIGATE_SIGNIN = "NAVIGATE_SIGNIN";
-    private static final String CMD_NAVIGATE_SIGNUP = "NAVIGATE_SIGNUP";
-    private static final String ASSISTANT_FARAH = "Farah (Arabe tunisien)";
-    private static final String ASSISTANT_TOMBARI = "Tombari (Français)";
-
     private Stage primaryStage;
-    private final FarahVoiceAssistant farahVoiceAssistant = new FarahVoiceAssistant();
-    private final TombariVoiceAssistant tombariVoiceAssistant = new TombariVoiceAssistant();
-    private String selectedAssistant = ASSISTANT_FARAH;
 
     @Override
     public void start(Stage primaryStage) {
@@ -53,92 +40,10 @@ public class LoginApp extends Application {
             controller.setPrimaryStage(primaryStage);
             Scene scene = new Scene(root, 900, 700);
             primaryStage.setScene(scene);
-
-            selectedAssistant = askAssistantChoice();
-            startSelectedAssistant();
-
-            primaryStage.addEventHandler(WindowEvent.WINDOW_HIDDEN, e -> stopSelectedAssistant());
             primaryStage.show();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String askAssistantChoice() {
-        ChoiceDialog<String> dialog = new ChoiceDialog<>(ASSISTANT_FARAH, ASSISTANT_FARAH, ASSISTANT_TOMBARI);
-        dialog.setTitle("Choix de l'assistant vocal");
-        dialog.setHeaderText("Choisissez l'assistant à utiliser au lancement");
-        dialog.setContentText("Assistant :");
-
-        Optional<String> result = dialog.showAndWait();
-        return result.orElse(ASSISTANT_FARAH);
-    }
-
-    private void startSelectedAssistant() {
-        if (ASSISTANT_TOMBARI.equals(selectedAssistant)) {
-            tombariVoiceAssistant.setCommandListener(this::handleVoiceCommand);
-            tombariVoiceAssistant.start();
-        } else {
-            farahVoiceAssistant.setCommandListener(this::handleVoiceCommand);
-            farahVoiceAssistant.start();
-        }
-    }
-
-    private void stopSelectedAssistant() {
-        farahVoiceAssistant.stop();
-        tombariVoiceAssistant.stop();
-    }
-
-    private void handleVoiceCommand(String command) {
-        String normalized = command == null ? "" : command.trim().toUpperCase();
-        if (normalized.isEmpty()) {
-            return;
-        }
-
-        Platform.runLater(() -> {
-            try {
-                System.out.println("[LoginApp] Voice command received: " + normalized);
-
-                if (normalized.contains(CMD_NAVIGATE_SIGNIN)) {
-                    openSignInScene();
-                } else if (normalized.contains(CMD_NAVIGATE_SIGNUP)) {
-                    openSignUpScene();
-                }
-            } catch (Exception e) {
-                System.err.println("[LoginApp] Redirection vocale impossible: " + e.getMessage());
-            }
-        });
-    }
-
-    private void openSignInScene() throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/Login.fxml"));
-        Parent root = loader.load();
-        LoginController controller = loader.getController();
-        controller.setPrimaryStage(primaryStage);
-
-        if (primaryStage.getScene() == null) {
-            primaryStage.setScene(new Scene(root, 900, 700));
-        } else {
-            primaryStage.getScene().setRoot(root);
-        }
-        primaryStage.setTitle("Travel Guide - Login");
-    }
-
-    private void openSignUpScene() throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/Signup.fxml"));
-        Parent root = loader.load();
-
-        if (primaryStage.getScene() == null) {
-            primaryStage.setScene(new Scene(root, 900, 700));
-        } else {
-            primaryStage.getScene().setRoot(root);
-        }
-        primaryStage.setTitle("Travel Guide - Sign up");
-    }
-
-    @Override
-    public void stop() {
-        stopSelectedAssistant();
     }
 
     private StackPane createRootWithGradient() {
