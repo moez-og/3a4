@@ -22,6 +22,16 @@
     -fx-border-color: rgba(255,255,255,0.55);
     -fx-border-radius: 22;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.10), 14, 0.20, 0, 4);
+    -fx-cursor: hand;
+}
+
+.brandCard:hover {
+    -fx-background-color: rgba(255,255,255,0.94);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.14), 18, 0.22, 0, 6);
+}
+
+.brandCard:pressed {
+    -fx-translate-y: 1;
 }
 
 .brandTitle {
@@ -71,14 +81,14 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.16), 12, 0.18, 0, 3);
 }
 
-/* ✅ État actif (JavaFX ne supporte pas :current -> on utilise une classe .active) */
+/* ✅ État actif */
 .navBtn.active {
     -fx-background-color: rgba(255,255,255,0.30);
     -fx-border-color: rgba(255,255,255,0.40);
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 14, 0.20, 0, 4);
 }
 
-/* Déconnexion ultra stylée */
+/* Déconnexion */
 .logoutBtn {
     -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
     -fx-background-radius: 22;
@@ -121,8 +131,6 @@
     -fx-background-color: linear-gradient(to bottom, rgba(210,220,232,0.95), rgba(245,247,250,0.92));
     -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.14), 18, 0.18, 0, 6);
 }
-
-.headerLeft { }
 
 .headerTitle {
     -fx-text-fill: #163a5c;
@@ -171,4 +179,20 @@
     -fx-border-color: rgba(15,23,42,0.06);
     -fx-border-radius: 18;
     -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 18, 0.18, 0, 6);
+}
+/* ── Bouton Analytics (accent doré) ── */
+.navBtnAnalytics {
+    -fx-background-color: rgba(212,175,55,0.22);
+    -fx-border-color: rgba(212,175,55,0.55);
+    -fx-text-fill: #f5e17a;
+    -fx-font-weight: 900;
+}
+.navBtnAnalytics:hover {
+    -fx-background-color: rgba(212,175,55,0.35);
+    -fx-border-color: rgba(212,175,55,0.75);
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.30), 12, 0.20, 0, 3);
+}
+.navBtnAnalytics.active {
+    -fx-background-color: rgba(212,175,55,0.45);
+    -fx-border-color: rgba(212,175,55,0.90);
 }

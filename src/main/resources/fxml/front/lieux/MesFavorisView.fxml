@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.front.lieux.MesFavorisController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            vbarPolicy="AS_NEEDED"
+            stylesheets="@/styles/lieux/lieux-view.css"
+            styleClass="lieuxScroll">
+
+    <content>
+        <VBox spacing="16" styleClass="lieuxRoot">
+            <padding>
+                <Insets top="14" right="14" bottom="18" left="14"/>
+            </padding>
+
+            <!-- HEADER -->
+            <HBox spacing="14" alignment="CENTER_LEFT" styleClass="lieuxHero">
+                <VBox spacing="4">
+                    <Label text="♥  Mes lieux favoris" styleClass="lieuxTitle"/>
+                    <Label fx:id="countLabel" text="0 lieu en favori" styleClass="lieuxSubtitle"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+
+            <!-- EMPTY STATE -->
+            <VBox fx:id="emptyState" alignment="CENTER" spacing="10" visible="false" managed="false">
+                <padding><Insets top="60" bottom="60"/></padding>
+                <Label text="♡" style="-fx-font-size: 52px; -fx-text-fill: #d1d5db;"/>
+                <Label text="Aucun lieu en favori pour le moment."
+                       style="-fx-font-size: 15px; -fx-text-fill: #6b7280; -fx-font-weight: 700;"/>
+                <Label text="Parcourez les lieux et cliquez sur ♡ pour en ajouter."
+                       style="-fx-font-size: 12px; -fx-text-fill: #9ca3af;"/>
+            </VBox>
+
+            <!-- CARDS -->
+            <FlowPane fx:id="cardsPane"
+                      hgap="14" vgap="14"
+                      prefWrapLength="1100"
+                      styleClass="cardsPane"/>
+
+        </VBox>
+    </content>
+</ScrollPane>

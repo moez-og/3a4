@@ -1,0 +1,384 @@
+/* ================================================
+   CHATBOT — Design avec Sidebar Historique
+================================================ */
+
+/* ---- ROOT ---- */
+.chatRoot {
+    -fx-background-color: #f0f4f9;
+}
+
+/* ══════════════════════════════════════
+   SIDEBAR HISTORIQUE
+══════════════════════════════════════ */
+.historySidebar {
+    -fx-background-color: #1e293b;
+    -fx-border-color: transparent #2d3f55 transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.historyHeader {
+    -fx-background-color: #162032;
+    -fx-border-color: transparent transparent #2d3f55 transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.historyHeaderTitle {
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-text-fill: white;
+}
+
+.newChatBtn {
+    -fx-background-color: #2563eb;
+    -fx-background-radius: 10;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-padding: 9 0;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+}
+.newChatBtn:hover {
+    -fx-background-color: #1d4ed8;
+}
+
+.historyScrollPane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.historyScrollPane .viewport {
+    -fx-background-color: transparent;
+}
+.historyScrollPane .scroll-bar:vertical {
+    -fx-pref-width: 4;
+    -fx-background-color: transparent;
+}
+.historyScrollPane .scroll-bar:vertical .thumb {
+    -fx-background-color: #334155;
+    -fx-background-radius: 999;
+}
+.historyScrollPane .scroll-bar:vertical .track,
+.historyScrollPane .scroll-bar:vertical .increment-button,
+.historyScrollPane .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.historyList {
+    -fx-background-color: transparent;
+}
+
+.historyTitle {
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #64748b;
+    -fx-padding: 4 4 6 4;
+}
+
+.historyEmpty {
+    -fx-font-size: 11px;
+    -fx-text-fill: #475569;
+    -fx-padding: 8 4;
+    -fx-font-style: italic;
+}
+
+.historyCard {
+    -fx-background-color: rgba(255,255,255,0.05);
+    -fx-background-radius: 10;
+    -fx-padding: 10 12;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-border-radius: 10;
+}
+.historyCard:hover {
+    -fx-background-color: rgba(255,255,255,0.10);
+}
+.historyCardActive {
+    -fx-background-color: rgba(37,99,235,0.30);
+    -fx-border-color: rgba(37,99,235,0.50);
+    -fx-border-width: 1;
+}
+
+.historyCardTitle {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #e2e8f0;
+}
+.historyCardDate {
+    -fx-font-size: 10px;
+    -fx-text-fill: #64748b;
+}
+
+/* ---- Bouton supprimer une conversation ---- */
+.historyDeleteBtn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ef4444;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-padding: 0;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-opacity: 0.6;
+}
+.historyDeleteBtn:hover {
+    -fx-opacity: 1;
+    -fx-background-color: rgba(239,68,68,0.15);
+    -fx-background-radius: 6;
+}
+.historyDeleteBtn:pressed {
+    -fx-scale-x: 0.90;
+    -fx-scale-y: 0.90;
+}
+
+/* ══════════════════════════════════════
+   ZONE CHAT PRINCIPALE
+══════════════════════════════════════ */
+.chatMain {
+    -fx-background-color: #f0f4f9;
+}
+
+/* ---- Header ---- */
+.chatHeader {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #e8edf5 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(gaussian, rgba(30,60,120,0.07), 8, 0, 0, 2);
+}
+
+.chatHeaderAvatarBox {
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #1d4ed8);
+    -fx-background-radius: 999;
+    -fx-min-width: 42;
+    -fx-min-height: 42;
+    -fx-max-width: 42;
+    -fx-max-height: 42;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(gaussian, rgba(59,130,246,0.40), 8, 0, 0, 3);
+}
+.chatHeaderIcon {
+    -fx-font-size: 20px;
+    -fx-text-fill: white;
+}
+.chatHeaderTitle {
+    -fx-font-size: 15px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+}
+.chatHeaderSub {
+    -fx-font-size: 11px;
+    -fx-text-fill: #64748b;
+    -fx-font-weight: 600;
+}
+.chatOnlineDot {
+    -fx-background-color: #22c55e;
+    -fx-background-radius: 999;
+    -fx-min-width: 9;  -fx-min-height: 9;
+    -fx-max-width: 9;  -fx-max-height: 9;
+}
+.chatStatus {
+    -fx-font-size: 11px;
+    -fx-text-fill: #3b82f6;
+    -fx-font-weight: 800;
+    -fx-font-style: italic;
+}
+.chatClearBtn {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 10;
+    -fx-text-fill: #64748b;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 7 14;
+    -fx-cursor: hand;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10;
+}
+.chatClearBtn:hover { -fx-background-color: #e2e8f0; }
+
+/* ---- Zone messages ---- */
+.chatScroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-min-height: -1;
+    -fx-pref-height: -1;
+}
+.chatScroll .viewport { 
+    -fx-background-color: #f0f4f9;
+    -fx-min-height: -1;
+    -fx-pref-height: -1;
+}
+.chatScroll .scroll-bar:vertical {
+    -fx-pref-width: 5;
+    -fx-background-color: transparent;
+}
+.chatScroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 999;
+}
+.chatScroll .scroll-bar:vertical .track,
+.chatScroll .scroll-bar:vertical .increment-button,
+.chatScroll .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.chatMessages {
+    -fx-background-color: transparent;
+    -fx-min-height: 0;
+    -fx-pref-height: -1;
+    -fx-max-height: Infinity;
+}
+
+/* ---- Bulles ---- */
+.chatBubbleUser {
+    -fx-background-color: #2563eb;
+    -fx-background-radius: 20 20 5 20;
+    -fx-text-fill: white;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 600;
+    -fx-padding: 12 18;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.28), 10, 0, 0, 4);
+    -fx-line-spacing: 4;
+}
+.chatBubbleBot {
+    -fx-background-color: white;
+    -fx-background-radius: 20 20 20 5;
+    -fx-text-fill: #1e293b;
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 500;
+    -fx-padding: 12 18;
+    -fx-border-color: #e8edf5;
+    -fx-border-radius: 20 20 20 5;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.07), 10, 0, 0, 4);
+    -fx-line-spacing: 4;
+}
+.chatAvatar {
+    -fx-background-color: linear-gradient(to bottom right, #3b82f6, #1d4ed8);
+    -fx-background-radius: 999;
+    -fx-font-size: 15px;
+    -fx-text-fill: white;
+    -fx-alignment: CENTER;
+    -fx-effect: dropshadow(gaussian, rgba(59,130,246,0.30), 6, 0, 0, 2);
+}
+
+/* ---- Barre input ---- */
+.chatInputBar {
+    -fx-background-color: white;
+    -fx-border-color: #e8edf5 transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+.chatInput {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1.5;
+    -fx-padding: 12 20;
+    -fx-font-size: 13px;
+    -fx-text-fill: #1e293b;
+    -fx-font-weight: 600;
+    -fx-prompt-text-fill: #94a3b8;
+}
+.chatInput:focused {
+    -fx-background-color: white;
+    -fx-border-color: #3b82f6;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(59,130,246,0.15), 8, 0, 0, 2);
+}
+
+/* ---- Bouton envoyer ---- */
+.chatSendBtn {
+    -fx-background-color: #2563eb;
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 13px;
+    -fx-padding: 12 24;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(37,99,235,0.35), 10, 0, 0, 4);
+    -fx-min-width: 110;
+}
+.chatSendBtn:hover {
+    -fx-background-color: #1d4ed8;
+    -fx-scale-x: 1.03; -fx-scale-y: 1.03;
+}
+.chatSendBtn:disabled { -fx-opacity: 0.50; }
+
+/* ---- Bouton micro ---- */
+.chatVoiceBtn {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 999;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 999;
+    -fx-border-width: 1.5;
+    -fx-font-size: 16px;
+    -fx-min-width: 46;
+    -fx-min-height: 46;
+    -fx-max-width: 46;
+    -fx-max-height: 46;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER;
+}
+.chatVoiceBtn:hover {
+    -fx-background-color: #e0edff;
+    -fx-border-color: #3b82f6;
+}
+
+/* Bouton micro en mode enregistrement (rouge pulsant) */
+.chatVoiceBtnRecording {
+    -fx-background-color: #ef4444;
+    -fx-background-radius: 999;
+    -fx-border-color: #dc2626;
+    -fx-border-radius: 999;
+    -fx-border-width: 2;
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-min-width: 60;
+    -fx-min-height: 46;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.50), 10, 0, 0, 0);
+}
+
+/* ---- Bouton lire la réponse ---- */
+.chatReadBtn {
+    -fx-background-color: #f0f4f9;
+    -fx-border-color: #3b82f6;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: #2563eb;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+.chatReadBtn:hover {
+    -fx-background-color: #e0edff;
+    -fx-border-color: #1d4ed8;
+    -fx-text-fill: #1d4ed8;
+}
+.chatReadBtn:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}
+
+/* ---- Bouton arrêter la parole ---- */
+.chatStopBtn {
+    -fx-background-color: #fef3f2;
+    -fx-border-color: #ef4444;
+    -fx-border-radius: 8;
+    -fx-border-width: 1;
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+.chatStopBtn:hover {
+    -fx-background-color: #fee2e2;
+    -fx-border-color: #b91c1c;
+    -fx-text-fill: #b91c1c;
+}
+.chatStopBtn:pressed {
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
+}

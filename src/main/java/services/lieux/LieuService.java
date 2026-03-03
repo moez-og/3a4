@@ -4,6 +4,8 @@ import models.lieux.Lieu;
 import models.lieux.LieuHoraire;
 import utils.Mydb;
 
+import services.common.CrudService;
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -15,7 +17,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LieuService {
+public class LieuService implements CrudService<Lieu, Integer> {
 
     private final Connection cnx;
 
@@ -260,6 +262,20 @@ public class LieuService {
         } catch (SQLException e) {
             throw new RuntimeException("LieuService.delete: " + e.getMessage(), e);
         }
+    }
+
+    // ===== CrudService<Integer> wrappers (keep existing int API) =====
+
+    @Override
+    public Lieu getById(Integer id) {
+        if (id == null) throw new IllegalArgumentException("id null");
+        return getById(id.intValue());
+    }
+
+    @Override
+    public void delete(Integer id) {
+        if (id == null) throw new IllegalArgumentException("id null");
+        delete(id.intValue());
     }
 
     /* ===================== HORAIRES ===================== */

@@ -1,0 +1,244 @@
+/* ═══════════════════════════════════════════════════════════════════
+   GAMIFICATION STYLES  –  Fin Tokhroj
+   ═══════════════════════════════════════════════════════════════════ */
+
+.gamifRoot {
+    -fx-background-color: #0A1520;
+}
+
+.gamifScroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.gamifScroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ── Profil Card ─────────────────────────────────────────────────── */
+.profilCard {
+    -fx-background-color: linear-gradient(to right, #0D2137, #112840);
+    -fx-background-radius: 16;
+    -fx-border-color: #1E3A5F;
+    -fx-border-radius: 16;
+    -fx-border-width: 1.5;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 12, 0, 0, 4);
+}
+
+.niveauBlock {
+    -fx-min-width: 90px;
+}
+
+.niveauEmoji {
+    -fx-font-size: 44px;
+}
+
+.niveauLabel {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #CD7F32;
+}
+
+.pointsLabel {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFD700;
+}
+
+.rangLabel {
+    -fx-font-size: 14px;
+    -fx-text-fill: #4FC3F7;
+}
+
+.progressHint {
+    -fx-font-size: 11px;
+    -fx-text-fill: #78909C;
+}
+
+.niveauProgress {
+    -fx-pref-height: 10px;
+    -fx-background-radius: 5;
+    -fx-accent: #CD7F32;
+}
+
+.niveauProgress > .track {
+    -fx-background-color: #1E2A3A;
+    -fx-background-radius: 5;
+}
+
+.niveauProgress > .bar {
+    -fx-background-radius: 5;
+    -fx-background-insets: 0;
+}
+
+.badgesCountBlock {
+    -fx-min-width: 80px;
+}
+
+.badgesCountBig {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #4FC3F7;
+}
+
+.badgesCountSub {
+    -fx-font-size: 11px;
+    -fx-text-fill: #78909C;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────── */
+.gamifTabs {
+    -fx-background-color: transparent;
+    -fx-tab-min-height: 40px;
+}
+
+.gamifTabs > .tab-header-area {
+    -fx-background-color: #0D1E2D;
+    -fx-padding: 0;
+}
+
+.gamifTabs > .tab-header-area > .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.gamifTabs .tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #78909C;
+    -fx-font-size: 13px;
+    -fx-padding: 10 16 10 16;
+    -fx-background-radius: 0;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.gamifTabs .tab:selected {
+    -fx-background-color: #0A1520;
+    -fx-text-fill: #4FC3F7;
+    -fx-border-color: #4FC3F7 transparent transparent transparent;
+    -fx-border-width: 2 0 0 0;
+}
+
+.gamifTabs .tab-content-area {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* ── Sections ─────────────────────────────────────────────────────── */
+.sectionTitle {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.sectionSubtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #78909C;
+}
+
+/* ── Badges Flow ──────────────────────────────────────────────────── */
+.badgesFlow {
+    -fx-background-color: transparent;
+}
+
+/* ── Classement ────────────────────────────────────────────────────── */
+.classementList {
+    -fx-background-color: transparent;
+}
+
+.topBadge {
+    -fx-background-color: #1A3A5C;
+    -fx-text-fill: #4FC3F7;
+    -fx-background-radius: 12;
+    -fx-padding: 4 10 4 10;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* ── Rewards ──────────────────────────────────────────────────────── */
+.rewardRow {
+    -fx-background-color: #0D1E2D;
+    -fx-background-radius: 10;
+    -fx-border-color: #1E3A5F;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+}
+
+.rewardRow:hover {
+    -fx-background-color: #112840;
+    -fx-border-color: #2A5080;
+}
+
+.rewardEmoji {
+    -fx-font-size: 22px;
+    -fx-min-width: 36px;
+}
+
+.rewardTitle {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.rewardDesc {
+    -fx-font-size: 11px;
+    -fx-text-fill: #78909C;
+}
+
+.rewardPts {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FFD700;
+    -fx-min-width: 60px;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+/* ── Niveau Cards ─────────────────────────────────────────────────── */
+.niveauCard {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-width: 1.5;
+    -fx-min-width: 100px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 8, 0, 0, 3);
+}
+
+.bronzeCard {
+    -fx-background-color: #1A0F00;
+    -fx-border-color: #CD7F32;
+}
+
+.argentCard {
+    -fx-background-color: #141414;
+    -fx-border-color: #9E9E9E;
+}
+
+.orCard {
+    -fx-background-color: #1A1500;
+    -fx-border-color: #FFD700;
+}
+
+.platineCard {
+    -fx-background-color: #001A1F;
+    -fx-border-color: #00BCD4;
+}
+
+.niveauCardEmoji {
+    -fx-font-size: 26px;
+}
+
+.niveauCardTitle {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.niveauCardRange {
+    -fx-font-size: 10px;
+    -fx-text-fill: #90A4AE;
+}
+
+/* ── Separator ────────────────────────────────────────────────────── */
+.sep {
+    -fx-background-color: #1E3A5F;
+    -fx-padding: 0 0 0 0;
+}

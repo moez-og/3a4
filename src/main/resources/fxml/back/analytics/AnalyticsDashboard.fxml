@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Rectangle?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controllers.back.analytics.AnalyticsDashboardController"
+           stylesheets="@/styles/back/analytics.css">
+
+    <!-- Contenu principal -->
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="analyticsScroll">
+        <content>
+            <VBox fx:id="rootBox" spacing="20" styleClass="analyticsRoot">
+                <padding><Insets top="20" right="24" bottom="28" left="24"/></padding>
+
+                <!-- ══ EN-TÊTE ══ -->
+                <VBox spacing="4">
+                    <Label text="🔬  Analyse comportementale des favoris" styleClass="pageTitle"/>
+                    <Label text="Heatmap Âge × Catégorie · Score pondéré · Pearson · Shannon entropy"
+                           styleClass="pageSubtitle"/>
+                </VBox>
+
+                <!-- ══ KPI CARDS ══ -->
+                <HBox spacing="14">
+                    <VBox styleClass="kpiCard" HBox.hgrow="ALWAYS">
+                        <Label text="Favoris total" styleClass="kpiCardTitle"/>
+                        <Label fx:id="kpiFavoris" text="—" styleClass="kpiCardValue"/>
+                        <Label text="entrées favori_lieu" styleClass="kpiCardSub"/>
+                    </VBox>
+                    <VBox styleClass="kpiCard" HBox.hgrow="ALWAYS">
+                        <Label text="Users actifs" styleClass="kpiCardTitle"/>
+                        <Label fx:id="kpiUsers" text="—" styleClass="kpiCardValue"/>
+                        <Label text="ont ≥ 1 favori" styleClass="kpiCardSub"/>
+                    </VBox>
+                    <VBox styleClass="kpiCard" HBox.hgrow="ALWAYS">
+                        <Label text="Lieux favorisés" styleClass="kpiCardTitle"/>
+                        <Label fx:id="kpiLieux" text="—" styleClass="kpiCardValue"/>
+                        <Label text="lieux distincts" styleClass="kpiCardSub"/>
+                    </VBox>
+                    <VBox styleClass="kpiCard" HBox.hgrow="ALWAYS">
+                        <Label text="Engagement" styleClass="kpiCardTitle"/>
+                        <Label fx:id="kpiMoyenne" text="—" styleClass="kpiCardValue"/>
+                        <Label text="moyenne par utilisateur" styleClass="kpiCardSub"/>
+                    </VBox>
+                </HBox>
+
+                <!-- ══ HEATMAP ÂGE × CATÉGORIE ══ -->
+                <VBox fx:id="heatmapSection" spacing="12" styleClass="sectionCard">
+
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <VBox spacing="3">
+                            <Label text="🔥  Heatmap  Âge × Catégorie" styleClass="sectionTitle"/>
+                            <Label text="Intensité = nombre de favoris dans chaque segment (tranche d'âge × type de lieu)"
+                                   styleClass="sectionSubtitle"/>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <VBox spacing="4" alignment="CENTER_RIGHT">
+                            <Label text="Intensité" styleClass="legendTitle"/>
+                            <HBox spacing="6" alignment="CENTER">
+                                <Label fx:id="heatmapLegendMin" text="0" styleClass="legendVal"/>
+                                <Rectangle width="120" height="10" arcWidth="5" arcHeight="5"
+                                           style="-fx-fill: linear-gradient(to right, #eff6ff, #3b82f6, #1e40af);"/>
+                                <Label fx:id="heatmapLegendMax" text="?" styleClass="legendVal"/>
+                            </HBox>
+                        </VBox>
+                    </HBox>
+
+                    <!-- Grille heatmap générée dynamiquement -->
+                    <GridPane fx:id="heatmapGrid" hgap="3" vgap="3"/>
+
+                    <!-- Catégorie dominante par âge -->
+                    <VBox spacing="4" styleClass="dominanteBox">
+                        <Label text="Catégorie dominante par tranche d'âge" styleClass="dominanteTitle"/>
+                        <Label fx:id="dominanteInfo" text="" styleClass="dominanteText" wrapText="true"/>
+                    </VBox>
+                </VBox>
+
+                <!-- ══ 2 COLONNES : Top lieux | Budget×Âge ══ -->
+                <HBox spacing="16" alignment="TOP_LEFT">
+
+                    <!-- TOP 10 LIEUX -->
+                    <VBox spacing="10" styleClass="sectionCard" HBox.hgrow="ALWAYS">
+                        <Label text="🏆  Top 10 Lieux" styleClass="sectionTitle"/>
+                        <Label fx:id="topLieuxSubtitle" text="" styleClass="sectionSubtitle"/>
+                        <VBox fx:id="topLieuxBars" spacing="4"/>
+                        <HBox spacing="16" styleClass="legendRow">
+                            <Label text="↑ En hausse cette semaine" styleClass="legendUp"/>
+                            <Label text="↓ En baisse" styleClass="legendDown"/>
+                            <Label text="→ Stable" styleClass="legendNeutral"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- BUDGET × ÂGE -->
+                    <VBox spacing="10" styleClass="sectionCard" prefWidth="320">
+                        <Label text="💰  Budget × Âge" styleClass="sectionTitle"/>
+                        <Label text="Distribution des tranches de budget par tranche d'âge"
+                               styleClass="sectionSubtitle"/>
+                        <VBox fx:id="budgetAgeChart" spacing="6"/>
+                    </VBox>
+                </HBox>
+
+                <!-- ══ MÉTRIQUES AVANCÉES ══ -->
+                <HBox spacing="16">
+
+                    <!-- Pearson -->
+                    <VBox spacing="10" styleClass="sectionCard" HBox.hgrow="ALWAYS">
+                        <Label text="📐  Corrélation  Âge ↔ Budget  (Pearson)" styleClass="sectionTitle"/>
+                        <Label text="Mesure si les utilisateurs âgés tendent vers des lieux plus chers"
+                               styleClass="sectionSubtitle"/>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                            <Label fx:id="pearsonLabel" text="r = —" styleClass="pearsonValue"/>
+                            <Label fx:id="pearsonInterp" text="" styleClass="pearsonInterp"/>
+                        </HBox>
+                        <HBox fx:id="pearsonGauge"/>
+                        <Label text="r ∈ [-1,+1]  ·  +1 = corrélation parfaite  ·  0 = indépendance  ·  -1 = inverse"
+                               styleClass="pearsonFormula"/>
+                    </VBox>
+
+                    <!-- Shannon -->
+                    <VBox spacing="10" styleClass="sectionCard" HBox.hgrow="ALWAYS">
+                        <Label text="🌍  Diversité géographique  (Shannon)" styleClass="sectionTitle"/>
+                        <Label text="H = -Σ(pᵢ·log₂pᵢ)  ·  mesure si une tranche d'âge visite plusieurs villes"
+                               styleClass="sectionSubtitle"/>
+                        <VBox fx:id="shannonList" spacing="4"/>
+                        <Label text="H→0 : mono-ville  ·  H élevé : explorateur multi-villes"
+                               styleClass="sectionSubtitle" wrapText="true"/>
+                    </VBox>
+                </HBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+    <!-- Overlay chargement -->
+    <StackPane fx:id="loadingOverlay" styleClass="loadingOverlay">
+        <VBox spacing="14" alignment="CENTER">
+            <Label fx:id="loadingLabel" text="⚙  Calcul des analyses en cours…" styleClass="loadingText"/>
+            <Label text="Corrélations · Heatmap · Entropie · Scores" styleClass="loadingSub"/>
+        </VBox>
+    </StackPane>
+
+</StackPane>

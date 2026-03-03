@@ -1,0 +1,569 @@
+/* ═══════════════════════════════════════════════════════════════
+   NEURO MODE — Interface adaptée aux troubles cognitifs
+   ─────────────────────────────────────────────────────────────
+   Principes de design accessibilité cognitive :
+   ① Peu de texte : seulement ce qui est essentiel
+   ② Grandes icônes emoji : reconnaissance immédiate
+   ③ Couleurs très contrastées : fond blanc pur / texte très sombre
+   ④ Polices plus grandes : lecture facile
+   ⑤ Boutons larges avec labels clairs
+   ⑥ Espacement généreux : pas de surcharge visuelle
+   ⑦ Aucune animation distractrice
+   Palette :
+     Fond       → #ffffff (blanc pur)
+     Texte fort → #0b1a2e (navy très sombre)
+     Accent     → #d4af37 (or, repère visuel fort)
+     Succès     → #166534 (vert foncé)
+     Danger     → #9f1239 (rouge foncé)
+     Neutre     → #f0f4f8 (gris très clair)
+═══════════════════════════════════════════════════════════════ */
+
+/* ── Racine ─────────────────────────────────────────────────── */
+.neuroRoot {
+    -fx-background-color: #ffffff;
+    -fx-font-family: "Segoe UI";
+}
+
+.neuroScroll {
+    -fx-background-color: #ffffff;
+    -fx-background: #ffffff;
+    -fx-border-color: transparent;
+}
+.neuroScroll .viewport     { -fx-background-color: #ffffff; }
+.neuroScroll .scroll-bar:vertical { -fx-pref-width: 6; }
+.neuroScroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(11,26,46,0.25);
+    -fx-background-radius: 999;
+}
+.neuroScroll .scroll-bar:vertical .track,
+.neuroScroll .scroll-bar:vertical .increment-button,
+.neuroScroll .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* ── TOP BAR ─────────────────────────────────────────────────── */
+.neuroTopBar {
+    -fx-padding: 0 0 12 0;
+}
+
+.neuroBackBtn {
+    -fx-background-color: #f0f4f8;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(11,26,46,0.18);
+    -fx-border-radius: 16;
+    -fx-border-width: 2;
+    -fx-text-fill: #0b1a2e;
+    -fx-font-weight: 900;
+    -fx-font-size: 15px;
+    -fx-padding: 12 22;
+    -fx-cursor: hand;
+}
+.neuroBackBtn:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-translate-x: -2;
+}
+.neuroBackBtn:pressed { -fx-translate-x: 0; -fx-opacity: 0.85; }
+
+.neuroFavBtn {
+    -fx-background-color: #fff1f2;
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(225,29,72,0.30);
+    -fx-border-radius: 999;
+    -fx-border-width: 2;
+    -fx-text-fill: #9f1239;
+    -fx-font-size: 20px;
+    -fx-min-width: 48; -fx-max-width: 48;
+    -fx-min-height: 48; -fx-max-height: 48;
+    -fx-cursor: hand;
+}
+.neuroFavBtn:hover {
+    -fx-background-color: #ffe4e6;
+    -fx-border-color: rgba(225,29,72,0.65);
+}
+
+/* ── IMAGE HÉRO ──────────────────────────────────────────────── */
+.neuroImgWrap {
+    -fx-background-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(11,26,46,0.18), 24, 0.18, 0, 8);
+}
+
+.neuroHeroImg {
+    -fx-background-radius: 20;
+}
+
+/* Badges statut ─────────────────────────────────────────────── */
+.neuroStatusBadge {
+    -fx-background-radius: 12;
+    -fx-font-weight: 900;
+    -fx-font-size: 16px;
+    -fx-padding: 10 20;
+    -fx-cursor: default;
+}
+.neuroStatusOuvert {
+    -fx-background-color: rgba(22,101,52,0.92);
+    -fx-text-fill: #ffffff;
+}
+.neuroStatusFerme {
+    -fx-background-color: rgba(159,18,57,0.92);
+    -fx-text-fill: #ffffff;
+}
+
+/* ── BLOC TITRE ──────────────────────────────────────────────── */
+.neuroTitleBlock {
+    -fx-padding: 4 0 0 0;
+}
+
+.neuroLieuIcon {
+    -fx-font-size: 38px;
+    -fx-padding: 0 0 4 0;
+}
+
+.neuroLieuNom {
+    -fx-text-fill: #0b1a2e;
+    -fx-font-size: 26px;
+    -fx-font-weight: 900;
+    -fx-wrap-text: true;
+    -fx-line-spacing: 2;
+}
+
+.neuroCatBadge {
+    -fx-background-color: rgba(212,175,55,0.16);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(212,175,55,0.50);
+    -fx-border-radius: 999;
+    -fx-border-width: 2;
+    -fx-text-fill: #7a5000;
+    -fx-font-weight: 900;
+    -fx-font-size: 14px;
+    -fx-padding: 6 16;
+}
+
+/* ── 3 INFOS CLÉS ─────────────────────────────────────────────── */
+.neuroKeyInfoRow {
+    -fx-padding: 4 0;
+}
+
+.neuroKeyCard {
+    -fx-background-color: #f8faff;
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(11,26,46,0.10);
+    -fx-border-radius: 18;
+    -fx-border-width: 2;
+    -fx-padding: 18 12;
+    -fx-min-width: 110;
+    -fx-effect: dropshadow(gaussian, rgba(11,26,46,0.07), 12, 0.10, 0, 4);
+    -fx-cursor: default;
+}
+
+.neuroKeyIcon {
+    -fx-font-size: 32px;
+}
+
+.neuroKeyLabel {
+    -fx-text-fill: rgba(11,26,46,0.55);
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+    -fx-text-transform: uppercase;
+}
+
+.neuroKeyValue {
+    -fx-text-fill: #0b1a2e;
+    -fx-font-size: 15px;
+    -fx-font-weight: 900;
+    -fx-wrap-text: true;
+    -fx-alignment: CENTER;
+}
+
+/* ── RÉSUMÉ ──────────────────────────────────────────────────── */
+.neuroResumeBlock {
+    -fx-background-color: #f0f9ff;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(14,165,233,0.22);
+    -fx-border-radius: 16;
+    -fx-border-width: 2;
+    -fx-padding: 16 18;
+}
+
+.neuroResumeTitle {
+    -fx-text-fill: #0369a1;
+    -fx-font-weight: 900;
+    -fx-font-size: 14px;
+}
+
+.neuroResumeText {
+    -fx-text-fill: #0b1a2e;
+    -fx-font-size: 14.5px;
+    -fx-line-spacing: 3;
+    -fx-wrap-text: true;
+}
+
+/* ── HORAIRES ────────────────────────────────────────────────── */
+.neuroHorairesBlock {
+    -fx-background-color: #fff9f0;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(212,175,55,0.35);
+    -fx-border-radius: 16;
+    -fx-border-width: 2;
+    -fx-padding: 14 18;
+}
+
+.neuroHorairesIcon {
+    -fx-font-size: 28px;
+}
+
+.neuroHorairesText {
+    -fx-text-fill: #0b1a2e;
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-wrap-text: true;
+}
+
+/* ── NOTE ────────────────────────────────────────────────────── */
+.neuroNoteBlock {
+    -fx-background-color: #fffbf0;
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(212,175,55,0.30);
+    -fx-border-radius: 16;
+    -fx-border-width: 2;
+    -fx-padding: 14 18;
+}
+
+.neuroNoteIcon {
+    -fx-font-size: 30px;
+}
+
+.neuroNoteMoyenne {
+    -fx-text-fill: #b45309;
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+}
+
+.neuroNoteCount {
+    -fx-text-fill: rgba(11,26,46,0.55);
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+/* ── AVIS SIMPLIFIÉ ──────────────────────────────────────────── */
+.neuroAvisBlock {
+    -fx-background-color: #fafbff;
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(11,26,46,0.08);
+    -fx-border-radius: 18;
+    -fx-border-width: 2;
+    -fx-padding: 18 18;
+}
+
+.neuroAvisTitle {
+    -fx-text-fill: #0b1a2e;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+}
+
+.neuroAvisRow {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(11,26,46,0.07);
+    -fx-border-radius: 12;
+    -fx-border-width: 1.5;
+    -fx-padding: 12 14;
+    -fx-effect: dropshadow(gaussian, rgba(11,26,46,0.06), 8, 0.08, 0, 2);
+}
+
+.neuroLinkBtn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #1d4ed8;
+    -fx-font-weight: 900;
+    -fx-font-size: 13.5px;
+    -fx-cursor: hand;
+    -fx-padding: 4 0;
+}
+.neuroLinkBtn:hover { -fx-text-fill: #1e40af; -fx-underline: true; }
+
+/* ── ACTIONS ─────────────────────────────────────────────────── */
+.neuroActionsBlock {
+    -fx-padding: 6 0 4 0;
+}
+
+/* Bouton Maps — principal, très visible (or sur fond sombre) */
+.neuroActionPrimary {
+    -fx-background-color: #d4af37;
+    -fx-background-radius: 18;
+    -fx-border-color: transparent;
+    -fx-text-fill: #0b1a2e;
+    -fx-font-weight: 900;
+    -fx-font-size: 17px;
+    -fx-padding: 18 28;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.55), 18, 0.30, 0, 6);
+    -fx-min-height: 56;
+}
+.neuroActionPrimary:hover {
+    -fx-background-color: #e8c547;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.80), 24, 0.40, 0, 8);
+    -fx-translate-y: -2;
+}
+.neuroActionPrimary:pressed {
+    -fx-translate-y: 0;
+    -fx-opacity: 0.88;
+}
+
+/* Bouton Partager — outline navy */
+.neuroActionSecondary {
+    -fx-background-color: white;
+    -fx-background-radius: 18;
+    -fx-border-color: #0b1a2e;
+    -fx-border-radius: 18;
+    -fx-border-width: 2.5;
+    -fx-text-fill: #0b1a2e;
+    -fx-font-weight: 900;
+    -fx-font-size: 17px;
+    -fx-padding: 18 28;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+    -fx-min-height: 56;
+    -fx-effect: dropshadow(gaussian, rgba(11,26,46,0.10), 10, 0.10, 0, 3);
+}
+.neuroActionSecondary:hover {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #163a75;
+    -fx-effect: dropshadow(gaussian, rgba(11,26,46,0.18), 14, 0.14, 0, 4);
+    -fx-translate-y: -2;
+}
+.neuroActionSecondary:pressed {
+    -fx-translate-y: 0;
+    -fx-opacity: 0.85;
+}
+
+/* Bouton Favoris — rose/rouge */
+.neuroActionFavori {
+    -fx-background-color: #fff1f2;
+    -fx-background-radius: 18;
+    -fx-border-color: rgba(225,29,72,0.35);
+    -fx-border-radius: 18;
+    -fx-border-width: 2;
+    -fx-text-fill: #9f1239;
+    -fx-font-weight: 900;
+    -fx-font-size: 17px;
+    -fx-padding: 18 28;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+    -fx-min-height: 56;
+}
+.neuroActionFavori:hover {
+    -fx-background-color: #ffe4e6;
+    -fx-border-color: rgba(225,29,72,0.70);
+    -fx-translate-y: -2;
+}
+.neuroActionFavoriActive {
+    -fx-background-color: #e11d48;
+    -fx-background-radius: 18;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 17px;
+    -fx-padding: 18 28;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+    -fx-min-height: 56;
+    -fx-effect: dropshadow(gaussian, rgba(225,29,72,0.45), 14, 0.25, 0, 5);
+}
+.neuroActionFavoriActive:hover {
+    -fx-background-color: #be123c;
+    -fx-translate-y: -2;
+}
+
+/* Bouton Sortie — bleu profond */
+.neuroActionSortie {
+    -fx-background-color: #1e3a8a;
+    -fx-background-radius: 18;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 17px;
+    -fx-padding: 18 28;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+    -fx-min-height: 56;
+    -fx-effect: dropshadow(gaussian, rgba(30,58,138,0.45), 14, 0.25, 0, 5);
+}
+.neuroActionSortie:hover {
+    -fx-background-color: #1d4ed8;
+    -fx-effect: dropshadow(gaussian, rgba(30,58,138,0.70), 20, 0.35, 0, 7);
+    -fx-translate-y: -2;
+}
+.neuroActionSortie:pressed {
+    -fx-translate-y: 0;
+    -fx-opacity: 0.88;
+}
+
+/* Bouton switch mode normal */
+.neuroSwitchBtn {
+    -fx-background-color: rgba(11,26,46,0.06);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(11,26,46,0.16);
+    -fx-border-radius: 999;
+    -fx-border-width: 1.5;
+    -fx-text-fill: rgba(11,26,46,0.65);
+    -fx-font-weight: 700;
+    -fx-font-size: 12.5px;
+    -fx-padding: 10 22;
+    -fx-cursor: hand;
+}
+.neuroSwitchBtn:hover {
+    -fx-background-color: rgba(11,26,46,0.12);
+    -fx-text-fill: #0b1a2e;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   OVERRIDES GLOBAUX : classe "neuro-mode" sur le nœud racine.
+   Modifie l'affichage de toute l'app quand le mode est actif.
+   ─────────────────────────────────────────────────────────────
+   Ces règles s'appliquent via AccessibilityManager.bindClass()
+   sur la racine du shell (StackPane#root dans FrontDashboard).
+══════════════════════════════════════════════════════════════ */
+
+/* Fond général plus blanc et clair */
+.neuro-mode .app-root {
+    -fx-background-color: #ffffff;
+    -fx-font-family: "Segoe UI";
+}
+
+/* Nav pills : plus grandes, plus lisibles */
+.neuro-mode .navPill {
+    -fx-font-size: 14.5px;
+    -fx-padding: 12 18 12 18;
+    -fx-font-weight: 900;
+}
+.neuro-mode .navPill:selected {
+    -fx-background-color: #d4af37;
+    -fx-text-fill: #0b1a2e;
+    -fx-font-size: 14.5px;
+}
+
+/* PageTitle : plus grand */
+.neuro-mode .pageTitle {
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0b1a2e;
+}
+.neuro-mode .pageSubtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: rgba(11,26,46,0.65);
+}
+
+/* Cards lieux en mode neuro : grandes, simplifiées */
+.neuro-mode .lxCard {
+    -fx-background-color: #ffffff;
+    -fx-border-color: rgba(11,26,46,0.15);
+    -fx-border-width: 2.5;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-effect: dropshadow(gaussian, rgba(11,26,46,0.12), 20, 0.14, 0, 6);
+    -fx-cursor: hand;
+}
+.neuro-mode .lxCardSelected {
+    -fx-border-color: #d4af37;
+    -fx-border-width: 3;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.50), 22, 0.28, 0, 7);
+}
+
+/* Titre de card : très visible */
+.neuro-mode .lxCardTitle {
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0b1a2e;
+    -fx-wrap-text: true;
+}
+
+/* Meta : plus grande */
+.neuro-mode .lxCardMeta {
+    -fx-font-size: 13.5px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #334155;
+}
+
+/* Budget badge : plus lisible */
+.neuro-mode .lxCardBudgetBadge {
+    -fx-font-size: 13px;
+    -fx-padding: 4 12;
+    -fx-font-weight: 900;
+}
+
+/* Bouton Voir détails : grand et clair */
+.neuro-mode .lxCardPrimaryBtn {
+    -fx-background-color: #0b1a2e;
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 13.5px;
+    -fx-padding: 12 20;
+    -fx-cursor: hand;
+    -fx-min-height: 44;
+    -fx-effect: dropshadow(gaussian, rgba(11,26,46,0.35), 12, 0.20, 0, 4);
+}
+.neuro-mode .lxCardPrimaryBtn:hover {
+    -fx-background-color: #163a75;
+    -fx-translate-y: -2;
+}
+
+/* Bouton Maps sur card */
+.neuro-mode .lxCardGhostBtn {
+    -fx-background-color: #d4af37;
+    -fx-background-radius: 12;
+    -fx-border-color: transparent;
+    -fx-text-fill: #0b1a2e;
+    -fx-font-weight: 900;
+    -fx-font-size: 13.5px;
+    -fx-padding: 12 20;
+    -fx-min-height: 44;
+    -fx-cursor: hand;
+}
+.neuro-mode .lxCardGhostBtn:hover {
+    -fx-background-color: #e8c547;
+    -fx-translate-y: -2;
+}
+
+/* Toolbar : plus grande */
+.neuro-mode .lxToolbar {
+    -fx-min-height: 70;
+    -fx-padding: 14 18;
+}
+.neuro-mode .lxTitle {
+    -fx-font-size: 18px;
+}
+.neuro-mode .lxCount {
+    -fx-font-size: 13px;
+    -fx-padding: 4 14;
+}
+
+/* Chips filtres : plus grandes */
+.neuro-mode .lxChip {
+    -fx-font-size: 13px;
+    -fx-padding: 8 16;
+    -fx-font-weight: 900;
+}
+.neuro-mode .lxChipActive {
+    -fx-font-size: 13px;
+    -fx-padding: 8 16;
+}
+
+/* Toggle neuro pill dans la nav — style spécial actif */
+.navPillNeuro:selected {
+    -fx-background-color: #166534;
+    -fx-text-fill: #ffffff;
+    -fx-effect: dropshadow(gaussian, rgba(22,101,52,0.45), 12, 0.25, 0, 4);
+}
+.navPillNeuro {
+    -fx-background-color: rgba(22,101,52,0.10);
+    -fx-text-fill: #166534;
+    -fx-border-color: rgba(22,101,52,0.30);
+    -fx-border-radius: 999;
+    -fx-border-width: 1.5;
+}
+.navPillNeuro:hover {
+    -fx-background-color: rgba(22,101,52,0.18);
+}

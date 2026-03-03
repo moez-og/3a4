@@ -1,6 +1,7 @@
 package services.lieux;
 
 import models.lieux.EvaluationLieu;
+import services.common.ServiceBase;
 import utils.Mydb;
 
 import java.sql.*;
@@ -8,9 +9,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EvaluationLieuService {
+import services.gamification.GamificationService;
+
+public class EvaluationLieuService implements ServiceBase {
 
     private final Connection cnx;
+    private final GamificationService gamifService = new GamificationService();
 
     public EvaluationLieuService() {
         cnx = Mydb.getInstance().getConnection();
@@ -81,6 +85,9 @@ public class EvaluationLieuService {
 
     // respecte uq_eval_unique(lieu_id, user_id)
     public void upsert(int lieuId, int userId, int note, String commentaire) {
+        // Vérifier si c'est un nouvel avis
+        boolean isNew = !hasEvaluation(lieuId, userId);
+
         String sql = """
                 INSERT INTO evaluation_lieu(lieu_id, user_id, note, commentaire)
                 VALUES (?, ?, ?, ?)
@@ -98,6 +105,20 @@ public class EvaluationLieuService {
         } catch (SQLException e) {
             throw new RuntimeException("EvaluationLieuService.upsert: " + e.getMessage(), e);
         }
+
+        // Gamification : points pour un nouvel avis seulement
+        if (isNew) {
+            gamifService.ajouterPoints(userId, "AVIS_LAISSE");
+        }
+    }
+
+    public boolean hasEvaluation(int lieuId, int userId) {
+        try (PreparedStatement ps = cnx.prepareStatement(
+                "SELECT 1 FROM evaluation_lieu WHERE lieu_id=? AND user_id=?")) {
+            ps.setInt(1, lieuId);
+            ps.setInt(2, userId);
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
+        } catch (SQLException e) { return false; }
     }
 
     public void deleteByLieuUser(int lieuId, int userId) {

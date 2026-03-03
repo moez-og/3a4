@@ -1,5 +1,6 @@
 package controllers.back.shell;
 
+import controllers.front.shell.FrontDashboardController;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -14,16 +15,17 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import models.sorties.AnnonceSortie;
 import models.users.User;
+import services.sorties.AnnonceSortieService;
+import services.sorties.ParticipationSortieService;
 import services.users.UserService;
+import utils.ui.ViewPaths;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -32,6 +34,7 @@ import java.util.Map;
 
 public class BackDashboardController {
 
+    private static final String ANALYTICS_VIEW_PATH = "/fxml/back/analytics/AnalyticsDashboard.fxml";
     private static final String DASHBOARD_VIEW_PATH = "/fxml/back/dashboard/DashboardAdmin.fxml";
     private static final String USERS_VIEW_PATH = "/fxml/back/users/UserDashboard.fxml";
     private static final String SORTIES_VIEW_PATH = "/fxml/back/sorties/SortiesAdmin.fxml";
@@ -54,6 +57,7 @@ public class BackDashboardController {
     @FXML private Button btnLieux;
     @FXML private Button btnOffres;
     @FXML private Button btnEvents;
+    @FXML private Button btnAnalytics;
     @FXML private Button btnGoFront;
 
     private Stage primaryStage;
@@ -103,12 +107,6 @@ public class BackDashboardController {
 
     @FXML
     public void showSorties() {
-        // si tu veux réserver aux admins, décommente:
-        // if (!checkAuthorization("admin")) {
-        //     showError("Accès refusé", "Espace réservé aux admins", "");
-        //     return;
-        // }
-
         setActive(btnSorties);
         setHeader("Gestion des Sorties", "Catalogue, annonces, participations");
         loadAndSetCachedView("sorties", SORTIES_VIEW_PATH);
@@ -131,8 +129,24 @@ public class BackDashboardController {
     @FXML
     public void showEvents() {
         setActive(btnEvents);
-        setHeader("Gestion des Événements", "Catalogue, recherche, ajout, modification et suppression");
+        setHeader("Gestion des Événements", "Agenda, inscriptions, gestion");
         loadAndSetCachedView("events", EVENTS_VIEW_PATH);
+    }
+
+    @FXML
+    public void showAnalytics() {
+        setActive(btnAnalytics);
+        setHeader("🔬  Analytics IA", "Heatmap · Corrélation Pearson · Entropie Shannon · Score pondéré");
+        // Pas de cache : les données doivent être recalculées à chaque visite
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(
+                    getClass().getResource(ANALYTICS_VIEW_PATH));
+            javafx.scene.Node view = loader.load();
+            dynamicContent.getChildren().setAll(view);
+        } catch (Exception e) {
+            Alert a = new Alert(Alert.AlertType.ERROR, "Erreur chargement Analytics : " + e.getMessage());
+            a.showAndWait();
+        }
     }
 
     @FXML
@@ -161,6 +175,47 @@ public class BackDashboardController {
         }
     }
 
+    /**
+     * Bascule vers le FrontOffice en gardant l'utilisateur connecté.
+     * Déclenché par clic sur le bloc "Fin Tokhroj" (brandCard) dans la sidebar.
+     */
+    @FXML
+    public void openFront() {
+        if (currentUser == null) {
+            showError("Session", "Utilisateur non défini", "Connexion requise pour ouvrir le Front.");
+            return;
+        }
+
+        try {
+            Stage stage = resolveStage();
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(ViewPaths.FRONT_SHELL));
+            Parent root = loader.load();
+
+            Object controller = loader.getController();
+            if (controller instanceof FrontDashboardController front) {
+                front.setPrimaryStage(stage);
+                front.setCurrentUser(currentUser);
+            }
+
+            Scene scene = stage.getScene();
+            if (scene == null) {
+                scene = new Scene(root, 1200, 720);
+                stage.setScene(scene);
+            } else {
+                scene.setRoot(root);
+            }
+
+            stage.setTitle("Fin Tokhroj");
+            stage.setResizable(true);
+            stage.centerOnScreen();
+            stage.show();
+
+        } catch (Exception e) {
+            showError("Erreur", "Impossible d'ouvrir le Front", e.getMessage());
+        }
+    }
+
     // ===== Authorization & Role Management =====
 
     private boolean checkAuthorization(String requiredRole) {
@@ -181,6 +236,7 @@ public class BackDashboardController {
             setDisable(btnLieux, false);
             setDisable(btnOffres, false);
             setDisable(btnEvents, false);
+            setDisable(btnAnalytics, false);  // admin : accès complet
             setDisable(btnGoFront, false);
             return;
         }
@@ -192,6 +248,7 @@ public class BackDashboardController {
             setDisable(btnLieux, false);
             setDisable(btnOffres, false);
             setDisable(btnEvents, false);
+            setDisable(btnAnalytics, true);  // partenaire : pas d'analytics
             setDisable(btnGoFront, false);
             return;
         }
@@ -203,6 +260,7 @@ public class BackDashboardController {
         setDisable(btnLieux, true);
         setDisable(btnOffres, true);
         setDisable(btnEvents, true);
+        setDisable(btnAnalytics, true);
         setDisable(btnGoFront, true);
     }
 
@@ -223,14 +281,33 @@ public class BackDashboardController {
                 long nbPartenaires = users.stream().filter(u -> "partenaire".equalsIgnoreCase(safe(u.getRole()))).count();
                 long nbAbonnes = users.stream().filter(u -> "abonne".equalsIgnoreCase(safe(u.getRole()))).count();
 
+                // Sorties & participations
+                AnnonceSortieService annonceService = new AnnonceSortieService();
+                ParticipationSortieService participationService = new ParticipationSortieService();
+
+                List<AnnonceSortie> sorties = annonceService.getAll();
+                long totalSorties = sorties.size();
+                long nbOuvertes = sorties.stream().filter(a -> "OUVERTE".equalsIgnoreCase(safe(a.getStatut()))).count();
+                long nbAnnulees = sorties.stream().filter(a -> "ANNULEE".equalsIgnoreCase(safe(a.getStatut()))).count();
+                long nbFermees = sorties.stream().filter(a -> "FERMEE".equalsIgnoreCase(safe(a.getStatut()))).count();
+                long nbAvenir = sorties.stream().filter(a -> a.getDateSortie() != null && a.getDateSortie().isAfter(java.time.LocalDateTime.now())).count();
+
+                long partTotal = participationService.countAll();
+                long partPending = participationService.countByStatus("EN_ATTENTE");
+                long partConfirmed = participationService.countByStatuses("CONFIRMEE", "ACCEPTEE");
+                long partRefused = participationService.countByStatus("REFUSEE");
+
                 Platform.runLater(() -> {
-                    VBox statsContainer = buildDashboardWithStats(totalUsers, nbAdmins, nbPartenaires, nbAbonnes);
+                    VBox statsContainer = buildDashboardWithStats(
+                            totalUsers, nbAdmins, nbPartenaires, nbAbonnes,
+                            totalSorties, nbOuvertes, nbAvenir, nbAnnulees, nbFermees,
+                            partTotal, partPending, partConfirmed, partRefused
+                    );
                     setContent(statsContainer);
                 });
 
             } catch (SQLException e) {
                 Platform.runLater(() -> {
-                    // fallback sur dashboard FXML si stats ne marchent pas
                     loadAndSetCachedView("dashboard", DASHBOARD_VIEW_PATH);
                     showError("Erreur", "Impossible de charger les statistiques", e.getMessage());
                 });
@@ -243,7 +320,11 @@ public class BackDashboardController {
         }).start();
     }
 
-    private VBox buildDashboardWithStats(long totalUsers, long nbAdmins, long nbPartenaires, long nbAbonnes) {
+    private VBox buildDashboardWithStats(
+            long totalUsers, long nbAdmins, long nbPartenaires, long nbAbonnes,
+            long totalSorties, long nbOuvertes, long nbAvenir, long nbAnnulees, long nbFermees,
+            long partTotal, long partPending, long partConfirmed, long partRefused
+    ) {
         VBox main = new VBox(20);
         main.setPadding(new Insets(30, 40, 30, 40));
         main.setStyle("-fx-background-color: transparent;");
@@ -255,8 +336,22 @@ public class BackDashboardController {
         barChart.setPrefHeight(450);
         barChart.setMaxWidth(Double.MAX_VALUE);
 
-        main.getChildren().addAll(titleLabel, barChart);
+        Label sortiesTitle = new Label("Statistiques des Sorties (Total: " + totalSorties + ")");
+        sortiesTitle.setStyle("-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #163a5c;");
+        BarChart<String, Number> sortiesChart = createSortiesChart(nbOuvertes, nbAvenir, nbAnnulees, nbFermees);
+        sortiesChart.setPrefHeight(420);
+        sortiesChart.setMaxWidth(Double.MAX_VALUE);
+
+        Label partsTitle = new Label("Statistiques des Participations (Total: " + partTotal + ")");
+        partsTitle.setStyle("-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #163a5c;");
+        BarChart<String, Number> partsChart = createParticipationsChart(partPending, partConfirmed, partRefused);
+        partsChart.setPrefHeight(420);
+        partsChart.setMaxWidth(Double.MAX_VALUE);
+
+        main.getChildren().addAll(titleLabel, barChart, sortiesTitle, sortiesChart, partsTitle, partsChart);
         VBox.setVgrow(barChart, javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(sortiesChart, javafx.scene.layout.Priority.ALWAYS);
+        VBox.setVgrow(partsChart, javafx.scene.layout.Priority.ALWAYS);
         return main;
     }
 
@@ -276,10 +371,10 @@ public class BackDashboardController {
         barChart.setCategoryGap(40);
         barChart.setStyle(
                 "-fx-background-color: rgba(255,255,255,0.85);" +
-                "-fx-background-radius: 16;" +
-                "-fx-padding: 25;" +
-                "-fx-border-radius: 16;" +
-                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 4);"
+                        "-fx-background-radius: 16;" +
+                        "-fx-padding: 25;" +
+                        "-fx-border-radius: 16;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 4);"
         );
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
@@ -288,9 +383,69 @@ public class BackDashboardController {
         series.getData().add(new XYChart.Data<>("Abonnés", nbAbonnes));
 
         barChart.getData().add(series);
+        return barChart;
+    }
 
-        // NB: Styling des barres via CSS est plus fiable que getNode()
-        // car les nodes peuvent être null avant le rendu.
+    private BarChart<String, Number> createSortiesChart(long nbOuvertes, long nbAvenir, long nbAnnulees, long nbFermees) {
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Catégories de sorties");
+        xAxis.setStyle("-fx-text-fill: #2c3e50; -fx-font-size: 12; -fx-font-weight: bold;");
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Nombre");
+        yAxis.setStyle("-fx-text-fill: #2c3e50; -fx-font-size: 12; -fx-font-weight: bold;");
+
+        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setLegendVisible(false);
+        barChart.setAnimated(true);
+        barChart.setBarGap(20);
+        barChart.setCategoryGap(40);
+        barChart.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.85);" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-padding: 25;" +
+                        "-fx-border-radius: 16;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 4);"
+        );
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.getData().add(new XYChart.Data<>("Ouvertes", nbOuvertes));
+        series.getData().add(new XYChart.Data<>("À venir", nbAvenir));
+        series.getData().add(new XYChart.Data<>("Annulées", nbAnnulees));
+        series.getData().add(new XYChart.Data<>("Fermées", nbFermees));
+
+        barChart.getData().add(series);
+        return barChart;
+    }
+
+    private BarChart<String, Number> createParticipationsChart(long pending, long confirmed, long refused) {
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setLabel("Statut des participations");
+        xAxis.setStyle("-fx-text-fill: #2c3e50; -fx-font-size: 12; -fx-font-weight: bold;");
+
+        NumberAxis yAxis = new NumberAxis();
+        yAxis.setLabel("Nombre");
+        yAxis.setStyle("-fx-text-fill: #2c3e50; -fx-font-size: 12; -fx-font-weight: bold;");
+
+        BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setLegendVisible(false);
+        barChart.setAnimated(true);
+        barChart.setBarGap(20);
+        barChart.setCategoryGap(40);
+        barChart.setStyle(
+                "-fx-background-color: rgba(255,255,255,0.85);" +
+                        "-fx-background-radius: 16;" +
+                        "-fx-padding: 25;" +
+                        "-fx-border-radius: 16;" +
+                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 12, 0, 0, 4);"
+        );
+
+        XYChart.Series<String, Number> series = new XYChart.Series<>();
+        series.getData().add(new XYChart.Data<>("EN_ATTENTE", pending));
+        series.getData().add(new XYChart.Data<>("CONFIRMÉES", confirmed));
+        series.getData().add(new XYChart.Data<>("REFUSÉES", refused));
+
+        barChart.getData().add(series);
         return barChart;
     }
 
@@ -310,7 +465,7 @@ public class BackDashboardController {
     }
 
     private void setActive(Button activeBtn) {
-        Button[] all = {btnDashboard, btnUtilisateurs, btnSorties, btnLieux, btnOffres, btnEvents, btnGoFront};
+        Button[] all = {btnDashboard, btnUtilisateurs, btnSorties, btnLieux, btnOffres, btnEvents, btnAnalytics, btnGoFront};
         for (Button b : all) {
             if (b == null) continue;
             b.getStyleClass().remove("active");
@@ -373,9 +528,6 @@ public class BackDashboardController {
 
         } catch (IOException e) {
             showError("Erreur de chargement", "Impossible de charger la vue", e.getMessage());
-               StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            showError("Erreur de chargement", "Impossible de charger la vue", sw.toString());
         }
     }
 
@@ -397,31 +549,4 @@ public class BackDashboardController {
         alert.setContentText(details);
         alert.showAndWait();
     }
-    private void showLoadError(String title, Exception e) {
-        // Remonte à la cause racine
-        Throwable root = e;
-        while (root.getCause() != null) root = root.getCause();
-
-        root.printStackTrace(); // AU MOINS dans la console
-
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Erreur de chargement");
-        alert.setHeaderText(title);
-        alert.setContentText(root.toString());
-
-        // Zone détails (stacktrace complète)
-        StringWriter sw = new StringWriter();
-        root.printStackTrace(new PrintWriter(sw));
-        TextArea ta = new TextArea(sw.toString());
-        ta.setEditable(false);
-        ta.setWrapText(false);
-        ta.setPrefWidth(900);
-        ta.setPrefHeight(500);
-
-        alert.getDialogPane().setExpandableContent(ta);
-        alert.getDialogPane().setExpanded(true);
-
-        alert.showAndWait();
-    }
-
 }

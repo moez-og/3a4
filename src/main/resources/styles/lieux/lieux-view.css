@@ -1,147 +1,323 @@
-/* =========================
-   LIEUX VIEW (Front) - template style
-========================= */
+/* ═══════════════════════════════════════════════════════════════
+   LIEUX VIEW — Compact filters + Grid cards + Split view
+   Palette : Navy #0b2550 · Or #d4af37 · Blanc
+   ⚠️ Largeurs panels : JAVA uniquement
+═══════════════════════════════════════════════════════════════ */
 
-.lieuxScroll {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
+.lieuxRoot  { -fx-background-color: #f0f2f7; }
+.leftPanel  { -fx-background-color: #f0f2f7; }
+
+/* ══════════════════════════════════════════════
+   TOOLBAR — une seule ligne compacte (Lead Mgmt style)
+══════════════════════════════════════════════ */
+.lxToolbar {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #e2e6ef transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 11 16;
+    -fx-min-height: 56;
 }
-.lieuxScroll .viewport { -fx-background-color: transparent; }
 
-.lieuxRoot { -fx-background-color: transparent; }
-
-/* Hero */
-.lieuxHero {
-    -fx-background-color: rgba(255,255,255,0.82);
-    -fx-background-radius: 18;
-    -fx-border-color: rgba(15,23,42,0.06);
-    -fx-border-radius: 18;
-    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 16, 0.18, 0, 6);
-    -fx-padding: 16 16 16 16;
+.lxTitle {
+    -fx-text-fill: #0b2550;
+    -fx-font-size: 15px;
+    -fx-font-weight: 900;
 }
-.lieuxTitle { -fx-text-fill: #163a5c; -fx-font-size: 26; -fx-font-weight: 900; }
-.lieuxSubtitle { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 12.5; -fx-font-weight: 800; }
-
-.lieuxSearchBox {
-    -fx-background-color: rgba(15,23,42,0.05);
-    -fx-background-radius: 16;
-    -fx-border-color: rgba(15,23,42,0.08);
-    -fx-border-radius: 16;
-    -fx-padding: 8 10 8 10;
+.lxCount {
+    -fx-background-color: rgba(212,175,55,0.16);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(212,175,55,0.42);
+    -fx-border-radius: 999;
+    -fx-text-fill: #7a5c00;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 900;
+    -fx-padding: 2 10;
 }
-.lieuxSearchIcon { -fx-text-fill: rgba(22,58,92,0.72); -fx-font-weight: 900; }
-.lieuxSearchField {
-    -fx-pref-width: 260;
+
+/* Chips actifs dans la toolbar */
+.lxActiveFiltersBar { -fx-padding: 0 4; }
+
+/* Badge filtre actif inline */
+.lxActiveFilterChip {
+    -fx-background-color: #0b2550;
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 900;
+    -fx-padding: 4 10;
+    -fx-cursor: hand;
+}
+.lxActiveFilterChip:hover {
+    -fx-background-color: #163a75;
+    -fx-translate-y: -1;
+}
+
+/* Searchbox */
+.lxSearchBox {
+    -fx-background-color: #f0f2f7;
+    -fx-background-radius: 20;
+    -fx-border-color: #dde2ee;
+    -fx-border-radius: 20;
+    -fx-border-width: 1.5;
+    -fx-padding: 6 12;
+}
+.lxSearchIcon  { -fx-text-fill: rgba(11,37,80,0.42); -fx-font-size: 11px; }
+.lxSearchField {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-text-fill: #173a57;
-    -fx-font-weight: 800;
+    -fx-text-fill: #0b2550;
+    -fx-font-weight: 700;
+    -fx-font-size: 12px;
+    -fx-prompt-text-fill: rgba(11,37,80,0.35);
+    -fx-pref-width: 150;
 }
-.lieuxGhostBtn {
-    -fx-background-color: rgba(255,255,255,0.70);
-    -fx-background-radius: 12;
-    -fx-border-color: rgba(15,23,42,0.08);
-    -fx-border-radius: 12;
-    -fx-text-fill: #173a57;
+
+/* Bouton "⊞ Filtres" */
+.lxToggleFiltersBtn {
+    -fx-background-color: rgba(11,37,80,0.06);
+    -fx-background-radius: 8;
+    -fx-border-color: rgba(11,37,80,0.14);
+    -fx-border-radius: 8;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #0b2550;
     -fx-font-weight: 900;
-    -fx-padding: 8 12 8 12;
+    -fx-font-size: 11.5px;
+    -fx-padding: 7 14;
     -fx-cursor: hand;
 }
-.lieuxGhostBtn:hover { -fx-background-color: rgba(255,255,255,0.92); }
-
-/* Sections */
-.lieuxSection { -fx-background-color: transparent; }
-.lieuxSectionTitle { -fx-text-fill: #163a5c; -fx-font-size: 15; -fx-font-weight: 900; }
-
-.countLabel {
-    -fx-text-fill: rgba(22,58,92,0.78);
-    -fx-font-size: 12;
-    -fx-font-weight: 900;
+.lxToggleFiltersBtn:hover {
+    -fx-background-color: rgba(11,37,80,0.12);
+    -fx-border-color: rgba(11,37,80,0.28);
+    -fx-translate-y: -1;
 }
+.lxToggleFiltersBtnActive {
+    -fx-background-color: #0b2550;
+    -fx-border-color: #0b2550;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.30), 8, 0.2, 0, 2);
+}
+.lxToggleFiltersBtnActive:hover { -fx-translate-y: -1; }
 
-/* Chips */
-.chipsScroll { -fx-background-color: transparent; -fx-background: transparent; }
-.chipsScroll .viewport { -fx-background-color: transparent; }
-.chipsRow { -fx-padding: 2 2 2 2; }
-
-.chip {
-    -fx-background-color: rgba(15,23,42,0.06);
+/* Reset X */
+.lxResetBtn {
+    -fx-background-color: rgba(11,37,80,0.07);
     -fx-background-radius: 999;
-    -fx-border-color: rgba(15,23,42,0.10);
-    -fx-border-radius: 999;
-    -fx-text-fill: rgba(22,58,92,0.86);
+    -fx-text-fill: rgba(11,37,80,0.50);
     -fx-font-weight: 900;
-    -fx-padding: 8 12 8 12;
+    -fx-font-size: 11px;
+    -fx-min-width: 28; -fx-max-width: 28;
+    -fx-min-height: 28; -fx-max-height: 28;
+    -fx-padding: 0;
     -fx-cursor: hand;
 }
-.chip:hover { -fx-background-color: rgba(15,23,42,0.10); }
+.lxResetBtn:hover { -fx-background-color: rgba(11,37,80,0.14); -fx-text-fill: #0b2550; }
 
-.chipMuted {
-    -fx-background-color: rgba(212,175,55,0.12);
-    -fx-border-color: rgba(212,175,55,0.30);
+/* ══════════════════════════════════════════════
+   PANEL FILTRES EXTENSIBLE
+══════════════════════════════════════════════ */
+.lxFiltersPanel {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #e2e6ef transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 12 18 14 18;
+    /* clip géré en Java pour l'animation slide */
 }
-
-.chipSelected {
-    -fx-background-color: rgba(212,175,55,0.22);
-    -fx-border-color: rgba(212,175,55,0.55);
-    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.22), 12, 0.18, 0, 4);
+.lxFilterLabel {
+    -fx-text-fill: rgba(11,37,80,0.50);
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 900;
 }
+.lxFilterResetBtn {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(11,37,80,0.40);
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+    -fx-padding: 2 8;
+    -fx-background-radius: 999;
+    -fx-cursor: hand;
+}
+.lxFilterResetBtn:hover { -fx-background-color: rgba(11,37,80,0.07); -fx-text-fill: #0b2550; }
 
-/* Cards */
-.cardsPane { -fx-padding: 2 0 6 0; }
+/* Chip scroll */
+.lxChipsScroll            { -fx-background-color: transparent; -fx-background: transparent; -fx-max-height: 36; }
+.lxChipsScroll .viewport  { -fx-background-color: transparent; }
+.lxChipsScroll .scroll-bar:horizontal { -fx-pref-height: 3; }
+.lxChipsScroll .scroll-bar:horizontal .thumb { -fx-background-color: rgba(11,37,80,0.14); -fx-background-radius: 999; }
+.lxChipsScroll .scroll-bar:horizontal .track,
+.lxChipsScroll .scroll-bar:horizontal .increment-button,
+.lxChipsScroll .scroll-bar:horizontal .decrement-button { -fx-background-color: transparent; -fx-padding: 0; }
+.lxChipsRow { -fx-padding: 1 2; -fx-alignment: CENTER_LEFT; }
 
-.lieuCard {
-    -fx-background-color: rgba(255,255,255,0.92);
+/* CHIPS */
+.lxChip {
+    -fx-background-color: #f0f2f7;
+    -fx-background-radius: 999;
+    -fx-border-color: #dde2ee;
+    -fx-border-radius: 999;
+    -fx-border-width: 1.5;
+    -fx-text-fill: rgba(11,37,80,0.68);
+    -fx-font-weight: 800;
+    -fx-font-size: 11.5px;
+    -fx-padding: 5 14;
+    -fx-cursor: hand;
+}
+.lxChip:hover { -fx-background-color: #e4e8f5; -fx-border-color: rgba(11,37,80,0.26); -fx-translate-y: -1; }
+.lxChip:pressed { -fx-translate-y: 0; }
+.lxChipActive {
+    -fx-background-color: #0b2550;
+    -fx-border-color: #0b2550;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.30), 8, 0.20, 0, 2);
+}
+.lxChipActive:hover { -fx-translate-y: -1; }
+
+/* ══════════════════════════════════════════════
+   GRILLE DE CARDS (style image 3)
+══════════════════════════════════════════════ */
+.lxCardsScroll           { -fx-background-color: transparent; -fx-background: transparent; }
+.lxCardsScroll .viewport { -fx-background-color: transparent; }
+.lxCardsScroll .scroll-bar:vertical { -fx-pref-width: 4; }
+.lxCardsScroll .scroll-bar:vertical .thumb { -fx-background-color: rgba(11,37,80,0.16); -fx-background-radius: 999; }
+.lxCardsScroll .scroll-bar:vertical .track,
+.lxCardsScroll .scroll-bar:vertical .increment-button,
+.lxCardsScroll .scroll-bar:vertical .decrement-button { -fx-background-color: transparent; -fx-padding: 0; }
+
+.lxCardsWrapper { -fx-background-color: transparent; }
+.lxCardsGrid    { -fx-background-color: transparent; }
+
+/* CARD individuelle */
+.lxCard {
+    -fx-background-color: white;
     -fx-background-radius: 18;
-    -fx-border-color: rgba(15,23,42,0.06);
+    -fx-border-color: rgba(11,37,80,0.07);
     -fx-border-radius: 18;
-    -fx-padding: 12;
-    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 16, 0.18, 0, 6);
+    -fx-border-width: 1;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(11,37,80,0.10), 16, 0.12, 0, 5);
 }
-.lieuCard:hover {
-    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.16), 18, 0.20, 0, 8);
-    -fx-translate-y: -2;
+.lxCardSelected {
+    -fx-border-color: #d4af37;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.45), 18, 0.28, 0, 4);
 }
-.cardImageWrap { -fx-background-radius: 18; }
 
-.cardTitle { -fx-text-fill: #163a5c; -fx-font-size: 14.5; -fx-font-weight: 900; }
-.cardMeta { -fx-text-fill: rgba(22,58,92,0.75); -fx-font-size: 12; -fx-font-weight: 800; }
-.cardAddr { -fx-text-fill: rgba(22,58,92,0.70); -fx-font-size: 11.6; -fx-font-weight: 700; }
+.lxCardTitle {
+    -fx-text-fill: #0b2550;
+    -fx-font-size: 14px;
+    -fx-font-weight: 900;
+    -fx-wrap-text: false;
+}
+.lxCardMeta {
+    -fx-text-fill: rgba(11,37,80,0.52);
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+.lxCardAddr {
+    -fx-text-fill: rgba(11,37,80,0.40);
+    -fx-font-size: 10.5px;
+    -fx-font-weight: 700;
+}
+.lxCardCatBadge {
+    -fx-background-color: rgba(11,37,80,0.08);
+    -fx-background-radius: 999;
+    -fx-text-fill: rgba(11,37,80,0.70);
+    -fx-font-size: 9.5px; -fx-font-weight: 900;
+    -fx-padding: 3 9;
+}
+.lxCardBudgetBadge {
+    -fx-background-color: rgba(212,175,55,0.13);
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(212,175,55,0.38);
+    -fx-border-radius: 999;
+    -fx-text-fill: #7a5c00;
+    -fx-font-size: 9.5px; -fx-font-weight: 900;
+    -fx-padding: 3 9;
+}
 
-/* Buttons */
-.primaryBtn {
-    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
-    -fx-background-radius: 12;
+.lxCardPrimaryBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #b8860b);
+    -fx-background-radius: 10;
     -fx-text-fill: white;
     -fx-font-weight: 900;
-    -fx-padding: 8 12 8 12;
+    -fx-font-size: 11.5px;
+    -fx-padding: 7 16;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.35), 8, 0.2, 0, 2);
 }
-.primaryBtn:hover { -fx-background-color: linear-gradient(to right, #e8c547, #d4af37); }
-
-.ghostBtn {
-    -fx-background-color: rgba(15,23,42,0.06);
-    -fx-background-radius: 12;
-    -fx-border-color: rgba(15,23,42,0.10);
-    -fx-border-radius: 12;
-    -fx-text-fill: #173a57;
+.lxCardPrimaryBtn:hover {
+    -fx-background-color: linear-gradient(to right, #e8c547, #d4af37);
+    -fx-translate-y: -1;
+}
+.lxCardGhostBtn {
+    -fx-background-color: #f0f2f7;
+    -fx-background-radius: 10;
+    -fx-border-color: #dde2ee;
+    -fx-border-radius: 10;
+    -fx-border-width: 1.5;
+    -fx-text-fill: #0b2550;
     -fx-font-weight: 900;
-    -fx-padding: 8 12 8 12;
+    -fx-font-size: 11px;
+    -fx-padding: 7 14;
     -fx-cursor: hand;
 }
-.ghostBtn:hover { -fx-background-color: rgba(15,23,42,0.10); }
+.lxCardGhostBtn:hover { -fx-background-color: #e4e8f5; -fx-translate-y: -1; }
 
-/* State */
-.stateLabel {
-    -fx-text-fill: rgba(22,58,92,0.72);
-    -fx-font-size: 12.5;
-    -fx-font-weight: 800;
-    -fx-padding: 10 0 0 0;
+.lxHeartBtn {
+    -fx-background-radius: 999;
+    -fx-min-width: 32; -fx-max-width: 32;
+    -fx-min-height: 32; -fx-max-height: 32;
+    -fx-padding: 0; -fx-font-size: 15px;
+    -fx-alignment: center; -fx-cursor: hand;
 }
 
-/* Modal details (simple for this étape) */
-.detailsModalRoot { -fx-padding: 14; -fx-background-color: transparent; }
-.detailsTitle { -fx-text-fill: #163a5c; -fx-font-size: 22; -fx-font-weight: 900; }
-.detailsSub { -fx-text-fill: rgba(22,58,92,0.72); -fx-font-size: 12.5; -fx-font-weight: 800; }
-.detailsLine { -fx-text-fill: rgba(22,58,92,0.78); -fx-font-size: 12.2; -fx-font-weight: 800; }
-.detailsDesc { -fx-text-fill: rgba(22,58,92,0.72); -fx-font-size: 12; -fx-font-weight: 700; }
+.lxStateLabel {
+    -fx-text-fill: rgba(11,37,80,0.42);
+    -fx-font-size: 13px; -fx-font-weight: 800;
+    -fx-padding: 30 18; -fx-alignment: center;
+}
+
+/* ══════════════════════════════════════════════
+   PANEL DROIT — split view
+══════════════════════════════════════════════ */
+.rightPanel {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent transparent #e2e6ef;
+    -fx-border-width: 0 0 0 1;
+}
+
+/* Header du panel droit */
+.lxRightHeader {
+    -fx-background-color: white;
+    -fx-border-color: transparent transparent #e2e6ef transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10 14;
+    -fx-min-height: 46;
+}
+.lxRightTitle {
+    -fx-text-fill: #0b2550;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: 900;
+}
+.lxRightFullBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #b8860b);
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-padding: 6 14;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.30), 6, 0.2, 0, 2);
+}
+.lxRightFullBtn:hover { -fx-background-color: linear-gradient(to right, #e8c547, #d4af37); -fx-translate-y: -1; }
+.lxRightCloseBtn {
+    -fx-background-color: rgba(11,37,80,0.06);
+    -fx-background-radius: 999;
+    -fx-text-fill: rgba(11,37,80,0.50);
+    -fx-font-weight: 900; -fx-font-size: 12px;
+    -fx-min-width: 28; -fx-max-width: 28;
+    -fx-min-height: 28; -fx-max-height: 28;
+    -fx-padding: 0; -fx-cursor: hand;
+}
+.lxRightCloseBtn:hover { -fx-background-color: rgba(220,38,38,0.12); -fx-text-fill: #dc2626; }
+
+.detailContainer { -fx-background-color: white; }

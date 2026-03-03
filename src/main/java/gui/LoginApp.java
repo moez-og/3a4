@@ -19,6 +19,7 @@ import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
 import controllers.common.auth.LoginController;
+import services.gamification.GamificationService;
 import services.users.UserService;
 import models.users.User;
 import java.io.InputStream;
@@ -33,6 +34,14 @@ public class LoginApp extends Application {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("Travel Guide - Login");
         primaryStage.setResizable(true);
+
+        // Initialiser les tables de gamification au démarrage
+        try {
+            new GamificationService().initTables();
+        } catch (Exception e) {
+            System.err.println("Gamification init warning: " + e.getMessage());
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/Login.fxml"));
             Parent root = loader.load();

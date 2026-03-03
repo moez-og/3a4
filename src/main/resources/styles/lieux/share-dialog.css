@@ -1,0 +1,175 @@
+/* =========================
+   SHARE DIALOG - Style YouTube
+========================= */
+
+.dialog-pane.shareDialog {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 30, 0, 0, 8);
+}
+
+.shareDialog .header-panel {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.shareDialog .header-panel .label {
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 17px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 0 0 4;
+}
+
+.shareDialog .content {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+/* ---- Titre dialog ---- */
+.shareDialogTitle {
+    -fx-font-size: 17px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #0f172a;
+    -fx-padding: 4 0 8 0;
+}
+
+/* ---- Boutons réseau social ---- */
+.shareNetworkBtn {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 6 4;
+    -fx-background-radius: 12;
+}
+
+.shareNetworkBtn:hover {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-scale-x: 1.06;
+    -fx-scale-y: 1.06;
+}
+
+.shareNetworkIcon {
+    -fx-font-size: 38px;
+    -fx-padding: 0;
+}
+
+.shareNetworkLabel {
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #374151;
+    -fx-padding: 4 0 0 0;
+}
+
+/* Icônes colorées */
+.iconWhatsapp  { -fx-text-fill: #25D366; }
+.iconFacebook  { -fx-text-fill: #1877F2; }
+.iconTwitter   { -fx-text-fill: #000000; }
+.iconEmail     { -fx-text-fill: #6B7280; }
+.iconCopyLink  { -fx-text-fill: #374151; }
+.iconTelegram  { -fx-text-fill: #229ED9; }
+
+/* ---- Séparateur ---- */
+.shareSeparator {
+    -fx-background-color: rgba(15,23,42,0.09);
+    -fx-min-height: 1;
+    -fx-pref-height: 1;
+    -fx-max-height: 1;
+}
+
+/* ---- Zone lien ---- */
+.shareLinkBox {
+    -fx-background-color: #f3f4f6;
+    -fx-background-radius: 10;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 10;
+    -fx-padding: 2 2 2 12;
+}
+
+.shareLinkField {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 12px;
+    -fx-text-fill: #374151;
+    -fx-font-weight: 700;
+}
+
+.shareLinkField:focused {
+    -fx-border-color: transparent;
+}
+
+/* ---- Bouton Copier ---- */
+.shareCopyBtn {
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.shareCopyBtn:hover {
+    -fx-background-color: linear-gradient(to right, #e8c547, #d4af37);
+}
+
+.shareCopyBtn.copied {
+    -fx-background-color: #16a34a;
+}
+
+/* ---- Bouton fermer ---- */
+.shareCloseBtn {
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 999;
+    -fx-text-fill: #374151;
+    -fx-font-weight: 900;
+    -fx-font-size: 13px;
+    -fx-padding: 4 9;
+    -fx-cursor: hand;
+    -fx-min-width: 28;
+    -fx-min-height: 28;
+}
+
+.shareCloseBtn:hover {
+    -fx-background-color: rgba(15,23,42,0.12);
+}
+
+/* ---- Hint texte ---- */
+.shareHint {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(22,58,92,0.55);
+    -fx-font-weight: 700;
+}
+
+/* ---- Toast copié ---- */
+.shareToast {
+    -fx-background-color: #0f172a;
+    -fx-background-radius: 8;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 12px;
+    -fx-padding: 6 14;
+}
+
+/* ---- Bouton partager dans la fiche ---- */
+.shareBtn {
+    -fx-background-color: rgba(15,23,42,0.07);
+    -fx-background-radius: 10;
+    -fx-text-fill: #0f172a;
+    -fx-font-weight: 900;
+    -fx-padding: 7 14;
+    -fx-cursor: hand;
+    -fx-font-size: 13px;
+}
+
+.shareBtn:hover {
+    -fx-background-color: rgba(15,23,42,0.13);
+}
+
+/* Dialog pane buttons zone - cacher les boutons par défaut */
+.shareDialog .button-bar {
+    -fx-pref-height: 0;
+    -fx-min-height: 0;
+    -fx-max-height: 0;
+    -fx-padding: 0;
+    -fx-opacity: 0;
+}

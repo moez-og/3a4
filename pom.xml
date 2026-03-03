@@ -51,7 +51,6 @@
             <version>${javafx.version}</version>
             <classifier>${javafx.platform}</classifier>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -59,14 +58,19 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- ✅ Apache PDFBox — génération PDF tickets/reçus -->
+        <!-- ✅ Apache PDFBox — génération PDF tickets/reçus (module événements) -->
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
             <version>2.0.31</version>
         </dependency>
 
-        <!-- Pas de dépendances externes pour le calendrier — 100% gratuit via export ICS (RFC 5545) -->
+        <!-- RichTextFX — zone de texte stylisable (soulignement fautes, module lieux) -->
+        <dependency>
+            <groupId>org.fxmisc.richtext</groupId>
+            <artifactId>richtextfx</artifactId>
+            <version>0.11.3</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -79,7 +83,7 @@
                     <mainClass>gui.LoginApp</mainClass>
                 </configuration>
             </plugin>
-
+            <!-- Maven Surefire: exécution des tests JUnit 5 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

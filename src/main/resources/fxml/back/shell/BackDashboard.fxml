@@ -23,7 +23,10 @@
                 <Insets top="16" right="16" bottom="16" left="16"/>
             </padding>
 
-            <VBox spacing="10" alignment="CENTER" styleClass="brandCard">
+            <!-- ✅ Clic sur "Fin Tokhroj" => bascule directe vers le Front (sans déconnexion) -->
+            <VBox spacing="10" alignment="CENTER" styleClass="brandCard"
+                  pickOnBounds="true"
+                  onMouseClicked="#openFront">
                 <ImageView fitWidth="46" fitHeight="46" preserveRatio="true" styleClass="brandLogo">
                     <image>
                         <Image url="@/images/logo/logo.png"/>
@@ -56,11 +59,13 @@
 
                 <Button fx:id="btnEvents" text="Événements" onAction="#showEvents"
                         maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
+
+                <Button fx:id="btnAnalytics" text="🔬  Analytics IA" onAction="#showAnalytics"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
             </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>
 
-            <!-- ✅ Déconnexion avec le vrai style (base-layout.css -> .logoutBtn) -->
             <Button fx:id="btnGoFront"
                     text="Déconnexion"
                     onAction="#goToFront"
