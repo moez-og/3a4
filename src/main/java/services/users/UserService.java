@@ -15,7 +15,7 @@ import java.util.List;
 public class UserService {
     private Connection connection;
 
-    public UserService() throws SQLException {
+    public UserService() {
         this.connection = Mydb.getInstance().getConnection();
         if (this.connection == null) {
             System.err.println("✗ ERREUR CRITIQUE: Impossible de se connecter à la base de données!");

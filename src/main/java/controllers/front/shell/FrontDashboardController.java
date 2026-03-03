@@ -59,6 +59,7 @@ public class FrontDashboardController implements ShellNavigator {
     public static final String ROUTE_FAVORIS = "favoris";
     public static final String ROUTE_GAMIFICATION = "gamification";
 
+    public static final String ROUTE_PAIEMENT_PREFIX = "paiement:"; // module événements
     public static final String ROUTE_LIEU_DETAILS_PREFIX = "lieu-details:";
     public static final String ROUTE_EVENEMENT_DETAILS_PREFIX = "evenement-details:";
     public static final String ROUTE_LIEUX_FILTER_PREFIX = "lieux-filter:";
@@ -293,6 +294,17 @@ public class FrontDashboardController implements ShellNavigator {
             return;
         }
 
+        if (route.startsWith(ROUTE_PAIEMENT_PREFIX)) {
+            String raw = route.substring(ROUTE_PAIEMENT_PREFIX.length()).trim();
+            try {
+                int id = Integer.parseInt(raw);
+                showPaiement(id);
+            } catch (Exception e) {
+                info("Navigation", "ID inscription invalide: " + raw);
+            }
+            return;
+        }
+
         if (route.startsWith(ROUTE_LIEUX_FILTER_PREFIX)) {
             String payload = route.substring(ROUTE_LIEUX_FILTER_PREFIX.length());
             Map<String, String> params = parseParams(payload);
@@ -396,6 +408,35 @@ public class FrontDashboardController implements ShellNavigator {
         } catch (Exception e) {
             error("Chargement vue",
                     "Vue: " + ViewPaths.FRONT_EVENEMENT_DETAILS + "\n" +
+                            e.getClass().getSimpleName() + " : " + safe(e.getMessage()));
+        }
+    }
+
+    private void showPaiement(int inscriptionId) {
+        pushHistory(ROUTE_PAIEMENT_PREFIX + inscriptionId);
+        navEvents.setSelected(true);
+        setHeader("Événements", "Paiement");
+
+        try {
+            URL url = getClass().getResource(ViewPaths.FRONT_PAIEMENT);
+            if (url == null) throw new IllegalStateException("FXML introuvable: " + ViewPaths.FRONT_PAIEMENT);
+
+            FXMLLoader loader = new FXMLLoader(url);
+            Node view = loader.load();
+
+            Object ctrl = loader.getController();
+            trySetCurrentUser(ctrl, currentUser);
+            trySetNavigator(ctrl, this);
+
+            if (ctrl instanceof controllers.front.evenements.PaiementController c) {
+                c.setInscriptionId(inscriptionId);
+            }
+
+            animateSwap(view);
+
+        } catch (Exception e) {
+            error("Chargement vue",
+                    "Vue: " + ViewPaths.FRONT_PAIEMENT + "\n" +
                             e.getClass().getSimpleName() + " : " + safe(e.getMessage()));
         }
     }

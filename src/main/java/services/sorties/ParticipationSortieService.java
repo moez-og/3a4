@@ -112,6 +112,47 @@ public class ParticipationSortieService {
         return list;
     }
 
+    /** Nombre total de participations toutes statuts confondus. */
+    public long countAll() {
+        String sql = "SELECT COUNT(*) FROM " + TABLE;
+        try (PreparedStatement ps = cnx.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getLong(1);
+        } catch (SQLException e) {
+            throw new RuntimeException("ParticipationSortieService.countAll: " + e.getMessage(), e);
+        }
+        return 0;
+    }
+
+    /** Nombre de participations pour un statut donné (insensible à la casse). */
+    public long countByStatus(String statut) {
+        String sql = "SELECT COUNT(*) FROM " + TABLE + " WHERE UPPER(statut)=UPPER(?)";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, statut);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("ParticipationSortieService.countByStatus: " + e.getMessage(), e);
+        }
+        return 0;
+    }
+
+    /** Nombre de participations correspondant à l'un des deux statuts donnés. */
+    public long countByStatuses(String statut1, String statut2) {
+        String sql = "SELECT COUNT(*) FROM " + TABLE + " WHERE UPPER(statut) IN (UPPER(?), UPPER(?))";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, statut1);
+            ps.setString(2, statut2);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("ParticipationSortieService.countByStatuses: " + e.getMessage(), e);
+        }
+        return 0;
+    }
+
     private ParticipationSortie map(ResultSet rs) throws SQLException {
         ParticipationSortie p = new ParticipationSortie();
         p.setId(rs.getInt("id"));
