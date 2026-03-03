@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:id="root"
+           fx:controller="controllers.front.shell.FrontDashboardController"
+           stylesheets="@/styles/front/front-layout.css"
+           styleClass="app-root">
+
+    <!-- MAIN LAYOUT -->
+    <BorderPane fx:id="mainPane" styleClass="main-pane">
+
+        <!-- TOP APP BAR -->
+        <top>
+            <HBox styleClass="appbar" spacing="14" alignment="CENTER_LEFT">
+                <padding>
+                    <Insets top="14" right="18" bottom="14" left="18"/>
+                </padding>
+
+                <!-- Brand -->
+                <HBox spacing="10" alignment="CENTER_LEFT" styleClass="brandBox">
+                    <ImageView fitWidth="34" fitHeight="34" preserveRatio="true">
+                        <image>
+                            <Image url="@/images/logo/logo.png"/>
+                        </image>
+                    </ImageView>
+                    <VBox spacing="2">
+                        <Label text="Fin Tokhroj" styleClass="brandTitle"/>
+                        <Label text="Front Office" styleClass="brandSubtitle"/>
+                    </VBox>
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- NAV (no sidebar) -->
+                <HBox spacing="8" alignment="CENTER" styleClass="navPills">
+                    <ToggleButton fx:id="navAccueil" text="Accueil" onAction="#showAccueil" styleClass="navPill"/>
+                    <ToggleButton fx:id="navSorties" text="Sorties" onAction="#showSorties" styleClass="navPill"/>
+                    <ToggleButton fx:id="navLieux" text="Lieux" onAction="#showLieux" styleClass="navPill"/>
+                    <ToggleButton fx:id="navOffres" text="Offres" onAction="#showOffres" styleClass="navPill"/>
+                    <ToggleButton fx:id="navEvents" text="Événements" onAction="#showEvents" styleClass="navPill"/>
+                    <ToggleButton fx:id="navHelp" text="Aide" onAction="#showHelp" styleClass="navPill"/>
+                </HBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <!-- SEARCH -->
+                <HBox spacing="8" alignment="CENTER_LEFT" styleClass="searchBox">
+                    <Label text="🔎" styleClass="searchIcon"/>
+                    <TextField fx:id="searchField" promptText="Rechercher…" styleClass="searchField"/>
+                    <Button text="Go" onAction="#doSearch" styleClass="miniBtn"/>
+                </HBox>
+
+                <!-- QUICK ACTIONS -->
+                <Button fx:id="btnNotif" text="🔔" onAction="#showNotifications" styleClass="iconBtn"/>
+                <Button fx:id="btnTheme" text="🌓" onAction="#toggleTheme" styleClass="iconBtn"/>
+
+                <!-- ACCOUNT -->
+                <Button fx:id="btnAccount" onAction="#openAccount" styleClass="accountBtn">
+                    <graphic>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <StackPane styleClass="avatarCircle">
+                                <Label fx:id="avatarLetter" text="U" styleClass="avatarLetter"/>
+                            </StackPane>
+                            <VBox spacing="1">
+                                <Label fx:id="userName" text="Utilisateur" styleClass="accountName"/>
+                                <Label fx:id="userRole" text="User" styleClass="accountRole"/>
+                            </VBox>
+                        </HBox>
+                    </graphic>
+                </Button>
+            </HBox>
+        </top>
+
+        <!-- PAGE HEADER -->
+        <center>
+            <VBox spacing="14" styleClass="pageRoot">
+                <padding>
+                    <Insets top="16" right="18" bottom="18" left="18"/>
+                </padding>
+
+                <VBox spacing="6">
+                    <Label fx:id="pageTitle" text="Accueil" styleClass="pageTitle"/>
+                    <Label fx:id="pageSubtitle" text="Vue d’ensemble" styleClass="pageSubtitle"/>
+                </VBox>
+
+                <StackPane fx:id="dynamicContent" styleClass="contentSurface"/>
+            </VBox>
+        </center>
+    </BorderPane>
+
+    <!-- ACCOUNT DRAWER (overlay) -->
+    <StackPane fx:id="overlay" visible="false" managed="false" styleClass="overlay">
+        <Region fx:id="overlayBg" onMouseClicked="#closeAccount" styleClass="overlayBg"/>
+
+        <VBox fx:id="accountDrawer" styleClass="drawer" StackPane.alignment="CENTER_RIGHT" onMouseClicked="#consume">
+            <padding>
+                <Insets top="18" right="18" bottom="18" left="18"/>
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <StackPane styleClass="avatarCircleLarge">
+                    <Label fx:id="avatarLetterLarge" text="U" styleClass="avatarLetterLarge"/>
+                </StackPane>
+
+                <VBox spacing="2">
+                    <Label fx:id="drawerName" text="Utilisateur" styleClass="drawerName"/>
+                    <Label fx:id="drawerEmail" text="email@example.com" styleClass="drawerEmail"/>
+                </VBox>
+
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="✕" onAction="#closeAccount" styleClass="closeBtn"/>
+            </HBox>
+
+            <Separator styleClass="sep"/>
+
+            <Label text="Compte" styleClass="drawerSectionTitle"/>
+            <Button text="👤 Profil" onAction="#showProfil" styleClass="drawerBtn"/>
+            <Button text="🔐 Sécurité" onAction="#showSecurity" styleClass="drawerBtn"/>
+            <Button text="⚙ Paramètres" onAction="#showSettings" styleClass="drawerBtn"/>
+
+            <Separator styleClass="sep"/>
+
+            <Label text="Actions rapides" styleClass="drawerSectionTitle"/>
+            <Button text="＋ Nouveau (Sortie/Offre/Événement)" onAction="#newAction" styleClass="drawerBtnPrimary"/>
+            <Button text="📌 Mes activités" onAction="#showMyActivity" styleClass="drawerBtn"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Button text="🚪 Déconnexion" onAction="#logout" styleClass="logoutBtn"/>
+        </VBox>
+    </StackPane>
+
+</StackPane>

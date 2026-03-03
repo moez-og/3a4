@@ -1,0 +1,112 @@
+@import "sorties-front.css";
+
+.participRoot{
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: rgba(248,250,252,1);
+}
+
+.participHeader{
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-padding: 12 14;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 16, 0.18, 0, 6);
+}
+
+.participTitle{
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+}
+.participSub{
+    -fx-text-fill: rgba(15,42,68,0.70);
+    -fx-font-weight: 800;
+}
+
+.participCard{
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-padding: 14 14 14 14;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 16, 0.16, 0, 5);
+}
+
+.annonceTitle{
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+}
+.annonceMeta{
+    -fx-text-fill: rgba(15,42,68,0.75);
+    -fx-font-weight: 800;
+}
+
+.sectionTitle{
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+}
+
+.segRow{
+    -fx-background-color: rgba(232,238,245,0.55);
+    -fx-background-radius: 14;
+    -fx-padding: 8 8;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(30,58,95,0.12);
+}
+
+.segBtn{
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-text-fill: #173a57;
+    -fx-font-weight: 900;
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+.segBtn:selected{
+    -fx-background-color: linear-gradient(to right, #1e3a5f, #2b5aa0);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(59,130,246,0.30);
+}
+
+.qBlock{
+    -fx-background-color: rgba(15,23,42,0.04);
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.06);
+}
+
+.qLabel{
+    -fx-text-fill: rgba(15,42,68,0.85);
+    -fx-font-weight: 900;
+}
+
+.qAnswer{
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+}
+
+.qAnswer.invalid{
+    -fx-border-color: rgba(220,38,38,0.65);
+    -fx-focus-color: rgba(220,38,38,0.65);
+    -fx-faint-focus-color: rgba(220,38,38,0.20);
+}
+
+.hintText{
+    -fx-text-fill: rgba(122,143,163,0.95);
+    -fx-font-weight: 900;
+}
+
+.errorBanner{
+    -fx-text-fill: rgba(185,28,28,1);
+    -fx-font-weight: 900;
+    -fx-padding: 10 12;
+    -fx-background-color: rgba(220,38,38,0.10);
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(220,38,38,0.18);
+}

@@ -1,0 +1,91 @@
+/* =========================
+   AVIS DIALOG (Star Rating)
+========================= */
+
+.dialog-pane.avisDialog {
+    -fx-background-color: rgba(255,255,255,0.98);
+    -fx-padding: 12;
+}
+
+.avisDialog .header-panel {
+    -fx-background-color: transparent;
+}
+
+.avisDialog .header-panel .label {
+    -fx-text-fill: #0f172a;
+    -fx-font-size: 16px;
+    -fx-font-weight: 900;
+}
+
+.avisDialog .content {
+    -fx-padding: 10 0 0 0;
+}
+
+.avisDialog .label {
+    -fx-text-fill: rgba(22,58,92,0.85);
+    -fx-font-weight: 900;
+}
+
+/* Inputs */
+.avisDialog .text-area {
+    -fx-background-color: rgba(15,23,42,0.05);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 14;
+    -fx-padding: 10;
+    -fx-font-weight: 800;
+}
+
+.avisDialog .text-area .content {
+    -fx-background-color: transparent;
+}
+
+/* Stars */
+.starPicker {
+    -fx-alignment: CENTER_LEFT;
+}
+
+.starBtn {
+    -fx-background-color: transparent;
+    -fx-padding: 0 2;
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-text-fill: rgba(22,58,92,0.28);
+    -fx-cursor: hand;
+}
+
+.starBtn.on {
+    -fx-text-fill: #c9920f;
+}
+.starBtn:hover {
+    -fx-scale-x: 1.06;
+    -fx-scale-y: 1.06;
+}
+
+.starValue {
+    -fx-text-fill: rgba(22,58,92,0.75);
+    -fx-font-weight: 900;
+}
+
+/* Buttons */
+.primaryBtn{
+    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
+    -fx-background-radius: 12;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+.primaryBtn:hover{ -fx-background-color: linear-gradient(to right, #e8c547, #d4af37); }
+
+.ghostBtn{
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 12;
+    -fx-text-fill: rgba(22,58,92,0.90);
+    -fx-font-weight: 900;
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+.ghostBtn:hover{
+    -fx-background-color: rgba(15,23,42,0.10);
+}

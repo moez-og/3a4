@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controllers.back.shell.BackDashboardController"
+            stylesheets="@/styles/common/base-layout.css"
+            styleClass="app-root">
+
+    <left>
+        <VBox prefWidth="300" styleClass="sidebar">
+            <padding>
+                <Insets top="16" right="16" bottom="16" left="16"/>
+            </padding>
+
+            <!-- ✅ Clic sur "Fin Tokhroj" => bascule directe vers le Front (sans déconnexion) -->
+            <VBox spacing="10" alignment="CENTER" styleClass="brandCard"
+                  pickOnBounds="true"
+                  onMouseClicked="#openFront">
+                <ImageView fitWidth="46" fitHeight="46" preserveRatio="true" styleClass="brandLogo">
+                    <image>
+                        <Image url="@/images/logo/logo.png"/>
+                    </image>
+                </ImageView>
+
+                <VBox spacing="2" alignment="CENTER">
+                    <Label text="Fin Tokhroj" styleClass="brandTitle"/>
+                    <Label text="Votre Guide Social" styleClass="brandSubtitle"/>
+                </VBox>
+            </VBox>
+
+            <Label text="MENU" styleClass="menuLabel"/>
+
+            <VBox spacing="14" styleClass="navBox" fillWidth="true">
+                <Button fx:id="btnDashboard" text="Dashboard" onAction="#showDashboard"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
+
+                <Button fx:id="btnUtilisateurs" text="Utilisateurs" onAction="#showUsers"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
+
+                <Button fx:id="btnSorties" text="Sorties" onAction="#showSorties"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
+
+                <Button fx:id="btnLieux" text="Lieux" onAction="#showLieux"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
+
+                <Button fx:id="btnOffres" text="Offres" onAction="#showOffres"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
+
+                <Button fx:id="btnEvents" text="Événements" onAction="#showEvents"
+                        maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
+            </VBox>
+
+            <Region VBox.vgrow="ALWAYS"/>
+
+            <Button fx:id="btnGoFront"
+                    text="Déconnexion"
+                    onAction="#goToFront"
+                    maxWidth="1.7976931348623157E308"
+                    styleClass="logoutBtn"/>
+
+            <Label text="© Fin Tokhroj · JavaFX" styleClass="sidebarFooter"/>
+        </VBox>
+    </left>
+
+    <center>
+        <BorderPane styleClass="mainArea">
+
+            <top>
+                <StackPane styleClass="topHeader">
+                    <BorderPane>
+                        <left>
+                            <VBox spacing="4" BorderPane.alignment="CENTER_LEFT" styleClass="headerLeft">
+                                <Label fx:id="pageTitle" text="Dashboard" styleClass="headerTitle"/>
+                                <Label fx:id="pageSubtitle" text="Vue d’ensemble" styleClass="headerSubtitle"/>
+                            </VBox>
+                        </left>
+
+                        <right>
+                            <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="headerUserBox">
+                                <VBox spacing="4" alignment="CENTER_RIGHT">
+                                    <Label fx:id="userName" text="Utilisateur" styleClass="userName"/>
+                                    <Label fx:id="userRole" text="ROLE" styleClass="roleChip"/>
+                                </VBox>
+                            </HBox>
+                        </right>
+                    </BorderPane>
+
+                    <padding>
+                        <Insets top="20" right="26" bottom="18" left="26"/>
+                    </padding>
+                </StackPane>
+            </top>
+
+            <center>
+                <StackPane styleClass="contentPad">
+                    <StackPane fx:id="dynamicContent" styleClass="contentCard"/>
+                </StackPane>
+            </center>
+
+        </BorderPane>
+    </center>
+
+</BorderPane>

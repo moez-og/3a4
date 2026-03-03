@@ -1,0 +1,168 @@
+@import "sorties-front.css";
+
+/* ===================== Details (lisible + premium) ===================== */
+
+.sortieDetailsRoot{
+    -fx-font-family: "Segoe UI";
+}
+
+.detailsScroll{
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.detailsScroll .viewport{
+    -fx-background-color: transparent;
+}
+
+/* Back */
+.backLinkBtn{
+    -fx-background-color: transparent;
+    -fx-text-fill: #1e3a5f;
+    -fx-font-weight: 900;
+    -fx-padding: 8 10;
+    -fx-cursor: hand;
+}
+.backLinkBtn:hover{
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 12;
+}
+
+/* HERO */
+.detailsHero{
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.16), 28, 0.22, 0, 10);
+}
+
+/* The ImageView is clipped by heroPane in controller */
+.heroImage{
+    -fx-opacity: 1.0;
+}
+
+/* Overlays for readability */
+.heroOverlayBottom{
+    -fx-background-color: linear-gradient(to top,
+    rgba(2,6,23,0.84),
+    rgba(2,6,23,0.22),
+    rgba(2,6,23,0.00)
+    );
+}
+.heroOverlaySide{
+    -fx-background-color: linear-gradient(to right,
+    rgba(2,6,23,0.45),
+    rgba(2,6,23,0.00) 62%
+    );
+}
+
+/* Glass card (lisible) */
+.heroGlass{
+    -fx-padding: 14 14 14 14;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+
+    /* Dark glass = lisible sur toute image */
+    -fx-background-color: rgba(8,12,20,0.34);
+    -fx-border-color: rgba(255,255,255,0.18);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 18, 0.18, 0, 6);
+
+    -fx-max-width: 720px;
+    -fx-min-width: 460px;
+    -fx-translate-x: 14px;
+    -fx-translate-y: -12px;
+}
+
+.detailsTitle{
+    -fx-text-fill: white;
+    -fx-font-size: 28px;
+    -fx-font-weight: 900;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.40), 12, 0.20, 0, 3);
+}
+
+.heroMeta{
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-font-weight: 850;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.28), 10, 0.18, 0, 2);
+}
+
+.badge{
+    -fx-background-color: rgba(255,255,255,0.18);
+    -fx-border-color: rgba(255,255,255,0.22);
+    -fx-border-radius: 999;
+    -fx-background-radius: 999;
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-padding: 6 10;
+}
+
+.detailsHint{
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-font-weight: 850;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 8, 0.18, 0, 2);
+}
+
+/* Cards */
+.detailsCard, .sideCard{
+    -fx-background-color: rgba(255,255,255,0.92);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-padding: 14 14 14 14;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 16, 0.16, 0, 5);
+}
+
+.detailsSectionTitle{
+    -fx-text-fill: #0f2a44;
+    -fx-font-size: 14.5px;
+    -fx-font-weight: 900;
+}
+
+.detailsLine{
+    -fx-text-fill: rgba(15,42,68,0.86);
+    -fx-font-weight: 850;
+}
+
+.detailsDesc{
+    -fx-text-fill: rgba(15,42,68,0.78);
+    -fx-font-weight: 800;
+}
+
+.detailsMuted{
+    -fx-text-fill: rgba(122,143,163,0.95);
+    -fx-font-weight: 900;
+}
+
+/* Summary rows */
+.infoRow{
+    -fx-background-color: rgba(232,238,245,0.80);
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(30,58,95,0.12);
+    -fx-padding: 10 12;
+}
+.infoIcon{ -fx-font-size: 16px; }
+
+.infoK{
+    -fx-text-fill: rgba(15,42,68,0.62);
+    -fx-font-weight: 900;
+    -fx-font-size: 11.5px;
+}
+.infoV{
+    -fx-text-fill: rgba(15,42,68,0.92);
+    -fx-font-weight: 900;
+}
+
+/* Question chips */
+.qChip{
+    -fx-background-color: rgba(15,23,42,0.06);
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-border-color: rgba(15,23,42,0.12);
+    -fx-text-fill: rgba(15,42,68,0.90);
+    -fx-font-weight: 900;
+}
+.qChip:hover{
+    -fx-background-color: rgba(59,130,246,0.12);
+    -fx-border-color: rgba(59,130,246,0.25);
+}
