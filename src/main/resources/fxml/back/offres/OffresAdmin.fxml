@@ -38,6 +38,12 @@
             <Label fx:id="kpiCodes" text="—" styleClass="kpi-number"/>
             <Label text="Générés" styleClass="kpi-sub"/>
         </VBox>
+
+        <VBox spacing="8" HBox.hgrow="ALWAYS" styleClass="kpi-card">
+            <Label text="Réservations" styleClass="kpi-title"/>
+            <Label fx:id="kpiReservations" text="—" styleClass="kpi-number"/>
+            <Label text="En attente" styleClass="kpi-sub"/>
+        </VBox>
     </HBox>
 
     <!-- Main card -->
@@ -51,6 +57,7 @@
             <ComboBox fx:id="modeCombo" prefWidth="170" styleClass="filter-combo"/>
             <ComboBox fx:id="filterCombo" prefWidth="160" styleClass="filter-combo"/>
             <TextField fx:id="searchField" promptText="Rechercher…" HBox.hgrow="ALWAYS" styleClass="top-search"/>
+            <Button fx:id="btnScanQr" text="📷 Scanner QR" styleClass="btn-pill" visible="false" managed="false"/>
             <Button fx:id="btnAdd" text="Ajouter" styleClass="btn-pill"/>
         </HBox>
 
@@ -82,6 +89,24 @@
                         styleClass="cards-scroll">
                 <content>
                     <TilePane fx:id="cardsPaneCodes"
+                              hgap="14"
+                              vgap="14"
+                              prefColumns="2"
+                              tileAlignment="TOP_LEFT"
+                              styleClass="cards-pane"/>
+                </content>
+            </ScrollPane>
+
+            <ScrollPane fx:id="cardsScrollReservations"
+                        visible="false" managed="false"
+                        VBox.vgrow="ALWAYS"
+                        fitToWidth="true"
+                        vbarPolicy="ALWAYS"
+                        hbarPolicy="NEVER"
+                        pannable="true"
+                        styleClass="cards-scroll">
+                <content>
+                    <TilePane fx:id="cardsPaneReservations"
                               hgap="14"
                               vgap="14"
                               prefColumns="2"

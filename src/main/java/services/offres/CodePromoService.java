@@ -59,9 +59,9 @@ public class CodePromoService {
 
         LocalDate today = LocalDate.now();
         LocalDate expiration = today.plusDays(30);
-        String qrUrl = buildQrUrl(offreId, userId);
         String statut = "ACTIF";
 
+        // Étape 1 : insérer avec une URL QR temporaire vide
         String sql;
         if (codePromoUserFkCol != null) {
             sql = "INSERT INTO " + codePromoTable + " (" + codePromoOffreFkCol + ", " + codePromoUserFkCol + ", " + codePromoQrCol + ", " + codePromoDateGenCol + ", " + codePromoDateExpCol + ", " + codePromoStatutCol + ") VALUES (?, ?, ?, ?, ?, ?)";
@@ -69,34 +69,45 @@ public class CodePromoService {
             sql = "INSERT INTO " + codePromoTable + " (" + codePromoOffreFkCol + ", " + codePromoQrCol + ", " + codePromoDateGenCol + ", " + codePromoDateExpCol + ", " + codePromoStatutCol + ") VALUES (?, ?, ?, ?, ?)";
         }
 
+        int id;
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             int idx = 1;
             ps.setInt(idx++, offreId);
             if (codePromoUserFkCol != null) {
                 ps.setInt(idx++, userId);
             }
-            ps.setString(idx++, qrUrl);
+            ps.setString(idx++, ""); // URL provisoire
             ps.setDate(idx++, Date.valueOf(today));
             ps.setDate(idx++, Date.valueOf(expiration));
             ps.setString(idx, statut);
             ps.executeUpdate();
 
-            int id = 0;
+            id = 0;
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
                     id = keys.getInt(1);
                 }
             }
-
-            CodePromo promo = new CodePromo();
-            promo.setId(id);
-            promo.setOffre_id(offreId);
-            promo.setQr_image_url(qrUrl);
-            promo.setDate_generation(Date.valueOf(today));
-            promo.setDate_expiration(Date.valueOf(expiration));
-            promo.setStatut(statut);
-            return promo;
         }
+
+        // Étape 2 : maintenant qu'on connaît l'id, construire le QR avec l'id en data
+        String qrUrl = buildQrUrl(id);
+        String updSql = "UPDATE " + codePromoTable + " SET " + codePromoQrCol + " = ? WHERE " + codePromoIdCol + " = ?";
+        try (PreparedStatement ps = connection.prepareStatement(updSql)) {
+            ps.setString(1, qrUrl);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        }
+
+        CodePromo promo = new CodePromo();
+        promo.setId(id);
+        promo.setOffre_id(offreId);
+        promo.setUser_id(userId);
+        promo.setQr_image_url(qrUrl);
+        promo.setDate_generation(Date.valueOf(today));
+        promo.setDate_expiration(Date.valueOf(expiration));
+        promo.setStatut(statut);
+        return promo;
     }
 
     public List<CodePromo> obtenirTousCodesPromo() throws SQLException {
@@ -163,6 +174,68 @@ public class CodePromoService {
         }
     }
 
+    /**
+     * Marque un code promo comme utilisé (statut = "UTILISÉ").
+     */
+    public void marquerUtilise(int id) throws SQLException {
+        if (id <= 0) {
+            throw new IllegalArgumentException("Identifiant code promo invalide.");
+        }
+        String sql = "UPDATE " + codePromoTable + " SET " + codePromoStatutCol + " = ? WHERE " + codePromoIdCol + " = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, "UTILISÉ");
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        }
+    }
+
+    /**
+     * Recherche un code promo par son identifiant (tel que lu par le scan QR).
+     */
+    public CodePromo trouverParId(int id) throws SQLException {
+        if (id <= 0) return null;
+        String sql = "SELECT * FROM " + codePromoTable + " WHERE " + codePromoIdCol + " = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapCodePromo(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Recherche le code promo correspondant à
+     * une offre et un utilisateur donnés (fallback format ancien QR).
+     */
+    public CodePromo trouverCodePromoActif(int offreId, int userId) throws SQLException {
+        String sql;
+        if (codePromoUserFkCol != null) {
+            sql = "SELECT * FROM " + codePromoTable
+                    + " WHERE " + codePromoOffreFkCol + " = ? AND " + codePromoUserFkCol + " = ?"
+                    + " ORDER BY " + codePromoIdCol + " DESC LIMIT 1";
+        } else {
+            sql = "SELECT * FROM " + codePromoTable
+                    + " WHERE " + codePromoOffreFkCol + " = ?"
+                    + " ORDER BY " + codePromoIdCol + " DESC LIMIT 1";
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, offreId);
+            if (codePromoUserFkCol != null) {
+                ps.setInt(2, userId);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapCodePromo(rs);
+                }
+            }
+        }
+        return null;
+    }
+
     private CodePromo findExistingCodePromo(int offreId, int userId) throws SQLException {
         String sql;
         if (codePromoUserFkCol != null) {
@@ -218,10 +291,13 @@ public class CodePromoService {
         return promo;
     }
 
-    private String buildQrUrl(int offreId, int userId) {
-        String raw = "OFFRE=" + offreId + "|USER=" + userId + "|TS=" + System.currentTimeMillis();
-        String encoded = URLEncoder.encode(raw, StandardCharsets.UTF_8);
-        return "https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=" + encoded;
+    /**
+     * Construit l'URL du QR code en encodant uniquement l'id du code promo.
+     * Le scanner lira alors un simple nombre (ex: "42").
+     */
+    private String buildQrUrl(int promoId) {
+        String data = URLEncoder.encode(String.valueOf(promoId), StandardCharsets.UTF_8);
+        return "https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=" + data;
     }
 
     private String resolveExistingColumn(String tableName, String... candidates) throws SQLException {

@@ -27,10 +27,23 @@ import javafx.scene.Scene;
 import models.lieux.Lieu;
 import models.offres.CodePromo;
 import models.offres.Offre;
+import models.offres.ReservationOffre;
 import models.users.User;
 import services.offres.CodePromoService;
 import services.offres.OffreService;
+import services.offres.ReservationOffreService;
 
+import java.net.URI;
+import java.net.URLDecoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -45,22 +58,28 @@ public class AdminOffreController {
     @FXML private Label kpiTotalOffres;
     @FXML private Label kpiActives;
     @FXML private Label kpiCodes;
+    @FXML private Label kpiReservations;
 
     @FXML private ComboBox<String> modeCombo;
     @FXML private ComboBox<String> filterCombo;
     @FXML private TextField searchField;
     @FXML private Button btnAdd;
+    @FXML private Button btnScanQr;
 
     @FXML private javafx.scene.control.ScrollPane cardsScrollOffres;
     @FXML private javafx.scene.control.ScrollPane cardsScrollCodes;
+    @FXML private javafx.scene.control.ScrollPane cardsScrollReservations;
     @FXML private TilePane cardsPaneOffres;
     @FXML private TilePane cardsPaneCodes;
+    @FXML private TilePane cardsPaneReservations;
 
     private final OffreService offreService = new OffreService();
     private final CodePromoService codePromoService = new CodePromoService();
+    private final ReservationOffreService reservationService = new ReservationOffreService();
 
     private final ObservableList<Offre> offresList = FXCollections.observableArrayList();
     private final ObservableList<CodePromo> codesPromoList = FXCollections.observableArrayList();
+    private final ObservableList<ReservationOffre> reservationsList = FXCollections.observableArrayList();
     private final ObservableList<Lieu> lieuxList = FXCollections.observableArrayList();
     private final Map<Integer, String> lieuxLabelById = new HashMap<>();
 
@@ -70,6 +89,9 @@ public class AdminOffreController {
     private CodePromo selectedPromo;
 
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    /** ⚠  Remplace cette URL par l'URL Webhook de ton workflow n8n. */
+    private static final String N8N_WEBHOOK_URL = "https://fourtiahmed.app.n8n.cloud/webhook-test/edff844c-8e3b-48c5-ad5e-50b88471dcb5";
 
     public void setCurrentUser(User currentUser) {
         this.currentUser = currentUser;
@@ -88,7 +110,7 @@ public class AdminOffreController {
     }
 
     private void setupModeCombo() {
-        modeCombo.setItems(FXCollections.observableArrayList("Offres", "Codes promo"));
+        modeCombo.setItems(FXCollections.observableArrayList("Offres", "Codes promo", "Réservations"));
         modeCombo.getSelectionModel().select("Offres");
         modeCombo.valueProperty().addListener((o, ov, nv) -> {
             showMode(nv);
@@ -102,6 +124,10 @@ public class AdminOffreController {
         if ("Codes promo".equals(mode)) {
             filterCombo.setItems(FXCollections.observableArrayList("Offre", "Utilisateur", "Statut"));
             filterCombo.getSelectionModel().select("Offre");
+            btnAdd.setDisable(true);
+        } else if ("Réservations".equals(mode)) {
+            filterCombo.setItems(FXCollections.observableArrayList("Utilisateur", "Offre", "Lieu", "Statut"));
+            filterCombo.getSelectionModel().select("Statut");
             btnAdd.setDisable(true);
         } else {
             filterCombo.setItems(FXCollections.observableArrayList("Titre", "Type", "Statut"));
@@ -120,6 +146,7 @@ public class AdminOffreController {
             if (!"Offres".equals(safe(modeCombo.getValue()))) return;
             openOffreEditor(null);
         });
+        btnScanQr.setOnAction(e -> openScanQrDialog());
     }
 
     private void loadLieux() {
@@ -152,9 +179,18 @@ public class AdminOffreController {
         }
     }
 
+    private void loadReservations() {
+        try {
+            reservationsList.setAll(reservationService.toutesLesReservations());
+        } catch (SQLException e) {
+            showError("Réservations", "Impossible de charger les réservations: " + e.getMessage());
+        }
+    }
+
     private void reloadAll() {
         loadOffres();
         loadCodesPromo();
+        loadReservations();
         updateKpis();
         render();
     }
@@ -164,21 +200,34 @@ public class AdminOffreController {
         long actives = offresList.stream().filter(o -> "active".equalsIgnoreCase(safe(o.getStatut()).trim())).count();
         if (kpiActives != null) kpiActives.setText(String.valueOf(actives));
         if (kpiCodes != null) kpiCodes.setText(String.valueOf(codesPromoList.size()));
+        long enAttente = reservationsList.stream().filter(r -> "EN_ATTENTE".equalsIgnoreCase(safe(r.getStatut()).trim())).count();
+        if (kpiReservations != null) kpiReservations.setText(String.valueOf(enAttente));
     }
 
     private void showMode(String mode) {
-        boolean showOffres = !"Codes promo".equals(mode);
+        boolean showOffres = "Offres".equals(mode);
+        boolean showCodes  = "Codes promo".equals(mode);
+        boolean showReserv = "Réservations".equals(mode);
+
         cardsScrollOffres.setVisible(showOffres);
         cardsScrollOffres.setManaged(showOffres);
-        cardsScrollCodes.setVisible(!showOffres);
-        cardsScrollCodes.setManaged(!showOffres);
-        btnAdd.setText(showOffres ? "Ajouter" : "Ajouter");
+        cardsScrollCodes.setVisible(showCodes);
+        cardsScrollCodes.setManaged(showCodes);
+        cardsScrollReservations.setVisible(showReserv);
+        cardsScrollReservations.setManaged(showReserv);
+
+        btnAdd.setVisible(showOffres);
+        btnAdd.setManaged(showOffres);
+        btnScanQr.setVisible(showCodes);
+        btnScanQr.setManaged(showCodes);
     }
 
     private void render() {
         String mode = safe(modeCombo.getValue());
         if ("Codes promo".equals(mode)) {
             renderPromoCards();
+        } else if ("Réservations".equals(mode)) {
+            renderReservationCards();
         } else {
             renderOffreCards();
         }
@@ -331,11 +380,25 @@ public class AdminOffreController {
         edit.getStyleClass().add("card-btn");
         edit.setOnAction(e -> openPromoEditor(promo));
 
+        Button markUsed = new Button("Marquer utilisé");
+        markUsed.getStyleClass().add("card-btn");
+        boolean alreadyUsed = "UTILISÉ".equalsIgnoreCase(safe(promo.getStatut()).trim());
+        markUsed.setDisable(alreadyUsed);
+        markUsed.setOnAction(e -> {
+            if (!confirm("Utiliser code promo", "Marquer le code promo #" + promo.getId() + " comme utilisé ?")) return;
+            try {
+                codePromoService.marquerUtilise(promo.getId());
+                reloadAll();
+            } catch (Exception ex) {
+                showError("Codes promo", safe(ex.getMessage()));
+            }
+        });
+
         Button del = new Button("Supprimer");
         del.getStyleClass().addAll("card-btn", "danger");
         del.setOnAction(e -> deletePromo(promo));
 
-        HBox actions = new HBox(10, edit, del);
+        HBox actions = new HBox(10, edit, markUsed, del);
         actions.getStyleClass().add("card-actions");
         actions.setAlignment(Pos.CENTER_RIGHT);
 
@@ -374,6 +437,125 @@ public class AdminOffreController {
         } catch (Exception ex) {
             showError("Codes promo", safe(ex.getMessage()));
         }
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  RÉSERVATIONS
+    // ═══════════════════════════════════════════════════════════════
+
+    private void renderReservationCards() {
+        cardsPaneReservations.getChildren().clear();
+        selectedCard = null;
+
+        List<ReservationOffre> filtered = reservationsList.stream()
+                .filter(this::matchesReservFilter).toList();
+
+        for (ReservationOffre r : filtered) {
+            cardsPaneReservations.getChildren().add(createReservationCard(r));
+        }
+
+        if (cardsPaneReservations.getChildren().isEmpty()) {
+            Label empty = new Label("Aucune réservation trouvée.");
+            empty.getStyleClass().add("cardLine");
+            VBox wrap = new VBox(empty);
+            wrap.setPadding(new Insets(10));
+            cardsPaneReservations.getChildren().add(wrap);
+        }
+    }
+
+    private boolean matchesReservFilter(ReservationOffre r) {
+        String q = safe(searchField.getText()).trim().toLowerCase();
+        if (q.isEmpty()) return true;
+        String col = safe(filterCombo.getValue());
+        return switch (col) {
+            case "Utilisateur" -> String.valueOf(r.getUserId()).contains(q);
+            case "Offre"       -> String.valueOf(r.getOffreId()).contains(q);
+            case "Lieu"        -> String.valueOf(r.getLieuId()).contains(q);
+            default            -> safe(r.getStatut()).toLowerCase().contains(q);
+        };
+    }
+
+    private Node createReservationCard(ReservationOffre r) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("sortie-card");
+        card.setMinWidth(360);
+
+        // ── En-tête id + statut ──────────────────────────────────
+        Label title = new Label("Réservation #" + r.getId());
+        title.getStyleClass().add("cardTitle");
+
+        String statut = safe(r.getStatut()).trim();
+        Label chip = new Label(statut.isEmpty() ? "-" : statut);
+        chip.getStyleClass().addAll("statusChip", mapReservStatutClass(statut));
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        HBox header = new HBox(10, title, spacer, chip);
+        header.setAlignment(Pos.TOP_LEFT);
+
+        // ── Infos ─────────────────────────────────────────────────
+        String lieuLabel = lieuxLabelById.getOrDefault(r.getLieuId(), "Lieu #" + r.getLieuId());
+        Label meta = new Label(
+                "Offre #" + r.getOffreId()
+                + "  ·  User #" + r.getUserId()
+                + "  ·  " + lieuLabel);
+        meta.getStyleClass().add("cardMeta");
+        meta.setWrapText(true);
+
+        Label dates = new Label(
+                "Date : " + formatDate(r.getDateReservation())
+                + "  ·  " + r.getNombrePersonnes() + " personne(s)");
+        dates.getStyleClass().add("cardLine");
+
+        String note = abbreviate(safe(r.getNote()).trim(), 100);
+        Label noteLbl = new Label(note.isBlank() ? "" : "Note : " + note);
+        noteLbl.getStyleClass().add("cardLine");
+        noteLbl.setWrapText(true);
+        noteLbl.setVisible(!note.isBlank());
+        noteLbl.setManaged(!note.isBlank());
+
+        // ── Boutons Accepter / Refuser ────────────────────────────
+        boolean isEnAttente = "EN_ATTENTE".equalsIgnoreCase(statut);
+
+        Button btnAccepter = new Button("✔  Accepter");
+        btnAccepter.getStyleClass().add("card-btn");
+        btnAccepter.setStyle("-fx-text-fill: #27ae60;");
+        btnAccepter.setDisable(!isEnAttente);
+        btnAccepter.setOnAction(e -> changerStatutReservation(r, "CONFIRMÉE"));
+
+        Button btnRefuser = new Button("✖  Refuser");
+        btnRefuser.getStyleClass().addAll("card-btn", "danger");
+        btnRefuser.setDisable(!isEnAttente);
+        btnRefuser.setOnAction(e -> changerStatutReservation(r, "REFUSÉE"));
+
+        HBox actions = new HBox(10, btnAccepter, btnRefuser);
+        actions.getStyleClass().add("card-actions");
+        actions.setAlignment(Pos.CENTER_RIGHT);
+
+        card.getChildren().addAll(header, meta, dates, noteLbl, actions);
+        card.setOnMouseClicked(e -> selectCard(card, null, null));
+        return card;
+    }
+
+    private void changerStatutReservation(ReservationOffre r, String nouveauStatut) {
+        String libelle = "CONFIRMÉE".equals(nouveauStatut) ? "accepter" : "refuser";
+        if (!confirm("Réservation", "Voulez-vous " + libelle + " la réservation #" + r.getId() + " ?"))
+            return;
+        try {
+            reservationService.changerStatut(r.getId(), nouveauStatut);
+            reloadAll();
+        } catch (Exception ex) {
+            showError("Réservations", safe(ex.getMessage()));
+        }
+    }
+
+    private String mapReservStatutClass(String statut) {
+        String s = safe(statut).trim().toLowerCase();
+        return switch (s) {
+            case "confirmée" -> "status-ouverte";
+            case "refusée", "annulée" -> "status-annulee";
+            default -> "status-cloturee"; // EN_ATTENTE
+        };
     }
 
     private void openOffreEditor(Offre existing) {
@@ -459,10 +641,99 @@ public class AdminOffreController {
             }
         });
 
+        // ── Status label shown next to the button ──────────────
+        Label webhookStatus = new Label();
+        webhookStatus.setStyle("-fx-font-weight: 800; -fx-font-size: 11.5px;");
+        webhookStatus.setWrapText(true);
+
+        Button btnAnalyse = new Button("📊 Analyser offres");
+        btnAnalyse.getStyleClass().add("card-btn-analyse");
+        btnAnalyse.setOnAction(e -> {
+            // ── Collect form fields ──────────────────────────────
+            String lieu    = cbLieu.getValue() != null ? cbLieu.getValue().toString() : "";
+            String statut  = safe(cbStatut.getValue());
+            String titre   = tfTitre.getText().trim();
+            String type    = tfType.getText().trim();
+            String pct     = tfPourcentage.getText().trim();
+            String debut   = dpDebut.getValue() != null ? dpDebut.getValue().toString() : "";
+            String fin     = dpFin.getValue()   != null ? dpFin.getValue().toString()   : "";
+            String desc    = taDesc.getText().trim();
+
+            // ── Build JSON payload ───────────────────────────────
+            String json = "{"
+                    + "\"lieu\":\""        + escJson(lieu)   + "\","
+                    + "\"statut\":\""      + escJson(statut) + "\","
+                    + "\"titre\":\""       + escJson(titre)  + "\","
+                    + "\"type\":\""        + escJson(type)   + "\","
+                    + "\"pourcentage\":\"" + escJson(pct)    + "\","
+                    + "\"date_debut\":\""  + escJson(debut)  + "\","
+                    + "\"date_fin\":\""    + escJson(fin)    + "\","
+                    + "\"description\":\"" + escJson(desc)   + "\""
+                    + "}";
+
+            // ── Send asynchronously so the UI stays responsive ───
+            btnAnalyse.setDisable(true);
+            webhookStatus.setText("Envoi en cours…");
+            webhookStatus.setStyle("-fx-text-fill: #555; -fx-font-weight: 800; -fx-font-size: 11.5px;");
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(N8N_WEBHOOK_URL))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
+                    .build();
+
+            client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                    .thenAccept(resp -> javafx.application.Platform.runLater(() -> {
+                        btnAnalyse.setDisable(false);
+                        if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
+                            webhookStatus.setText("✔ Analyse reçue");
+                            webhookStatus.setStyle("-fx-text-fill: #16a34a; -fx-font-weight: 800; -fx-font-size: 11.5px;");
+                            try {
+                                String body = resp.body().trim();
+                                JsonObject result;
+                                // Handle both array wrapper and plain object
+                                if (body.startsWith("[")) {
+                                    result = JsonParser.parseString(body)
+                                            .getAsJsonArray().get(0).getAsJsonObject();
+                                } else {
+                                    result = JsonParser.parseString(body).getAsJsonObject();
+                                }
+                                // If the result still has a nested "output" key (raw Anthropic shape),
+                                // drill down: output[0].content[0].text
+                                if (result.has("output")) {
+                                    JsonElement text = result
+                                            .getAsJsonArray("output").get(0).getAsJsonObject()
+                                            .getAsJsonArray("content").get(0).getAsJsonObject()
+                                            .get("text");
+                                    result = text.isJsonObject()
+                                            ? text.getAsJsonObject()
+                                            : JsonParser.parseString(text.getAsString()).getAsJsonObject();
+                                }
+                                showAnalysisDialog(result, tfTitre, tfType, tfPourcentage, taDesc,
+                                        () -> btnAnalyse.fire());
+                            } catch (Exception parseEx) {
+                                showError("Analyse", "Réponse invalide de n8n:\n" + resp.body());
+                            }
+                        } else {
+                            webhookStatus.setText("⚠ Erreur HTTP " + resp.statusCode());
+                            webhookStatus.setStyle("-fx-text-fill: #c0392b; -fx-font-weight: 800; -fx-font-size: 11.5px;");
+                        }
+                    }))
+                    .exceptionally(ex -> {
+                        javafx.application.Platform.runLater(() -> {
+                            btnAnalyse.setDisable(false);
+                            webhookStatus.setText("✗ " + ex.getCause().getMessage());
+                            webhookStatus.setStyle("-fx-text-fill: #c0392b; -fx-font-weight: 800; -fx-font-size: 11.5px;");
+                        });
+                        return null;
+                    });
+        });
+
         Region sp = new Region();
         HBox.setHgrow(sp, Priority.ALWAYS);
-        HBox footer = new HBox(10, btnCancel, sp, btnSave);
-        footer.setAlignment(Pos.CENTER_RIGHT);
+        HBox footer = new HBox(10, btnCancel, webhookStatus, sp, btnAnalyse, btnSave);
+        footer.setAlignment(Pos.CENTER_LEFT);
         footer.setPadding(new Insets(12, 0, 0, 0));
 
         VBox content = new VBox(12, headline, form);
@@ -555,7 +826,7 @@ public class AdminOffreController {
         TextField tfQr = new TextField(safe(existing.getQr_image_url()));
         DatePicker dpGen = new DatePicker(existing.getDate_generation() == null ? null : existing.getDate_generation().toLocalDate());
         DatePicker dpExp = new DatePicker(existing.getDate_expiration() == null ? null : existing.getDate_expiration().toLocalDate());
-        ComboBox<String> cbStatut = new ComboBox<>(FXCollections.observableArrayList("ACTIF", "EXPIRE", "DESACTIVE"));
+        ComboBox<String> cbStatut = new ComboBox<>(FXCollections.observableArrayList("ACTIF", "UTILISÉ", "EXPIRE", "DESACTIVE"));
         cbStatut.setValue(safe(existing.getStatut()).isBlank() ? "ACTIF" : existing.getStatut());
 
         Label headline = new Label("Modifier un code promo");
@@ -665,6 +936,7 @@ public class AdminOffreController {
         String s = safe(statut).trim().toLowerCase();
         return switch (s) {
             case "actif" -> "status-ouverte";
+            case "utilisé", "utilise" -> "status-cloturee";
             case "expire" , "expiré", "expirée", "expiree" -> "status-annulee";
             default -> "status-cloturee";
         };
@@ -710,11 +982,407 @@ public class AdminOffreController {
         return value == null ? "" : value;
     }
 
+    /** Escapes a string for safe embedding inside a JSON string literal. */
+    private String escJson(String v) {
+        if (v == null) return "";
+        return v.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    //  ANALYSE MARKETING – dialog de résultats
+    // ─────────────────────────────────────────────────────────────────
+    private void showAnalysisDialog(JsonObject result,
+                                    TextField tfTitre,
+                                    TextField tfType,
+                                    TextField tfPourcentage,
+                                    TextArea  taDesc,
+                                    Runnable  onRerun) {
+        Stage dlg = new Stage();
+        dlg.initModality(Modality.APPLICATION_MODAL);
+        dlg.setTitle("📊 Analyse Marketing IA");
+
+        // ── helpers ──
+        java.util.function.Function<String, String> str = key -> {
+            try { return result.has(key) && !result.get(key).isJsonNull()
+                    ? result.get(key).getAsString() : "—"; } catch(Exception e){ return "—"; }
+        };
+        java.util.function.Function<String, Integer> num = key -> {
+            try { return result.has(key) ? result.get(key).getAsInt() : 0; } catch(Exception e){ return 0; }
+        };
+        java.util.function.Function<String, List<String>> arr = key -> {
+            List<String> list = new java.util.ArrayList<>();
+            try { if(result.has(key)) {
+                JsonArray a = result.getAsJsonArray(key);
+                for(JsonElement el : a) list.add(el.getAsString());
+            }} catch(Exception ignored){}
+            return list;
+        };
+
+        // ── Score ──────────────────────────────────────────────
+        int score = num.apply("score");
+        String scoreColor = score >= 75 ? "#16a34a" : score >= 50 ? "#d97706" : "#dc2626";
+        Label lblScore = new Label(score + " / 100");
+        lblScore.setStyle("-fx-font-size: 42px; -fx-font-weight: 900; -fx-text-fill: " + scoreColor + ";");
+        Label lblEval = new Label(str.apply("evaluation"));
+        lblEval.setStyle("-fx-text-fill: #555; -fx-font-size: 13px;");
+        lblEval.setWrapText(true);
+
+        // ── Score bar ──────────────────────────────────────────
+        javafx.scene.layout.StackPane barBg = new javafx.scene.layout.StackPane();
+        barBg.setStyle("-fx-background-color: #e2e8f0; -fx-background-radius: 999; -fx-pref-height: 10; -fx-min-height: 10;");
+        barBg.setMaxWidth(Double.MAX_VALUE);
+        javafx.scene.layout.HBox barFill = new javafx.scene.layout.HBox();
+        barFill.setStyle("-fx-background-color: " + scoreColor + "; -fx-background-radius: 999; -fx-pref-height: 10; -fx-min-height: 10;");
+        barFill.setPrefWidth(4.0 * score); // 400px max at score=100
+        javafx.scene.layout.StackPane.setAlignment(barFill, Pos.CENTER_LEFT);
+        barBg.getChildren().add(barFill);
+
+        VBox scoreBox = new VBox(4, lblScore, lblEval, barBg);
+        scoreBox.setStyle("-fx-background-color: #f8faff; -fx-background-radius: 14; -fx-padding: 14; -fx-border-color: #e2e8f0; -fx-border-radius: 14;");
+
+        // ── Section builder ────────────────────────────────────
+        java.util.function.BiFunction<String, List<String>, VBox> listSection = (title, items) -> {
+            VBox box = new VBox(6);
+            box.setStyle("-fx-background-color: #f8faff; -fx-background-radius: 12; -fx-padding: 12; -fx-border-color: #e2e8f0; -fx-border-radius: 12;");
+            Label lbl = new Label(title);
+            lbl.setStyle("-fx-font-weight: 900; -fx-font-size: 13px; -fx-text-fill: #0f2a44;");
+            box.getChildren().add(lbl);
+            if (items.isEmpty()) {
+                Label none = new Label("—");
+                none.setStyle("-fx-text-fill: #888;");
+                box.getChildren().add(none);
+            } else {
+                for (String item : items) {
+                    Label li = new Label("• " + item);
+                    li.setWrapText(true);
+                    li.setStyle("-fx-text-fill: #334155; -fx-font-size: 12.5px;");
+                    box.getChildren().add(li);
+                }
+            }
+            return box;
+        };
+
+        VBox weakBox  = listSection.apply("⚠  Points faibles",           arr.apply("points_faibles"));
+        VBox amelBox  = listSection.apply("💡 Améliorations conseillées", arr.apply("ameliorations"));
+
+        // ── Offre optimisée ────────────────────────────────────
+        JsonObject opt = result.has("offre_optimisee") && result.get("offre_optimisee").isJsonObject()
+                ? result.getAsJsonObject("offre_optimisee") : new JsonObject();
+        String optTitre = opt.has("titre")       ? opt.get("titre").getAsString()       : "";
+        String optDesc  = opt.has("description") ? opt.get("description").getAsString() : "";
+        String optPct   = opt.has("pourcentage_suggere") ? opt.get("pourcentage_suggere").getAsString() : "";
+
+        VBox optBox = new VBox(6);
+        optBox.setStyle("-fx-background-color: #f0fdf4; -fx-background-radius: 12; -fx-padding: 12; -fx-border-color: #bbf7d0; -fx-border-radius: 12;");
+        Label optTitle = new Label("✨ Version optimisée suggérée");
+        optTitle.setStyle("-fx-font-weight: 900; -fx-font-size: 13px; -fx-text-fill: #15803d;");
+        Label optTitreL = new Label("Titre : " + optTitre);
+        optTitreL.setWrapText(true);
+        optTitreL.setStyle("-fx-font-size: 12.5px; -fx-text-fill: #166534;");
+        Label optPctL = new Label("Réduction suggérée : " + optPct + "%");
+        optPctL.setStyle("-fx-font-size: 12.5px; -fx-text-fill: #166534;");
+        Label optDescL = new Label("Description : " + optDesc);
+        optDescL.setWrapText(true);
+        optDescL.setStyle("-fx-font-size: 12.5px; -fx-text-fill: #166534;");
+        Button btnApply = new Button("✔ Appliquer ces suggestions");
+        btnApply.setStyle("-fx-background-color: #16a34a; -fx-text-fill: white; -fx-font-weight: 900; -fx-background-radius: 10; -fx-padding: 8 14; -fx-cursor: hand;");
+        btnApply.setOnAction(ev -> {
+            if (!optTitre.isEmpty()) tfTitre.setText(optTitre);
+            if (!optPct.isEmpty())   tfPourcentage.setText(optPct);
+            if (!optDesc.isEmpty())  taDesc.setText(optDesc);
+            dlg.close();
+        });
+        optBox.getChildren().addAll(optTitle, optTitreL, optPctL, optDescL, btnApply);
+
+        // ── Diffusion ──────────────────────────────────────────
+        JsonObject diff = result.has("diffusion") && result.get("diffusion").isJsonObject()
+                ? result.getAsJsonObject("diffusion") : new JsonObject();
+        List<String> canaux = new java.util.ArrayList<>();
+        if (diff.has("canaux")) for(JsonElement c : diff.getAsJsonArray("canaux")) canaux.add(c.getAsString());
+        String timing = diff.has("timing")        ? diff.get("timing").getAsString()        : "—";
+        String cible  = diff.has("public_cible")  ? diff.get("public_cible").getAsString()  : "—";
+
+        VBox diffBox = new VBox(6);
+        diffBox.setStyle("-fx-background-color: #eff6ff; -fx-background-radius: 12; -fx-padding: 12; -fx-border-color: #bfdbfe; -fx-border-radius: 12;");
+        Label diffTitle = new Label("📣 Recommandations de diffusion");
+        diffTitle.setStyle("-fx-font-weight: 900; -fx-font-size: 13px; -fx-text-fill: #1d4ed8;");
+        Label lblCanaux  = new Label("Canaux : " + String.join(", ", canaux));
+        lblCanaux.setWrapText(true); lblCanaux.setStyle("-fx-font-size: 12.5px; -fx-text-fill: #1e3a8a;");
+        Label lblTiming  = new Label("⏰ Timing optimal : " + timing);
+        lblTiming.setWrapText(true); lblTiming.setStyle("-fx-font-size: 12.5px; -fx-text-fill: #1e3a8a;");
+        Label lblCible   = new Label("🎯 Public cible : " + cible);
+        lblCible.setWrapText(true);  lblCible.setStyle("-fx-font-size: 12.5px; -fx-text-fill: #1e3a8a;");
+        diffBox.getChildren().addAll(diffTitle, lblCanaux, lblTiming, lblCible);
+
+        // ── Footer buttons ─────────────────────────────────────
+        Button btnRerun = new Button("🔄 Relancer l'analyse");
+        btnRerun.setStyle("-fx-background-color: linear-gradient(to right,#6d28d9,#7c3aed); -fx-text-fill: white; -fx-font-weight: 900; -fx-background-radius: 10; -fx-padding: 9 16; -fx-cursor: hand;");
+        btnRerun.setOnAction(ev -> { dlg.close(); onRerun.run(); });
+
+        Button btnClose = new Button("Fermer");
+        btnClose.setStyle("-fx-background-color: #e2e8f0; -fx-text-fill: #334155; -fx-font-weight: 900; -fx-background-radius: 10; -fx-padding: 9 16; -fx-cursor: hand;");
+        btnClose.setOnAction(ev -> dlg.close());
+
+        Region fsp = new Region(); HBox.setHgrow(fsp, Priority.ALWAYS);
+        HBox footer = new HBox(10, btnClose, fsp, btnRerun);
+        footer.setAlignment(Pos.CENTER_RIGHT);
+        footer.setPadding(new Insets(14, 0, 0, 0));
+
+        // ── Layout ─────────────────────────────────────────────
+        Label header = new Label("📊 Analyse Marketing IA");
+        header.setStyle("-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #0f2a44;");
+
+        VBox body = new VBox(12, header, scoreBox, weakBox, amelBox, optBox, diffBox, footer);
+        body.setPadding(new Insets(20));
+
+        ScrollPane sp = new ScrollPane(body);
+        sp.setFitToWidth(true);
+        sp.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        Scene scene = new Scene(sp, 560, 700);
+        scene.getStylesheets().add(getClass().getResource("/styles/back/sorties-admin.css").toExternalForm());
+        dlg.setScene(scene);
+        dlg.setResizable(true);
+        dlg.centerOnScreen();
+        dlg.showAndWait();
+    }
+
     private void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Erreur");
         alert.setHeaderText(title);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * Ouvre un dialogue permettant au restaurateur de saisir/coller le contenu
+     * scanné du QR code (format: OFFRE=X|USER=Y|TS=Z).
+     * Le code promo correspondant est recherché puis marqué UTILISÉ.
+     */
+    private void openScanQrDialog() {
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setTitle("Valider un code promo");
+
+        // ── Titre ──────────────────────────────────────────────
+        Label headline = new Label("Validation code promo");
+        headline.getStyleClass().add("dialogTitle");
+
+        // ── Saisie du numéro ───────────────────────────────────
+        Label hint = new Label("Entrez le numéro donné par le scan du QR code :");
+        hint.getStyleClass().add("cardLine");
+
+        TextField tfCode = new TextField();
+        tfCode.setPromptText("Numéro du code promo (ex: 42)");
+        tfCode.setMaxWidth(Double.MAX_VALUE);
+
+        Button btnRechercher = new Button("Rechercher");
+        btnRechercher.getStyleClass().add("card-btn");
+        btnRechercher.setDefaultButton(true);
+
+        HBox searchRow = new HBox(10, tfCode, btnRechercher);
+        searchRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(tfCode, Priority.ALWAYS);
+
+        // ── Zone d'information sur le code trouvé ──────────────
+        VBox infoBox = new VBox(8);
+        infoBox.setVisible(false);
+        infoBox.setManaged(false);
+        infoBox.setStyle("-fx-background-color: #f0f4ff; -fx-background-radius: 8; -fx-padding: 12;");
+
+        Label lblBadge   = new Label();
+        Label lblOffre   = new Label();
+        Label lblUser    = new Label();
+        Label lblDates   = new Label();
+        Label lblStatut  = new Label();
+        for (Label l : new Label[]{lblBadge, lblOffre, lblUser, lblDates, lblStatut}) {
+            l.getStyleClass().add("cardLine");
+            l.setWrapText(true);
+        }
+        lblBadge.setStyle("-fx-font-weight: bold; -fx-font-size: 14;");
+
+        infoBox.getChildren().addAll(lblBadge, lblOffre, lblUser, lblDates, lblStatut);
+
+        // ── Message de résultat ────────────────────────────────
+        Label resultLabel = new Label();
+        resultLabel.setWrapText(true);
+        resultLabel.getStyleClass().add("cardMeta");
+        resultLabel.setVisible(false);
+        resultLabel.setManaged(false);
+
+        // ── Boutons du bas ──────────────────────────────────────
+        Button btnCancel  = new Button("Fermer");
+        btnCancel.getStyleClass().add("card-btn");
+        btnCancel.setOnAction(e -> dialog.close());
+
+        Button btnConfirm = new Button("✔  Confirmer l'utilisation");
+        btnConfirm.getStyleClass().add("card-btn");
+        btnConfirm.setVisible(false);
+        btnConfirm.setManaged(false);
+
+        Region sp = new Region();
+        HBox.setHgrow(sp, Priority.ALWAYS);
+        HBox footer = new HBox(10, btnCancel, sp, btnConfirm);
+        footer.setAlignment(Pos.CENTER_RIGHT);
+        footer.setPadding(new Insets(12, 0, 0, 0));
+
+        // ── Conteneur principal ────────────────────────────────
+        VBox content = new VBox(14, headline, hint, searchRow, infoBox, resultLabel, footer);
+        content.setPadding(new Insets(20));
+        content.getStyleClass().add("dialogRoot");
+
+        // ── Wrapper pour codePromo trouvé ─────────────────────
+        final CodePromo[] foundPromo = {null};
+
+        // ── Action Rechercher ──────────────────────────────────
+        Runnable doSearch = () -> {
+            String raw = safe(tfCode.getText()).trim();
+            // reset état
+            infoBox.setVisible(false);
+            infoBox.setManaged(false);
+            resultLabel.setVisible(false);
+            resultLabel.setManaged(false);
+            btnConfirm.setVisible(false);
+            btnConfirm.setManaged(false);
+            foundPromo[0] = null;
+
+            if (raw.isEmpty()) {
+                resultLabel.setText("⚠  Entrez le numéro du code promo.");
+                resultLabel.setVisible(true);
+                resultLabel.setManaged(true);
+                dialog.sizeToScene();
+                return;
+            }
+
+            String decoded;
+            try { decoded = URLDecoder.decode(raw, StandardCharsets.UTF_8); }
+            catch (Exception ex) { decoded = raw; }
+
+            try {
+                CodePromo promo = null;
+
+                if (decoded.matches("\\d+")) {
+                    // Format actuel : simple ID
+                    int id = Integer.parseInt(decoded);
+                    promo = codePromoService.trouverParId(id);
+                    if (promo == null) {
+                        resultLabel.setText("✗  Aucun code promo trouvé avec le numéro " + id + ".");
+                        resultLabel.setVisible(true);
+                        resultLabel.setManaged(true);
+                        dialog.sizeToScene();
+                        return;
+                    }
+                } else {
+                    // Rétrocompat OFFRE=X|USER=Y
+                    int offreId = 0, userId = 0;
+                    for (String part : decoded.split("\\|")) {
+                        String[] kv = part.split("=", 2);
+                        if (kv.length == 2) {
+                            switch (kv[0].trim().toUpperCase()) {
+                                case "OFFRE" -> offreId = Integer.parseInt(kv[1].trim());
+                                case "USER"  -> userId  = Integer.parseInt(kv[1].trim());
+                            }
+                        }
+                    }
+                    if (offreId <= 0) {
+                        resultLabel.setText("⚠  Format non reconnu. Entrez le numéro donné par le scanner.");
+                        resultLabel.setVisible(true);
+                        resultLabel.setManaged(true);
+                        dialog.sizeToScene();
+                        return;
+                    }
+                    promo = codePromoService.trouverCodePromoActif(offreId, userId);
+                    if (promo == null) {
+                        resultLabel.setText("✗  Aucun code promo trouvé pour cette offre/utilisateur.");
+                        resultLabel.setVisible(true);
+                        resultLabel.setManaged(true);
+                        dialog.sizeToScene();
+                        return;
+                    }
+                }
+
+                // Afficher les détails
+                foundPromo[0] = promo;
+                String statut = safe(promo.getStatut()).trim();
+                boolean dejUtilise = "UTILISÉ".equalsIgnoreCase(statut);
+                java.sql.Date today = new java.sql.Date(System.currentTimeMillis());
+                boolean expire = promo.getDate_expiration() != null && promo.getDate_expiration().before(today);
+
+                lblBadge.setText("Code promo  #" + promo.getId());
+                lblOffre.setText("Offre :  #" + promo.getOffre_id());
+                lblUser.setText("Utilisateur :  " + (promo.getUser_id() > 0 ? "#" + promo.getUser_id() : "—"));
+                lblDates.setText("Généré : " + formatDate(promo.getDate_generation())
+                        + "    Expire : " + formatDate(promo.getDate_expiration()));
+                lblStatut.setText("Statut :  " + (statut.isEmpty() ? "—" : statut));
+
+                infoBox.setVisible(true);
+                infoBox.setManaged(true);
+
+                if (dejUtilise) {
+                    resultLabel.setText("⚠  Ce code promo a déjà été utilisé.");
+                    resultLabel.setVisible(true);
+                    resultLabel.setManaged(true);
+                } else if (expire) {
+                    resultLabel.setText("⚠  Ce code promo est expiré (" + formatDate(promo.getDate_expiration()) + ").");
+                    resultLabel.setVisible(true);
+                    resultLabel.setManaged(true);
+                } else {
+                    btnConfirm.setVisible(true);
+                    btnConfirm.setManaged(true);
+                }
+                dialog.sizeToScene();
+
+            } catch (NumberFormatException ex) {
+                resultLabel.setText("⚠  Numéro invalide.");
+                resultLabel.setVisible(true);
+                resultLabel.setManaged(true);
+                dialog.sizeToScene();
+            } catch (SQLException ex) {
+                resultLabel.setText("✗  Erreur BD : " + safe(ex.getMessage()));
+                resultLabel.setVisible(true);
+                resultLabel.setManaged(true);
+                dialog.sizeToScene();
+            }
+        };
+
+        btnRechercher.setOnAction(e -> doSearch.run());
+        tfCode.setOnAction(e -> doSearch.run());
+
+        // ── Action Confirmer ───────────────────────────────────
+        btnConfirm.setOnAction(e -> {
+            CodePromo promo = foundPromo[0];
+            if (promo == null) return;
+            try {
+                codePromoService.marquerUtilise(promo.getId());
+                infoBox.setVisible(false);
+                infoBox.setManaged(false);
+                btnConfirm.setVisible(false);
+                btnConfirm.setManaged(false);
+                resultLabel.setText("✔  Code promo #" + promo.getId() + " marqué comme UTILISÉ avec succès.");
+                resultLabel.setVisible(true);
+                resultLabel.setManaged(true);
+                tfCode.clear();
+                foundPromo[0] = null;
+                reloadAll();
+                dialog.sizeToScene();
+            } catch (SQLException ex) {
+                resultLabel.setText("✗  Erreur BD : " + safe(ex.getMessage()));
+                resultLabel.setVisible(true);
+                resultLabel.setManaged(true);
+                dialog.sizeToScene();
+            }
+        });
+
+        Scene scene = new Scene(content, 480, 220);
+        scene.getStylesheets().add(getClass().getResource("/styles/back/sorties-admin.css").toExternalForm());
+        dialog.setScene(scene);
+        dialog.setResizable(false);
+        dialog.centerOnScreen();
+        dialog.showAndWait();
     }
 }

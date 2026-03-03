@@ -417,3 +417,19 @@
     -fx-border-radius: 12;
     -fx-border-color: rgba(220,38,38,0.16);
 }
+
+/* Offres – AI analyse button (gestion-offre) */
+.card-btn-analyse {
+    -fx-background-color: linear-gradient(to right, #6d28d9, #7c3aed);
+    -fx-text-fill: white;
+    -fx-font-weight: 800;
+    -fx-font-size: 12px;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-padding: 7 16;
+    -fx-effect: dropshadow(gaussian, rgba(109,40,217,0.35), 8, 0, 0, 2);
+    -fx-cursor: hand;
+}
+.card-btn-analyse:hover {
+    -fx-background-color: linear-gradient(to right, #5b21b6, #6d28d9);
+}
