@@ -59,9 +59,6 @@
 
                 <Button fx:id="btnEvents" text="Événements" onAction="#showEvents"
                         maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
-
-                <Button fx:id="btnAnalytics" text="🔬  Analytics IA" onAction="#showAnalytics"
-                        maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
             </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>

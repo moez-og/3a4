@@ -1,6 +1,7 @@
 package services.users;
 
 import models.users.User;
+import services.common.CrudService;
 import utils.Mydb;
 import utils.PasswordUtil;
 
@@ -12,7 +13,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UserService {
+public class UserService implements CrudService<User, Integer> {
     private Connection connection;
 
     public UserService() {
@@ -178,5 +179,67 @@ public class UserService {
      */
     public boolean emailExiste(String email) throws SQLException {
         return trouverParEmail(email) != null;
+    }
+
+    public void mettreAJourMotDePasseParEmail(String email, String nouveauPasswordHash) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Connexion à la base de données indisponible");
+        }
+        String sql = "UPDATE user SET password_hash = ? WHERE email = ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, nouveauPasswordHash);
+            ps.setString(2, email);
+            int updated = ps.executeUpdate();
+            if (updated == 0) {
+                throw new SQLException("Aucun utilisateur trouvé pour cet email");
+            }
+        }
+    }
+
+    // ===== Generic CRUD (wrappers) =====
+
+    @Override
+    public List<User> getAll() {
+        try {
+            return obtenirTous();
+        } catch (SQLException e) {
+            throw new RuntimeException("UserService.getAll: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public User getById(Integer id) {
+        try {
+            return trouverParId(id);
+        } catch (SQLException e) {
+            throw new RuntimeException("UserService.getById: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void add(User entity) {
+        try {
+            ajouter(entity);
+        } catch (SQLException e) {
+            throw new RuntimeException("UserService.add: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void update(User entity) {
+        try {
+            modifier(entity);
+        } catch (SQLException e) {
+            throw new RuntimeException("UserService.update: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void delete(Integer id) {
+        try {
+            supprimer(id);
+        } catch (SQLException e) {
+            throw new RuntimeException("UserService.delete: " + e.getMessage(), e);
+        }
     }
 }

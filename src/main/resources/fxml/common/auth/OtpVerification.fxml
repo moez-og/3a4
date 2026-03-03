@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="controllers.common.auth.OtpVerificationController"
+           prefWidth="900.0" prefHeight="700.0"
+           style="-fx-background-color: linear-gradient(to bottom right, #f8fafc, #e2e8f0);">
+
+    <children>
+        <VBox alignment="CENTER" spacing="18" maxWidth="460"
+              style="-fx-background-color: white; -fx-background-radius: 16; -fx-padding: 35;"
+              StackPane.alignment="CENTER">
+            <children>
+                <Label text="Vérification OTP">
+                    <font>
+                        <Font name="Segoe UI Bold" size="26"/>
+                    </font>
+                </Label>
+
+                <Label text="Un code a été envoyé à:" style="-fx-text-fill: #64748b; -fx-font-size: 13;"/>
+                <Label fx:id="emailLabel" text="-" style="-fx-text-fill: #1e293b; -fx-font-size: 14; -fx-font-weight: bold;" wrapText="true"/>
+
+                <Label fx:id="timerLabel" text="Expire dans: 60s" style="-fx-text-fill: #0f766e; -fx-font-size: 13; -fx-font-weight: bold;"/>
+                <Label fx:id="attemptsLabel" text="Tentatives restantes: 3" style="-fx-text-fill: #334155; -fx-font-size: 12;"/>
+                <Label fx:id="blockLabel" text="" style="-fx-text-fill: #b91c1c; -fx-font-size: 12;"/>
+
+                <TextField fx:id="otpField" promptText="Saisir OTP (6 chiffres)" prefHeight="44"
+                           style="-fx-font-size: 14; -fx-background-radius: 10; -fx-border-radius: 10; -fx-border-color: #cbd5e1;"/>
+
+                <HBox alignment="CENTER" spacing="10">
+                    <children>
+                        <Button fx:id="verifyBtn" text="Vérifier" prefWidth="130" prefHeight="42"
+                                style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: linear-gradient(to right, #d4af37, #c9920f); -fx-background-radius: 10;"/>
+                        <Button fx:id="resendBtn" text="Renvoyer OTP" prefWidth="130" prefHeight="42"
+                                style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #1e293b; -fx-background-color: #e2e8f0; -fx-background-radius: 10;"/>
+                    </children>
+                </HBox>
+
+                <Hyperlink fx:id="backLoginLink" text="Retour login" style="-fx-font-size: 12; -fx-text-fill: #c9920f;"/>
+            </children>
+            <padding>
+                <Insets top="8" right="8" bottom="8" left="8"/>
+            </padding>
+        </VBox>
+    </children>
+</StackPane>

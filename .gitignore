@@ -35,5 +35,8 @@ build/
 ### VS Code ###
 .vscode/
 
+### Local secrets ###
+local-secrets.properties
+
 ### Mac OS ###
 .DS_Store
