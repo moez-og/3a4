@@ -1,0 +1,161 @@
+@import "../sorties-front.css";
+@import "../sorties-details.css";
+
+/* Album/Recap panel uses existing palette from sorties-front.css + sorties-details.css */
+
+.albumRoot {
+    -fx-padding: 0;
+}
+
+.albumUploadCard {
+    -fx-padding: 14;
+}
+
+.albumGalleryScroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.albumGalleryScroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.albumGalleryPane {
+    -fx-padding: 2 2 2 2;
+}
+
+.albumTile {
+    -fx-background-color: linear-gradient(to bottom, white, #f7f9fe);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 16;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.08), 14, 0.16, 0, 4);
+    -fx-cursor: hand;
+}
+
+.albumTile:hover {
+    -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.12), 18, 0.18, 0, 6);
+    -fx-border-color: rgba(26, 58, 92, 0.25);
+}
+
+.albumThumb {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(15,23,42,0.08);
+}
+
+.albumVideoTag {
+    -fx-background-color: rgba(26, 58, 92, 0.92);
+    -fx-text-fill: white;
+    -fx-font-weight: 900;
+    -fx-font-size: 10px;
+    -fx-padding: 3 8;
+    -fx-background-radius: 999;
+}
+
+.albumMetaLine {
+    -fx-text-fill: rgba(15,42,68,0.72);
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.albumDeleteBtn {
+    -fx-background-color: rgba(239, 68, 68, 0.12);
+    -fx-text-fill: #b91c1c;
+    -fx-font-weight: 900;
+    -fx-background-radius: 999;
+    -fx-padding: 4 10;
+}
+
+.albumDeleteBtn:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.18);
+}
+
+.albumUpdateBadge {
+    -fx-background-color: rgba(201,146,15,0.16);
+    -fx-text-fill: rgba(139,92,10,0.95);
+    -fx-font-weight: 900;
+    -fx-padding: 3 10;
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(201,146,15,0.28);
+    -fx-border-radius: 999;
+}
+
+.albumRecapCard .text-field {
+    -fx-background-color: rgba(244, 246, 251, 0.92);
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 12;
+    -fx-padding: 8 10;
+    -fx-font-weight: 800;
+}
+
+.albumVersionsScroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.albumVersionsScroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.albumVersionsBox {
+    -fx-padding: 2 2 2 2;
+}
+
+.recapVersionCard {
+    -fx-background-color: rgba(255,255,255,0.86);
+    -fx-background-radius: 14;
+    -fx-border-color: rgba(15,23,42,0.08);
+    -fx-border-radius: 14;
+    -fx-padding: 10;
+}
+
+.recapVersionCard.final {
+    -fx-border-color: rgba(201,146,15,0.35);
+    -fx-effect: dropshadow(gaussian, rgba(201,146,15,0.12), 14, 0.18, 0, 4);
+}
+
+.recapVersionTitle {
+    -fx-text-fill: rgba(15,42,68,0.92);
+    -fx-font-weight: 900;
+}
+
+.recapVersionMeta {
+    -fx-text-fill: rgba(15,42,68,0.62);
+    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+}
+
+.recapFinalBadge {
+    -fx-background-color: rgba(201,146,15,0.16);
+    -fx-text-fill: rgba(139,92,10,0.95);
+    -fx-font-weight: 900;
+    -fx-padding: 3 10;
+    -fx-background-radius: 999;
+    -fx-border-color: rgba(201,146,15,0.28);
+    -fx-border-radius: 999;
+}
+
+.albumPlayerWrap {
+    -fx-background-color: rgba(244, 246, 251, 0.92);
+    -fx-background-radius: 16;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 16;
+    -fx-padding: 10;
+    -fx-alignment: center;
+}
+
+.albumPlayerOverlay {
+    -fx-background-color: rgba(244, 246, 251, 0.88);
+    -fx-background-radius: 14;
+    -fx-padding: 12 14;
+    -fx-border-color: rgba(15,23,42,0.10);
+    -fx-border-radius: 14;
+}
+
+.albumPlayerOverlayText {
+    -fx-text-fill: rgba(15,42,68,0.80);
+    -fx-font-weight: 900;
+}

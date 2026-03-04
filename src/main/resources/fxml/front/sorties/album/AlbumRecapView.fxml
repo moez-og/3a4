@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.media.MediaView?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="controllers.front.sorties.album.AlbumRecapController"
+      spacing="14"
+      styleClass="albumRoot"
+      stylesheets="@/styles/sorties/album/album-recap.css">
+
+    <padding>
+        <Insets top="6" right="2" bottom="6" left="2"/>
+    </padding>
+
+    <!-- Upload -->
+    <VBox spacing="10" styleClass="detailsCard albumUploadCard">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="Album" styleClass="detailsSectionTitle"/>
+            <Label fx:id="lblStatusHint" text="Disponible après la sortie" styleClass="detailsMuted"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblUpdateAvailable" text="Mise à jour disponible" visible="false" managed="false" styleClass="albumUpdateBadge"/>
+        </HBox>
+
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button fx:id="btnPickFiles" text="Choisir des fichiers" onAction="#pickFiles" styleClass="primaryBtn"/>
+            <Button fx:id="btnRefresh" text="Rafraîchir" onAction="#refresh" styleClass="ghostBtn"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblCount" text="0 média" styleClass="detailsMuted"/>
+        </HBox>
+    </VBox>
+
+    <!-- Gallery -->
+    <VBox spacing="10" styleClass="detailsCard">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="Galerie" styleClass="detailsSectionTitle"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblEmpty" text="Aucun média pour le moment." styleClass="detailsMuted" visible="false" managed="false"/>
+        </HBox>
+
+        <ScrollPane fx:id="galleryScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="albumGalleryScroll">
+            <content>
+                <TilePane fx:id="galleryPane" hgap="12" vgap="12" prefColumns="3" prefTileWidth="280" prefTileHeight="210" styleClass="albumGalleryPane"/>
+            </content>
+        </ScrollPane>
+    </VBox>
+
+    <!-- Recap -->
+    <VBox spacing="10" styleClass="detailsCard albumRecapCard">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label text="Vidéo récap" styleClass="detailsSectionTitle"/>
+            <Label fx:id="lblRecapMeta" text="" styleClass="detailsMuted"/>
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <ProgressIndicator fx:id="recapSpinner" prefWidth="18" prefHeight="18" visible="false" managed="false"/>
+
+            <Button fx:id="btnGenerate" text="Générer le récap vidéo" onAction="#generateRecap" styleClass="primaryBtn"/>
+            <Button fx:id="btnRegenerate" text="Régénérer" onAction="#regenerateRecap" styleClass="ghostBtn" visible="false" managed="false"/>
+        </HBox>
+
+        <Separator/>
+
+        <!-- Versions timeline -->
+        <ScrollPane fx:id="versionsScroll" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="albumVersionsScroll">
+            <content>
+                <VBox fx:id="versionsBox" spacing="10" styleClass="albumVersionsBox"/>
+            </content>
+        </ScrollPane>
+
+        <StackPane fx:id="playerWrap" styleClass="albumPlayerWrap" minHeight="260" prefHeight="280">
+            <MediaView fx:id="mediaView" preserveRatio="true"/>
+            <Label fx:id="lblNoVideo" text="Aucune vidéo générée." styleClass="detailsMuted"/>
+            <VBox fx:id="playerOverlay" alignment="CENTER" spacing="8" visible="false" managed="false" styleClass="albumPlayerOverlay">
+                <ProgressIndicator fx:id="playerOverlaySpinner" prefWidth="26" prefHeight="26"/>
+                <Label fx:id="lblPlayerOverlay" text="Chargement…" styleClass="albumPlayerOverlayText"/>
+            </VBox>
+        </StackPane>
+
+        <HBox fx:id="recapMetaRow" alignment="CENTER_LEFT" spacing="10" visible="false" managed="false">
+            <Label text="Titre" styleClass="detailsMuted"/>
+            <TextField fx:id="tfVideoTitle" promptText="Titre généré (IA)" editable="false" HBox.hgrow="ALWAYS"/>
+            <Label text="Ambiance" styleClass="detailsMuted"/>
+            <TextField fx:id="tfMood" promptText="mood" editable="false" prefWidth="140"/>
+        </HBox>
+    </VBox>
+
+</VBox>

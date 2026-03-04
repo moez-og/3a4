@@ -35,8 +35,17 @@ build/
 ### VS Code ###
 .vscode/
 
-### Local secrets ###
-local-secrets.properties
+# Local secrets (SMTP/Twilio) — do not commit
+app-secrets.properties
+.app-secrets.properties
+
+# Generated media/runtime folders — do not commit
+uploads/
+outputs/
+
+# Python transient
+__pycache__/
+*.pyc
 
 ### Mac OS ###
 .DS_Store

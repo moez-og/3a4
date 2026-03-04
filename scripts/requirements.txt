@@ -1,0 +1,11 @@
+# Dependencies for scripts/sortie_recap_ai.py
+# Install (Windows):
+#   py -m pip install -r scripts/requirements.txt
+
+requests>=2.31.0
+Pillow>=10.0.0
+moviepy>=1.0.3
+imageio-ffmpeg>=0.4.9
+
+# Optional (only if you enable OpenAI calls in the script)
+openai>=1.0.0

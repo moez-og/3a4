@@ -7,6 +7,50 @@
 }
 
 /* =========================
+   GLOBAL POLISH (scrollbars + focus)
+========================= */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(15,23,42,0.16);
+    -fx-background-radius: 999;
+}
+
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(15,23,42,0.22);
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 2;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: rgba(15,23,42,0.35);
+}
+
+.text-field:focused,
+.text-area:focused,
+.combo-box-base:focused {
+    -fx-effect: dropshadow(gaussian, rgba(22,58,92,0.12), 14, 0.18, 0, 0);
+}
+
+/* =========================
    SIDEBAR
 ========================= */
 .sidebar {
@@ -180,19 +224,13 @@
     -fx-border-radius: 18;
     -fx-effect: dropshadow(gaussian, rgba(10,20,40,0.10), 18, 0.18, 0, 6);
 }
-/* ── Bouton Analytics (accent doré) ── */
-.navBtnAnalytics {
-    -fx-background-color: rgba(212,175,55,0.22);
-    -fx-border-color: rgba(212,175,55,0.55);
-    -fx-text-fill: #f5e17a;
-    -fx-font-weight: 900;
+
+/* Dashboard: avoid 'zoom' feel by allowing vertical scroll for large charts */
+.dashboardScroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
 }
-.navBtnAnalytics:hover {
-    -fx-background-color: rgba(212,175,55,0.35);
-    -fx-border-color: rgba(212,175,55,0.75);
-    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.30), 12, 0.20, 0, 3);
-}
-.navBtnAnalytics.active {
-    -fx-background-color: rgba(212,175,55,0.45);
-    -fx-border-color: rgba(212,175,55,0.90);
+.dashboardScroll > .viewport {
+    -fx-background-color: transparent;
 }
