@@ -35,11 +35,12 @@ build/
 ### VS Code ###
 .vscode/
 
-# Local secrets (SMTP/Twilio) — do not commit
+### Local secrets ###
+local-secrets.properties
 app-secrets.properties
 .app-secrets.properties
 
-# Generated media/runtime folders — do not commit
+### Runtime / local data ###
 uploads/
 outputs/
 

@@ -9,7 +9,7 @@ import java.sql.SQLException;
 
 public class Mydb {
 
-    private final String url="jdbc:mysql://localhost:3306/fintokhrejj";
+    private final String url="jdbc:mysql://localhost:3306/fintokhrej";
     private final String user="root";
     private final String password="";
 

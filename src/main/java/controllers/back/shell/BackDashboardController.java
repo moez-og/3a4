@@ -41,7 +41,7 @@ public class BackDashboardController {
     private static final String LIEUX_VIEW_PATH = "/fxml/back/lieux/LieuxAdmin.fxml";
     private static final String OFFRES_VIEW_PATH = "/fxml/back/offres/OffresAdmin.fxml";
     private static final String EVENTS_VIEW_PATH = "/fxml/back/evenements/EvenementsAdmin.fxml";
-    private static final String LOGIN_VIEW_PATH = "/fxml/common/auth/Login.fxml";
+    private static final String LOGIN_VIEW_PATH = "/fxml/common/auth/auth/Login.fxml";
 
     @FXML private StackPane dynamicContent;
 

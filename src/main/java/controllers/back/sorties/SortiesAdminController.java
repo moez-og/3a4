@@ -1113,312 +1113,312 @@ public class SortiesAdminController {
         dpDate.setPromptText("Date");
 
         dpDate.setDayCellFactory(p -> new DateCell() {
-        @Override
-        public void updateItem(LocalDate item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty || item == null) return;
-            setDisable(item.isBefore(LocalDate.now()));
-        }
-    });
+            @Override
+            public void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) return;
+                setDisable(item.isBefore(LocalDate.now()));
+            }
+        });
 
-    Spinner<Integer> spHour = new Spinner<>(0, 23, 10);
-    Spinner<Integer> spMin  = new Spinner<>(0, 59, 0);
+        Spinner<Integer> spHour = new Spinner<>(0, 23, 10);
+        Spinner<Integer> spMin  = new Spinner<>(0, 59, 0);
         spHour.setEditable(true);
         spMin.setEditable(true);
         spHour.setPrefWidth(110);
         spMin.setPrefWidth(110);
 
-    CheckBox cbNoBudget = new CheckBox("Aucun budget");
-    TextField tfBudget  = new TextField();
+        CheckBox cbNoBudget = new CheckBox("Aucun budget");
+        TextField tfBudget  = new TextField();
         tfBudget.setPromptText("Budget max (TND)");
 
         cbNoBudget.selectedProperty().addListener((obs, o, n) -> {
-        tfBudget.setDisable(Boolean.TRUE.equals(n));
-        if (Boolean.TRUE.equals(n)) tfBudget.setText("0");
-        else if ("0".equals(tfBudget.getText())) tfBudget.clear();
-    });
+            tfBudget.setDisable(Boolean.TRUE.equals(n));
+            if (Boolean.TRUE.equals(n)) tfBudget.setText("0");
+            else if ("0".equals(tfBudget.getText())) tfBudget.clear();
+        });
 
-    Spinner<Integer> spPlaces = new Spinner<>(1, 999, 5);
+        Spinner<Integer> spPlaces = new Spinner<>(1, 999, 5);
         spPlaces.setEditable(true);
 
-    ComboBox<String> cbStatut = new ComboBox<>(
-            FXCollections.observableArrayList("OUVERTE", "CLOTUREE", "ANNULEE", "TERMINEE"));
+        ComboBox<String> cbStatut = new ComboBox<>(
+                FXCollections.observableArrayList("OUVERTE", "CLOTUREE", "ANNULEE", "TERMINEE"));
         cbStatut.getSelectionModel().select("OUVERTE");
 
-    ImageView imgPrev = new ImageView();
+        ImageView imgPrev = new ImageView();
         imgPrev.setFitWidth(420);
         imgPrev.setFitHeight(200);
         imgPrev.setPreserveRatio(false);
-    Rectangle clipForm = new Rectangle(420, 200);
+        Rectangle clipForm = new Rectangle(420, 200);
         clipForm.setArcWidth(24);
         clipForm.setArcHeight(24);
         imgPrev.setClip(clipForm);
 
-    Label imgEmpty = new Label("Aucune image");
+        Label imgEmpty = new Label("Aucune image");
         imgEmpty.getStyleClass().add("imageEmpty");
 
-    StackPane imgWrap = new StackPane(imgPrev, imgEmpty);
+        StackPane imgWrap = new StackPane(imgPrev, imgEmpty);
         imgWrap.getStyleClass().add("imageWrap");
         StackPane.setAlignment(imgEmpty, Pos.CENTER);
 
-    Label imgPath = new Label("");
+        Label imgPath = new Label("");
         imgPath.getStyleClass().add("hint");
 
-    Button btnPickImg = new Button("Uploader image");
+        Button btnPickImg = new Button("Uploader image");
         btnPickImg.getStyleClass().add("btn-pill");
 
-    final String[] pickedPath          = {null};
-    final String[] lastPreviewImgPath  = {null};
-    final Image[]  cachedPreviewImage  = {null};
+        final String[] pickedPath          = {null};
+        final String[] lastPreviewImgPath  = {null};
+        final Image[]  cachedPreviewImage  = {null};
 
-    // ====== PREVIEW LIVE ======
-    VBox previewCard = new VBox(10);
+        // ====== PREVIEW LIVE ======
+        VBox previewCard = new VBox(10);
         previewCard.getStyleClass().add("previewCard");
         previewCard.setPrefWidth(380);
         previewCard.setMinWidth(300);
         previewCard.setMaxWidth(520);
 
-    StackPane previewImgWrap = new StackPane();
+        StackPane previewImgWrap = new StackPane();
         previewImgWrap.getStyleClass().add("previewImageWrap");
 
-    ImageView previewIV = new ImageView();
+        ImageView previewIV = new ImageView();
         previewIV.setFitWidth(340);
         previewIV.setFitHeight(180);
         previewIV.setPreserveRatio(false);
         previewIV.setSmooth(true);
         previewIV.setCache(true);
         previewIV.setCacheHint(CacheHint.SPEED);
-    Rectangle clipPrev = new Rectangle(340, 180);
+        Rectangle clipPrev = new Rectangle(340, 180);
         clipPrev.setArcWidth(22);
         clipPrev.setArcHeight(22);
         previewIV.setClip(clipPrev);
 
-    Label previewImgEmpty = new Label("Aucune image");
+        Label previewImgEmpty = new Label("Aucune image");
         previewImgEmpty.getStyleClass().add("previewImageEmpty");
         previewImgWrap.getChildren().addAll(previewIV, previewImgEmpty);
 
-    Label previewStatus = new Label("OUVERTE");
+        Label previewStatus = new Label("OUVERTE");
         previewStatus.getStyleClass().addAll("statusChip", "status-ouverte");
         StackPane.setAlignment(previewStatus, Pos.TOP_LEFT);
         StackPane.setMargin(previewStatus, new Insets(10, 0, 0, 10));
         previewImgWrap.getChildren().add(previewStatus);
 
-    Label previewTitle     = new Label("Titre de la sortie");
+        Label previewTitle     = new Label("Titre de la sortie");
         previewTitle.getStyleClass().add("previewTitle");
         previewTitle.setWrapText(true);
 
-    Label previewMeta = new Label("Ville • Région • Activité");
+        Label previewMeta = new Label("Ville • Région • Activité");
         previewMeta.getStyleClass().add("previewMeta");
         previewMeta.setWrapText(true);
 
-    Label previewLine = new Label("📅 —   •   💰 —   •   👥 —");
+        Label previewLine = new Label("📅 —   •   💰 —   •   👥 —");
         previewLine.getStyleClass().add("previewLine");
         previewLine.setWrapText(true);
 
-    Label previewMeet = new Label("🤝 —");
+        Label previewMeet = new Label("🤝 —");
         previewMeet.getStyleClass().add("previewLine");
         previewMeet.setWrapText(true);
 
-    Label previewDescTitle = new Label("Description");
+        Label previewDescTitle = new Label("Description");
         previewDescTitle.getStyleClass().add("previewSectionTitle");
 
-    Label previewDesc = new Label("—");
+        Label previewDesc = new Label("—");
         previewDesc.getStyleClass().add("previewDesc");
         previewDesc.setWrapText(true);
 
-    Label liveHint = new Label("");
+        Label liveHint = new Label("");
         liveHint.getStyleClass().add("liveHint");
 
         previewCard.getChildren().addAll(
                 new Label("Aperçu en direct"),
-    previewImgWrap, previewTitle, previewMeta,
-    previewLine, previewMeet, previewDescTitle, previewDesc, liveHint
+                previewImgWrap, previewTitle, previewMeta,
+                previewLine, previewMeet, previewDescTitle, previewDesc, liveHint
         );
         previewCard.getChildren().get(0).getStyleClass().add("previewHeader");
 
         previewCard.widthProperty().addListener((obs, o, w) -> {
-        double ww = Math.max(280, w.doubleValue() - 24);
-        previewIV.setFitWidth(ww);
-        clipPrev.setWidth(ww);
-    });
+            double ww = Math.max(280, w.doubleValue() - 24);
+            previewIV.setFitWidth(ww);
+            clipPrev.setWidth(ww);
+        });
 
-    Runnable applyPreviewImageIfChanged = () -> {
-        String p = pickedPath[0];
-        if (Objects.equals(p, lastPreviewImgPath[0])) return;
-        lastPreviewImgPath[0] = p;
-        cachedPreviewImage[0] = loadImageOrNull(p);
-        previewIV.setImage(cachedPreviewImage[0]);
-        boolean emptyImg = (cachedPreviewImage[0] == null);
-        previewImgEmpty.setVisible(emptyImg);
-        previewImgEmpty.setManaged(emptyImg);
-    };
+        Runnable applyPreviewImageIfChanged = () -> {
+            String p = pickedPath[0];
+            if (Objects.equals(p, lastPreviewImgPath[0])) return;
+            lastPreviewImgPath[0] = p;
+            cachedPreviewImage[0] = loadImageOrNull(p);
+            previewIV.setImage(cachedPreviewImage[0]);
+            boolean emptyImg = (cachedPreviewImage[0] == null);
+            previewImgEmpty.setVisible(emptyImg);
+            previewImgEmpty.setManaged(emptyImg);
+        };
 
-    Runnable updatePreviewNow = () -> {
-        String t = safe(tfTitre.getText()).trim();
-        previewTitle.setText(t.isEmpty() ? "Titre de la sortie" : t);
+        Runnable updatePreviewNow = () -> {
+            String t = safe(tfTitre.getText()).trim();
+            previewTitle.setText(t.isEmpty() ? "Titre de la sortie" : t);
 
-        String ville     = safe(cbVille.getValue());
-        String regionSel = cbRegion.getValue();
-        String region    = TunisiaGeo.REGION_OTHER.equals(regionSel)
-                ? safe(tfRegionAutre.getText()).trim()
-                : safe(regionSel);
+            String ville     = safe(cbVille.getValue());
+            String regionSel = cbRegion.getValue();
+            String region    = TunisiaGeo.REGION_OTHER.equals(regionSel)
+                    ? safe(tfRegionAutre.getText()).trim()
+                    : safe(regionSel);
 
-        String actSel = safe(cbAct.getValue());
-        String act    = "Autre".equalsIgnoreCase(actSel)
-                ? safe(tfAutreAct.getText()).trim()
-                : actSel;
+            String actSel = safe(cbAct.getValue());
+            String act    = "Autre".equalsIgnoreCase(actSel)
+                    ? safe(tfAutreAct.getText()).trim()
+                    : actSel;
 
-        previewMeta.setText(
-                (ville.isEmpty() ? "Ville" : ville) + " • " +
-                        (region.isEmpty() ? "Région" : region) + " • " +
-                        (act.isEmpty() ? "Activité" : act));
+            previewMeta.setText(
+                    (ville.isEmpty() ? "Ville" : ville) + " • " +
+                            (region.isEmpty() ? "Région" : region) + " • " +
+                            (act.isEmpty() ? "Activité" : act));
 
-        LocalDate d  = dpDate.getValue();
-        LocalDateTime dt = (d == null) ? null
-                : LocalDateTime.of(d, LocalTime.of(spHour.getValue(), spMin.getValue()));
-        String when  = (dt == null) ? "—" : DT_FMT.format(dt);
+            LocalDate d  = dpDate.getValue();
+            LocalDateTime dt = (d == null) ? null
+                    : LocalDateTime.of(d, LocalTime.of(spHour.getValue(), spMin.getValue()));
+            String when  = (dt == null) ? "—" : DT_FMT.format(dt);
 
-        String budget;
-        if (cbNoBudget.isSelected()) {
-            budget = "Aucun budget";
-        } else {
-            String raw = safe(tfBudget.getText()).trim().replace(',', '.');
-            if (raw.isEmpty()) budget = "—";
-            else {
-                try {
-                    double v = Double.parseDouble(raw);
-                    budget = (v <= 0) ? "Aucun budget" : (MONEY_FMT.format(v) + " TND max");
-                } catch (Exception ex) { budget = "Budget invalide"; }
+            String budget;
+            if (cbNoBudget.isSelected()) {
+                budget = "Aucun budget";
+            } else {
+                String raw = safe(tfBudget.getText()).trim().replace(',', '.');
+                if (raw.isEmpty()) budget = "—";
+                else {
+                    try {
+                        double v = Double.parseDouble(raw);
+                        budget = (v <= 0) ? "Aucun budget" : (MONEY_FMT.format(v) + " TND max");
+                    } catch (Exception ex) { budget = "Budget invalide"; }
+                }
             }
-        }
 
-        previewLine.setText("📅 " + when + "   •   💰 " + budget
-                + "   •   👥 " + spPlaces.getValue() + " places");
+            previewLine.setText("📅 " + when + "   •   💰 " + budget
+                    + "   •   👥 " + spPlaces.getValue() + " places");
 
-        String meet = safe(tfPoint.getText()).trim();
-        previewMeet.setText("🤝 " + (meet.isEmpty() ? "—" : meet));
+            String meet = safe(tfPoint.getText()).trim();
+            previewMeet.setText("🤝 " + (meet.isEmpty() ? "—" : meet));
 
-        String desc = safe(taDesc.getText()).trim();
-        previewDesc.setText(desc.isEmpty() ? "—" : desc);
+            String desc = safe(taDesc.getText()).trim();
+            previewDesc.setText(desc.isEmpty() ? "—" : desc);
 
-        String st = safe(cbStatut.getValue()).trim();
-        if (st.isEmpty()) st = "OUVERTE";
-        previewStatus.setText(st);
-        previewStatus.getStyleClass().removeIf(c -> c.startsWith("status-"));
-        previewStatus.getStyleClass().add("status-" + st.trim().toLowerCase());
+            String st = safe(cbStatut.getValue()).trim();
+            if (st.isEmpty()) st = "OUVERTE";
+            previewStatus.setText(st);
+            previewStatus.getStyleClass().removeIf(c -> c.startsWith("status-"));
+            previewStatus.getStyleClass().add("status-" + st.trim().toLowerCase());
 
-        applyPreviewImageIfChanged.run();
+            applyPreviewImageIfChanged.run();
 
-        String validation = validateLive(tfTitre, cbVille, cbRegion, tfRegionAutre, tfPoint,
-                cbAct, tfAutreAct, dpDate, spHour, spMin, cbNoBudget, tfBudget, cbStatut);
-        liveHint.setText(validation);
-        liveHint.setVisible(!validation.isEmpty());
-        liveHint.setManaged(!validation.isEmpty());
-    };
+            String validation = validateLive(tfTitre, cbVille, cbRegion, tfRegionAutre, tfPoint,
+                    cbAct, tfAutreAct, dpDate, spHour, spMin, cbNoBudget, tfBudget, cbStatut);
+            liveHint.setText(validation);
+            liveHint.setVisible(!validation.isEmpty());
+            liveHint.setManaged(!validation.isEmpty());
+        };
 
-    PauseTransition debounce = new PauseTransition(Duration.millis(120));
-    Runnable schedulePreview = () -> {
-        debounce.stop();
-        debounce.setOnFinished(ev -> updatePreviewNow.run());
-        debounce.playFromStart();
-    };
+        PauseTransition debounce = new PauseTransition(Duration.millis(120));
+        Runnable schedulePreview = () -> {
+            debounce.stop();
+            debounce.setOnFinished(ev -> updatePreviewNow.run());
+            debounce.playFromStart();
+        };
 
         btnPickImg.setOnAction(e -> {
-        FileChooser fc = new FileChooser();
-        fc.setTitle("Choisir une image");
-        fc.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.webp"));
-        File f = fc.showOpenDialog(dialog);
-        if (f == null) return;
-        try {
-            String saved = UploadStore.saveSortieImage(f);
-            pickedPath[0] = saved;
-            imgPath.setText(shortPath(saved));
-            Image im = loadImageOrNull(saved);
-            imgPrev.setImage(im);
-            boolean empty = (im == null);
-            imgEmpty.setVisible(empty);
-            imgEmpty.setManaged(empty);
-            applyPreviewImageIfChanged.run();
-            schedulePreview.run();
-        } catch (Exception ex) {
-            showError("Upload", "Impossible d'uploader l'image", safe(ex.getMessage()));
-        }
-    });
+            FileChooser fc = new FileChooser();
+            fc.setTitle("Choisir une image");
+            fc.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.webp"));
+            File f = fc.showOpenDialog(dialog);
+            if (f == null) return;
+            try {
+                String saved = UploadStore.saveSortieImage(f);
+                pickedPath[0] = saved;
+                imgPath.setText(shortPath(saved));
+                Image im = loadImageOrNull(saved);
+                imgPrev.setImage(im);
+                boolean empty = (im == null);
+                imgEmpty.setVisible(empty);
+                imgEmpty.setManaged(empty);
+                applyPreviewImageIfChanged.run();
+                schedulePreview.run();
+            } catch (Exception ex) {
+                showError("Upload", "Impossible d'uploader l'image", safe(ex.getMessage()));
+            }
+        });
 
-    VBox qBox = new VBox(8);
+        VBox qBox = new VBox(8);
         qBox.getStyleClass().add("questionsBox");
-    Button btnAddQ = new Button("+ Ajouter une question");
+        Button btnAddQ = new Button("+ Ajouter une question");
         btnAddQ.getStyleClass().add("ghostBtn");
         btnAddQ.setOnAction(e -> qBox.getChildren().add(buildQuestionRow("", schedulePreview)));
 
         if (isEdit) {
-        tfTitre.setText(existing.getTitre());
-        taDesc.setText(safe(existing.getDescription()));
-        String villeToSelect = Optional.ofNullable(
-                TunisiaGeo.matchVilleForSelection(existing.getVille())).orElse(existing.getVille());
-        cbVille.getSelectionModel().select(villeToSelect);
+            tfTitre.setText(existing.getTitre());
+            taDesc.setText(safe(existing.getDescription()));
+            String villeToSelect = Optional.ofNullable(
+                    TunisiaGeo.matchVilleForSelection(existing.getVille())).orElse(existing.getVille());
+            cbVille.getSelectionModel().select(villeToSelect);
 
-        cbRegion.getItems().setAll(regionsForVille(villeToSelect));
-        String reg = safe(existing.getLieuTexte());
-        if (cbRegion.getItems().stream().anyMatch(x -> x.equalsIgnoreCase(reg))) {
-            cbRegion.getSelectionModel().select(
-                    cbRegion.getItems().stream().filter(x -> x.equalsIgnoreCase(reg))
-                            .findFirst().orElse(null));
-        } else {
-            cbRegion.getSelectionModel().select(TunisiaGeo.REGION_OTHER);
-            tfRegionAutre.setVisible(true);
-            tfRegionAutre.setManaged(true);
-            tfRegionAutre.setText(reg);
+            cbRegion.getItems().setAll(regionsForVille(villeToSelect));
+            String reg = safe(existing.getLieuTexte());
+            if (cbRegion.getItems().stream().anyMatch(x -> x.equalsIgnoreCase(reg))) {
+                cbRegion.getSelectionModel().select(
+                        cbRegion.getItems().stream().filter(x -> x.equalsIgnoreCase(reg))
+                                .findFirst().orElse(null));
+            } else {
+                cbRegion.getSelectionModel().select(TunisiaGeo.REGION_OTHER);
+                tfRegionAutre.setVisible(true);
+                tfRegionAutre.setManaged(true);
+                tfRegionAutre.setText(reg);
+            }
+
+            tfPoint.setText(existing.getPointRencontre());
+            String act = safe(existing.getTypeActivite()).trim();
+            String cat = SortieActivities.findCategoryForActivity(act);
+            if (cat != null) {
+                lvActCats.getSelectionModel().select(cat);
+                String matched = SortieActivities.matchActivityInCategory(cat, act);
+                if (matched != null) lvActs.getSelectionModel().select(matched);
+                else if (!lvActs.getItems().isEmpty()) lvActs.getSelectionModel().selectFirst();
+            } else {
+                if (!lvActCats.getItems().isEmpty()) lvActCats.getSelectionModel().selectFirst();
+                lvActs.getSelectionModel().select(SortieActivities.OTHER);
+                tfAutreAct.setVisible(true);
+                tfAutreAct.setManaged(true);
+                tfAutreAct.setText(act);
+            }
+
+            if (existing.getDateSortie() != null) {
+                dpDate.setValue(existing.getDateSortie().toLocalDate());
+                spHour.getValueFactory().setValue(existing.getDateSortie().getHour());
+                spMin.getValueFactory().setValue(existing.getDateSortie().getMinute());
+            }
+
+            if (existing.getBudgetMax() <= 0) {
+                cbNoBudget.setSelected(true);
+                tfBudget.setText("0");
+                tfBudget.setDisable(true);
+            } else {
+                tfBudget.setText(String.valueOf(existing.getBudgetMax()));
+            }
+
+            spPlaces.getValueFactory().setValue(Math.max(1, existing.getNbPlaces()));
+            cbStatut.getSelectionModel().select(
+                    safe(existing.getStatut()).isEmpty() ? "OUVERTE" : existing.getStatut());
+
+            pickedPath[0] = existing.getImageUrl();
+            imgPath.setText(shortPath(safe(existing.getImageUrl())));
+            Image im = loadImageOrNull(existing.getImageUrl());
+            imgPrev.setImage(im);
+            boolean empty = (im == null);
+            imgEmpty.setVisible(empty);
+            imgEmpty.setManaged(empty);
+
+            if (existing.getQuestions() != null) {
+                for (String q : existing.getQuestions())
+                    qBox.getChildren().add(buildQuestionRow(q, schedulePreview));
+            }
         }
-
-        tfPoint.setText(existing.getPointRencontre());
-        String act = safe(existing.getTypeActivite()).trim();
-        String cat = SortieActivities.findCategoryForActivity(act);
-        if (cat != null) {
-            lvActCats.getSelectionModel().select(cat);
-            String matched = SortieActivities.matchActivityInCategory(cat, act);
-            if (matched != null) lvActs.getSelectionModel().select(matched);
-            else if (!lvActs.getItems().isEmpty()) lvActs.getSelectionModel().selectFirst();
-        } else {
-            if (!lvActCats.getItems().isEmpty()) lvActCats.getSelectionModel().selectFirst();
-            lvActs.getSelectionModel().select(SortieActivities.OTHER);
-            tfAutreAct.setVisible(true);
-            tfAutreAct.setManaged(true);
-            tfAutreAct.setText(act);
-        }
-
-        if (existing.getDateSortie() != null) {
-            dpDate.setValue(existing.getDateSortie().toLocalDate());
-            spHour.getValueFactory().setValue(existing.getDateSortie().getHour());
-            spMin.getValueFactory().setValue(existing.getDateSortie().getMinute());
-        }
-
-        if (existing.getBudgetMax() <= 0) {
-            cbNoBudget.setSelected(true);
-            tfBudget.setText("0");
-            tfBudget.setDisable(true);
-        } else {
-            tfBudget.setText(String.valueOf(existing.getBudgetMax()));
-        }
-
-        spPlaces.getValueFactory().setValue(Math.max(1, existing.getNbPlaces()));
-        cbStatut.getSelectionModel().select(
-                safe(existing.getStatut()).isEmpty() ? "OUVERTE" : existing.getStatut());
-
-        pickedPath[0] = existing.getImageUrl();
-        imgPath.setText(shortPath(safe(existing.getImageUrl())));
-        Image im = loadImageOrNull(existing.getImageUrl());
-        imgPrev.setImage(im);
-        boolean empty = (im == null);
-        imgEmpty.setVisible(empty);
-        imgEmpty.setManaged(empty);
-
-        if (existing.getQuestions() != null) {
-            for (String q : existing.getQuestions())
-                qBox.getChildren().add(buildQuestionRow(q, schedulePreview));
-        }
-    }
 
         if (qBox.getChildren().isEmpty())
             qBox.getChildren().add(buildQuestionRow("", schedulePreview));
@@ -1439,300 +1439,300 @@ public class SortiesAdminController {
         spPlaces.valueProperty().addListener((a,b,c)    -> schedulePreview.run());
         cbStatut.valueProperty().addListener((a,b,c)    -> schedulePreview.run());
 
-    Label headline = new Label(isEdit ? "Modifier une annonce" : "Créer une annonce");
+        Label headline = new Label(isEdit ? "Modifier une annonce" : "Créer une annonce");
         headline.getStyleClass().add("dialogTitle");
 
-    GridPane grid = new GridPane();
+        GridPane grid = new GridPane();
         grid.setHgap(12);
         grid.setVgap(10);
-    ColumnConstraints c1 = new ColumnConstraints(); c1.setPercentWidth(48);
-    ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(52);
+        ColumnConstraints c1 = new ColumnConstraints(); c1.setPercentWidth(48);
+        ColumnConstraints c2 = new ColumnConstraints(); c2.setPercentWidth(52);
         grid.getColumnConstraints().addAll(c1, c2);
 
-    int r = 0;
+        int r = 0;
         grid.add(lab("Titre"), 0, r);             grid.add(tfTitre, 1, r++);
         grid.add(lab("Ville"), 0, r);             grid.add(cbVille, 1, r++);
         grid.add(lab("Lieu (région)"), 0, r);
         grid.add(new VBox(8, cbRegion, tfRegionAutre), 1, r++);
         grid.add(lab("Point de rencontre"), 0, r); grid.add(tfPoint, 1, r++);
 
-    VBox mapBox = new VBox(8, mapHint, mapView, coordsLabel);
+        VBox mapBox = new VBox(8, mapHint, mapView, coordsLabel);
         grid.add(lab("Carte"), 0, r); grid.add(mapBox, 1, r++);
         grid.add(lab("Activité"), 0, r);
         grid.add(new VBox(8, activityPicker, tfAutreAct), 1, r++);
         grid.add(lab("Date + heure"), 0, r);
-    HBox timeRow = new HBox(10, dpDate, new Label("Heure"), spHour, new Label("Min"), spMin);
+        HBox timeRow = new HBox(10, dpDate, new Label("Heure"), spHour, new Label("Min"), spMin);
         timeRow.setAlignment(Pos.CENTER_LEFT);
         grid.add(timeRow, 1, r++);
         grid.add(lab("Budget"), 0, r);
-    HBox budgetRow = new HBox(10, cbNoBudget, tfBudget);
+        HBox budgetRow = new HBox(10, cbNoBudget, tfBudget);
         budgetRow.setAlignment(Pos.CENTER_LEFT);
         grid.add(budgetRow, 1, r++);
         grid.add(lab("Nombre de places"), 0, r);  grid.add(spPlaces, 1, r++);
         grid.add(lab("Statut"), 0, r);            grid.add(cbStatut, 1, r++);
 
-    VBox imgBox = new VBox(10, imgWrap, new HBox(10, btnPickImg, imgPath));
+        VBox imgBox = new VBox(10, imgWrap, new HBox(10, btnPickImg, imgPath));
         ((HBox) imgBox.getChildren().get(1)).setAlignment(Pos.CENTER_LEFT);
-    VBox descBox = new VBox(8, lab("Description"), taDesc);
-    VBox qWrap   = new VBox(8, lab("Questions (optionnel)"), qBox, btnAddQ);
-    VBox formContent = new VBox(14, grid, imgBox, descBox, qWrap);
+        VBox descBox = new VBox(8, lab("Description"), taDesc);
+        VBox qWrap   = new VBox(8, lab("Questions (optionnel)"), qBox, btnAddQ);
+        VBox formContent = new VBox(14, grid, imgBox, descBox, qWrap);
         formContent.setPadding(new Insets(0, 6, 6, 0));
 
-    ScrollPane formScroll = new ScrollPane(formContent);
+        ScrollPane formScroll = new ScrollPane(formContent);
         formScroll.setFitToWidth(true);
         formScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         formScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         formScroll.getStyleClass().add("editorScroll");
 
-    Button btnSave   = new Button(isEdit ? "Enregistrer" : "Créer");
+        Button btnSave   = new Button(isEdit ? "Enregistrer" : "Créer");
         btnSave.getStyleClass().add("primaryBtn");
-    Button btnCancel = new Button("Annuler");
+        Button btnCancel = new Button("Annuler");
         btnCancel.getStyleClass().add("ghostBtn");
-    HBox footer = new HBox(10, btnCancel, btnSave);
+        HBox footer = new HBox(10, btnCancel, btnSave);
         footer.setAlignment(Pos.CENTER_RIGHT);
         btnCancel.setOnAction(e -> dialog.close());
 
         btnSave.setOnAction(e -> {
-        try {
-            String validation = validateLive(tfTitre, cbVille, cbRegion, tfRegionAutre, tfPoint,
-                    cbAct, tfAutreAct, dpDate, spHour, spMin, cbNoBudget, tfBudget, cbStatut);
-            if (!validation.isEmpty()) {
-                showError("Validation", "Formulaire incomplet", validation);
-                return;
+            try {
+                String validation = validateLive(tfTitre, cbVille, cbRegion, tfRegionAutre, tfPoint,
+                        cbAct, tfAutreAct, dpDate, spHour, spMin, cbNoBudget, tfBudget, cbStatut);
+                if (!validation.isEmpty()) {
+                    showError("Validation", "Formulaire incomplet", validation);
+                    return;
+                }
+
+                AnnonceSortie an = isEdit ? existing : new AnnonceSortie();
+                an.setUserId(currentUser.getId());
+                an.setTitre(req(tfTitre.getText(), "Titre"));
+                an.setDescription(emptyToNull(taDesc.getText()));
+                an.setVille(req(cbVille.getValue(), "Ville"));
+
+                String selectedRegion = cbRegion.getValue();
+                if (selectedRegion == null || selectedRegion.trim().isEmpty())
+                    throw new IllegalArgumentException("Région obligatoire");
+                an.setLieuTexte(TunisiaGeo.REGION_OTHER.equals(selectedRegion)
+                        ? req(tfRegionAutre.getText(), "Région") : selectedRegion);
+
+                an.setPointRencontre(req(tfPoint.getText(), "Point de rencontre"));
+
+                String act = cbAct.getValue();
+                if (act == null || act.trim().isEmpty())
+                    throw new IllegalArgumentException("Type d'activité obligatoire");
+                an.setTypeActivite("Autre".equalsIgnoreCase(act)
+                        ? req(tfAutreAct.getText(), "Type d'activité") : act);
+
+                LocalDate d  = dpDate.getValue();
+                LocalDateTime dt = LocalDateTime.of(d, LocalTime.of(spHour.getValue(), spMin.getValue()));
+                if (!dt.isAfter(LocalDateTime.now()))
+                    throw new IllegalArgumentException("Date + heure doit être dans le futur");
+                an.setDateSortie(dt);
+
+                an.setBudgetMax(parseBudget(tfBudget.getText(), cbNoBudget.isSelected()));
+                an.setNbPlaces(spPlaces.getValue());
+                an.setStatut(req(cbStatut.getValue(), "Statut"));
+                an.setImageUrl(emptyToNull(pickedPath[0]));
+                an.setQuestions(readQuestions(qBox));
+
+                if (isEdit) service.update(an);
+                else        service.add(an);
+
+                dialog.close();
+                loadData();
+
+            } catch (Exception ex) {
+                showError("Erreur", "Impossible d'enregistrer", safe(ex.getMessage()));
             }
-
-            AnnonceSortie an = isEdit ? existing : new AnnonceSortie();
-            an.setUserId(currentUser.getId());
-            an.setTitre(req(tfTitre.getText(), "Titre"));
-            an.setDescription(emptyToNull(taDesc.getText()));
-            an.setVille(req(cbVille.getValue(), "Ville"));
-
-            String selectedRegion = cbRegion.getValue();
-            if (selectedRegion == null || selectedRegion.trim().isEmpty())
-                throw new IllegalArgumentException("Région obligatoire");
-            an.setLieuTexte(TunisiaGeo.REGION_OTHER.equals(selectedRegion)
-                    ? req(tfRegionAutre.getText(), "Région") : selectedRegion);
-
-            an.setPointRencontre(req(tfPoint.getText(), "Point de rencontre"));
-
-            String act = cbAct.getValue();
-            if (act == null || act.trim().isEmpty())
-                throw new IllegalArgumentException("Type d'activité obligatoire");
-            an.setTypeActivite("Autre".equalsIgnoreCase(act)
-                    ? req(tfAutreAct.getText(), "Type d'activité") : act);
-
-            LocalDate d  = dpDate.getValue();
-            LocalDateTime dt = LocalDateTime.of(d, LocalTime.of(spHour.getValue(), spMin.getValue()));
-            if (!dt.isAfter(LocalDateTime.now()))
-                throw new IllegalArgumentException("Date + heure doit être dans le futur");
-            an.setDateSortie(dt);
-
-            an.setBudgetMax(parseBudget(tfBudget.getText(), cbNoBudget.isSelected()));
-            an.setNbPlaces(spPlaces.getValue());
-            an.setStatut(req(cbStatut.getValue(), "Statut"));
-            an.setImageUrl(emptyToNull(pickedPath[0]));
-            an.setQuestions(readQuestions(qBox));
-
-            if (isEdit) service.update(an);
-            else        service.add(an);
-
-            dialog.close();
-            loadData();
-
-        } catch (Exception ex) {
-            showError("Erreur", "Impossible d'enregistrer", safe(ex.getMessage()));
-        }
-    });
+        });
 
         updatePreviewNow.run();
         btnSave.setDisable(!liveHint.getText().isEmpty());
         liveHint.textProperty().addListener((obs, o, n) -> btnSave.setDisable(n != null && !n.isEmpty()));
 
-    VBox shell = new VBox(12);
+        VBox shell = new VBox(12);
         shell.setPadding(new Insets(16));
         shell.getStyleClass().add("dialogRoot");
 
-    SplitPane split = new SplitPane(formScroll, previewCard);
+        SplitPane split = new SplitPane(formScroll, previewCard);
         split.setDividerPositions(0.64);
         split.getStyleClass().add("editorSplit");
         VBox.setVgrow(split, Priority.ALWAYS);
 
         shell.getChildren().addAll(headline, split, footer);
 
-    Scene scene = new Scene(shell, 980, 820);
+        Scene scene = new Scene(shell, 980, 820);
         scene.getStylesheets().add(getClass().getResource("/styles/back/sorties-admin.css").toExternalForm());
         dialog.setScene(scene);
         dialog.setResizable(true);
         dialog.centerOnScreen();
         dialog.showAndWait();
-}
+    }
 
-private String validateLive(
-        TextField tfTitre, ComboBox<String> cbVille, ComboBox<String> cbRegion,
-        TextField tfRegionAutre, TextField tfPoint, ComboBox<String> cbAct,
-        TextField tfAutreAct, DatePicker dpDate, Spinner<Integer> spHour,
-        Spinner<Integer> spMin, CheckBox cbNoBudget, TextField tfBudget,
-        ComboBox<String> cbStatut) {
+    private String validateLive(
+            TextField tfTitre, ComboBox<String> cbVille, ComboBox<String> cbRegion,
+            TextField tfRegionAutre, TextField tfPoint, ComboBox<String> cbAct,
+            TextField tfAutreAct, DatePicker dpDate, Spinner<Integer> spHour,
+            Spinner<Integer> spMin, CheckBox cbNoBudget, TextField tfBudget,
+            ComboBox<String> cbStatut) {
 
-    if (safe(tfTitre.getText()).trim().length() < 5) return "Titre trop court (min 5 caractères)";
-    if (safe(cbVille.getValue()).trim().isEmpty())   return "Choisir une ville";
+        if (safe(tfTitre.getText()).trim().length() < 5) return "Titre trop court (min 5 caractères)";
+        if (safe(cbVille.getValue()).trim().isEmpty())   return "Choisir une ville";
 
-    String regSel = cbRegion.getValue();
-    if (regSel == null || regSel.trim().isEmpty()) return "Choisir une région";
-    if (TunisiaGeo.REGION_OTHER.equals(regSel) && safe(tfRegionAutre.getText()).trim().isEmpty())
-        return "Écrire la région";
+        String regSel = cbRegion.getValue();
+        if (regSel == null || regSel.trim().isEmpty()) return "Choisir une région";
+        if (TunisiaGeo.REGION_OTHER.equals(regSel) && safe(tfRegionAutre.getText()).trim().isEmpty())
+            return "Écrire la région";
 
-    if (safe(tfPoint.getText()).trim().length() < 3) return "Point de rencontre obligatoire";
+        if (safe(tfPoint.getText()).trim().length() < 3) return "Point de rencontre obligatoire";
 
-    String actSel = safe(cbAct.getValue()).trim();
-    if (actSel.isEmpty()) return "Choisir une activité";
-    if ("Autre".equalsIgnoreCase(actSel) && safe(tfAutreAct.getText()).trim().isEmpty())
-        return "Écrire le type d'activité";
+        String actSel = safe(cbAct.getValue()).trim();
+        if (actSel.isEmpty()) return "Choisir une activité";
+        if ("Autre".equalsIgnoreCase(actSel) && safe(tfAutreAct.getText()).trim().isEmpty())
+            return "Écrire le type d'activité";
 
-    LocalDate d = dpDate.getValue();
-    if (d == null) return "Choisir une date";
-    if (!LocalDateTime.of(d, LocalTime.of(spHour.getValue(), spMin.getValue()))
-            .isAfter(LocalDateTime.now())) return "Date + heure doit être dans le futur";
+        LocalDate d = dpDate.getValue();
+        if (d == null) return "Choisir une date";
+        if (!LocalDateTime.of(d, LocalTime.of(spHour.getValue(), spMin.getValue()))
+                .isAfter(LocalDateTime.now())) return "Date + heure doit être dans le futur";
 
-    if (!cbNoBudget.isSelected()) {
-        String raw = safe(tfBudget.getText()).trim().replace(',', '.');
-        if (raw.isEmpty()) return "Budget vide ou cocher 'Aucun budget'";
+        if (!cbNoBudget.isSelected()) {
+            String raw = safe(tfBudget.getText()).trim().replace(',', '.');
+            if (raw.isEmpty()) return "Budget vide ou cocher 'Aucun budget'";
+            try {
+                if (Double.parseDouble(raw) < 0) return "Budget invalide";
+            } catch (Exception ex) { return "Budget invalide"; }
+        }
+
+        if (safe(cbStatut.getValue()).trim().isEmpty()) return "Choisir un statut";
+        return "";
+    }
+
+    private HBox buildQuestionRow(String value, Runnable updatePreview) {
+        TextField tf = new TextField(value == null ? "" : value);
+        tf.setPromptText("Ex: Avez-vous une voiture ?");
+        tf.getStyleClass().add("qField");
+
+        Button rm = new Button("✕");
+        rm.getStyleClass().add("qRemove");
+
+        HBox row = new HBox(10, tf, rm);
+        row.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(tf, Priority.ALWAYS);
+        tf.textProperty().addListener((a,b,c) -> updatePreview.run());
+        rm.setOnAction(e -> {
+            VBox parent = (VBox) row.getParent();
+            if (parent != null) parent.getChildren().remove(row);
+            updatePreview.run();
+        });
+        return row;
+    }
+
+    private List<String> readQuestions(VBox qBox) {
+        List<String> out = new ArrayList<>();
+        for (Node n : qBox.getChildren()) {
+            if (!(n instanceof HBox row)) continue;
+            for (Node c : row.getChildren()) {
+                if (c instanceof TextField tf) {
+                    String s = safe(tf.getText()).trim();
+                    if (!s.isEmpty()) out.add(s);
+                }
+            }
+        }
+        return out;
+    }
+
+    private double parseBudget(String raw, boolean noBudget) {
+        if (noBudget) return 0.0;
+        String s = safe(raw).trim().replace(',', '.');
+        if (s.isEmpty()) throw new IllegalArgumentException("Budget obligatoire ou cocher 'Aucun budget'");
+        double v = Double.parseDouble(s);
+        if (v < 0) throw new IllegalArgumentException("Budget invalide");
+        return v;
+    }
+
+    private Label lab(String t) {
+        Label l = new Label(t);
+        l.getStyleClass().add("formLabel");
+        return l;
+    }
+
+    private String req(String s, String label) {
+        if (s == null || s.trim().isEmpty()) throw new IllegalArgumentException(label + " obligatoire");
+        return s.trim();
+    }
+
+    private String emptyToNull(String s) {
+        if (s == null) return null;
+        String t = s.trim();
+        return t.isEmpty() ? null : t;
+    }
+
+    private boolean confirmDelete(String msg) {
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION);
+        a.setTitle("Confirmation");
+        a.setHeaderText("Suppression");
+        a.setContentText(msg);
+        Optional<ButtonType> r = a.showAndWait();
+        return r.isPresent() && r.get() == ButtonType.OK;
+    }
+
+    private void showError(String title, String header, String content) {
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setTitle(title);
+        a.setHeaderText(header);
+        a.setContentText(content);
+        a.showAndWait();
+    }
+
+    private void showInfo(String title, String content) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle(title);
+        a.setHeaderText(null);
+        a.setContentText(content);
+        a.showAndWait();
+    }
+
+    private String safe(String s) { return s == null ? "" : s; }
+
+    private String shortPath(String p) {
+        if (p == null) return "";
         try {
-            if (Double.parseDouble(raw) < 0) return "Budget invalide";
-        } catch (Exception ex) { return "Budget invalide"; }
+            File f = new File(p);
+            if (f.getName() != null && !f.getName().isEmpty()) return f.getName();
+        } catch (Exception ignored) {}
+        return p;
     }
 
-    if (safe(cbStatut.getValue()).trim().isEmpty()) return "Choisir un statut";
-    return "";
-}
-
-private HBox buildQuestionRow(String value, Runnable updatePreview) {
-    TextField tf = new TextField(value == null ? "" : value);
-    tf.setPromptText("Ex: Avez-vous une voiture ?");
-    tf.getStyleClass().add("qField");
-
-    Button rm = new Button("✕");
-    rm.getStyleClass().add("qRemove");
-
-    HBox row = new HBox(10, tf, rm);
-    row.setAlignment(Pos.CENTER_LEFT);
-    HBox.setHgrow(tf, Priority.ALWAYS);
-    tf.textProperty().addListener((a,b,c) -> updatePreview.run());
-    rm.setOnAction(e -> {
-        VBox parent = (VBox) row.getParent();
-        if (parent != null) parent.getChildren().remove(row);
-        updatePreview.run();
-    });
-    return row;
-}
-
-private List<String> readQuestions(VBox qBox) {
-    List<String> out = new ArrayList<>();
-    for (Node n : qBox.getChildren()) {
-        if (!(n instanceof HBox row)) continue;
-        for (Node c : row.getChildren()) {
-            if (c instanceof TextField tf) {
-                String s = safe(tf.getText()).trim();
-                if (!s.isEmpty()) out.add(s);
+    private Image loadImageOrFallback(String pathOrUrl) {
+        try {
+            if (pathOrUrl != null && !pathOrUrl.trim().isEmpty()) {
+                String p = pathOrUrl.trim();
+                File f = new File(p);
+                if (p.startsWith("file:")) return new Image(p, true);
+                if (f.exists()) return new Image(f.toURI().toString(), true);
+                if (p.startsWith("http://") || p.startsWith("https://")) return new Image(p, true);
+                if (p.startsWith("/")) {
+                    var u = getClass().getResource(p);
+                    if (u != null) return new Image(u.toExternalForm(), true);
+                }
             }
-        }
+        } catch (Exception ignored) {}
+        return new Image(getClass().getResource("/images/demo/hero/hero.jpg").toExternalForm(), true);
     }
-    return out;
-}
 
-private double parseBudget(String raw, boolean noBudget) {
-    if (noBudget) return 0.0;
-    String s = safe(raw).trim().replace(',', '.');
-    if (s.isEmpty()) throw new IllegalArgumentException("Budget obligatoire ou cocher 'Aucun budget'");
-    double v = Double.parseDouble(s);
-    if (v < 0) throw new IllegalArgumentException("Budget invalide");
-    return v;
-}
-
-private Label lab(String t) {
-    Label l = new Label(t);
-    l.getStyleClass().add("formLabel");
-    return l;
-}
-
-private String req(String s, String label) {
-    if (s == null || s.trim().isEmpty()) throw new IllegalArgumentException(label + " obligatoire");
-    return s.trim();
-}
-
-private String emptyToNull(String s) {
-    if (s == null) return null;
-    String t = s.trim();
-    return t.isEmpty() ? null : t;
-}
-
-private boolean confirmDelete(String msg) {
-    Alert a = new Alert(Alert.AlertType.CONFIRMATION);
-    a.setTitle("Confirmation");
-    a.setHeaderText("Suppression");
-    a.setContentText(msg);
-    Optional<ButtonType> r = a.showAndWait();
-    return r.isPresent() && r.get() == ButtonType.OK;
-}
-
-private void showError(String title, String header, String content) {
-    Alert a = new Alert(Alert.AlertType.ERROR);
-    a.setTitle(title);
-    a.setHeaderText(header);
-    a.setContentText(content);
-    a.showAndWait();
-}
-
-private void showInfo(String title, String content) {
-    Alert a = new Alert(Alert.AlertType.INFORMATION);
-    a.setTitle(title);
-    a.setHeaderText(null);
-    a.setContentText(content);
-    a.showAndWait();
-}
-
-private String safe(String s) { return s == null ? "" : s; }
-
-private String shortPath(String p) {
-    if (p == null) return "";
-    try {
-        File f = new File(p);
-        if (f.getName() != null && !f.getName().isEmpty()) return f.getName();
-    } catch (Exception ignored) {}
-    return p;
-}
-
-private Image loadImageOrFallback(String pathOrUrl) {
-    try {
-        if (pathOrUrl != null && !pathOrUrl.trim().isEmpty()) {
-            String p = pathOrUrl.trim();
-            File f = new File(p);
-            if (p.startsWith("file:")) return new Image(p, true);
-            if (f.exists()) return new Image(f.toURI().toString(), true);
-            if (p.startsWith("http://") || p.startsWith("https://")) return new Image(p, true);
-            if (p.startsWith("/")) {
-                var u = getClass().getResource(p);
-                if (u != null) return new Image(u.toExternalForm(), true);
+    private Image loadImageOrNull(String pathOrUrl) {
+        try {
+            if (pathOrUrl != null && !pathOrUrl.trim().isEmpty()) {
+                String p = pathOrUrl.trim();
+                File f = new File(p);
+                if (p.startsWith("file:")) return new Image(p, true);
+                if (f.exists()) return new Image(f.toURI().toString(), true);
+                if (p.startsWith("http://") || p.startsWith("https://")) return new Image(p, true);
+                if (p.startsWith("/")) {
+                    var u = getClass().getResource(p);
+                    if (u != null) return new Image(u.toExternalForm(), true);
+                }
             }
-        }
-    } catch (Exception ignored) {}
-    return new Image(getClass().getResource("/images/demo/hero/hero.jpg").toExternalForm(), true);
-}
-
-private Image loadImageOrNull(String pathOrUrl) {
-    try {
-        if (pathOrUrl != null && !pathOrUrl.trim().isEmpty()) {
-            String p = pathOrUrl.trim();
-            File f = new File(p);
-            if (p.startsWith("file:")) return new Image(p, true);
-            if (f.exists()) return new Image(f.toURI().toString(), true);
-            if (p.startsWith("http://") || p.startsWith("https://")) return new Image(p, true);
-            if (p.startsWith("/")) {
-                var u = getClass().getResource(p);
-                if (u != null) return new Image(u.toExternalForm(), true);
-            }
-        }
-    } catch (Exception ignored) {}
-    return null;
-}
+        } catch (Exception ignored) {}
+        return null;
+    }
 }

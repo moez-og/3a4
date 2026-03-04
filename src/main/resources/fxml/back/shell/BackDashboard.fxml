@@ -59,9 +59,6 @@
 
                 <Button fx:id="btnEvents" text="Événements" onAction="#showEvents"
                         maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
-
-                <Button fx:id="btnAnalytics" text="🔬  Analytics IA" onAction="#showAnalytics"
-                        maxWidth="1.7976931348623157E308" styleClass="navBtn"/>
             </VBox>
 
             <Region VBox.vgrow="ALWAYS"/>
@@ -91,6 +88,13 @@
 
                         <right>
                             <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="headerUserBox">
+                                <StackPane>
+                                    <Button fx:id="btnNotif" text="🔔" onAction="#showNotifications"
+                                            style="-fx-background-color: rgba(15,23,42,0.06); -fx-background-radius: 999; -fx-border-color: rgba(15,23,42,0.08); -fx-border-radius: 999; -fx-min-width: 38; -fx-min-height: 38; -fx-font-weight: 900; -fx-cursor: hand;"/>
+                                    <Label fx:id="notifBadge" text="0" visible="false" managed="false"
+                                           StackPane.alignment="TOP_RIGHT"
+                                           style="-fx-background-color: linear-gradient(to right, #d4af37, #c9920f); -fx-background-radius: 999; -fx-text-fill: white; -fx-font-weight: 900; -fx-font-size: 10px; -fx-padding: 2 6 2 6; -fx-translate-x: 6; -fx-translate-y: -6;"/>
+                                </StackPane>
                                 <VBox spacing="4" alignment="CENTER_RIGHT">
                                     <Label fx:id="userName" text="Utilisateur" styleClass="userName"/>
                                     <Label fx:id="userRole" text="ROLE" styleClass="roleChip"/>

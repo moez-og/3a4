@@ -47,7 +47,7 @@ public class LoginApp extends Application {
         primaryStage.setTitle("Travel Guide - Login");
         primaryStage.setResizable(true);
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/auth/Login.fxml"));
             Parent root = loader.load();
             LoginController controller = loader.getController();
             controller.setPrimaryStage(primaryStage);
@@ -111,7 +111,7 @@ public class LoginApp extends Application {
     }
 
     private void openSignInScene() throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/Login.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/auth/Login.fxml"));
         Parent root = loader.load();
         LoginController controller = loader.getController();
         controller.setPrimaryStage(primaryStage);
@@ -125,7 +125,7 @@ public class LoginApp extends Application {
     }
 
     private void openSignUpScene() throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/Signup.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/common/auth/auth/Signup.fxml"));
         Parent root = loader.load();
 
         if (primaryStage.getScene() == null) {

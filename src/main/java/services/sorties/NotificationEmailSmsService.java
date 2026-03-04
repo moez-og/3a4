@@ -3,11 +3,11 @@ package services.sorties;
 import models.sorties.AnnonceSortie;
 import models.sorties.ParticipationSortie;
 
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import jakarta.mail.*;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -95,10 +95,10 @@ public class NotificationEmailSmsService {
         String budget = a.getBudgetMax() <= 0 ? "Aucun budget défini" : a.getBudgetMax() + " TND max";
 
         String intro  = accepte
-            ? "Bonne nouvelle ! Votre demande de participation a été ACCEPTÉE."
-            : "Nous sommes désolés. Votre demande de participation a été REFUSÉE.";
+                ? "Bonne nouvelle ! Votre demande de participation a été ACCEPTÉE."
+                : "Nous sommes désolés. Votre demande de participation a été REFUSÉE.";
         String footer = accepte
-            ? "Merci de vous présenter à l'heure au point de rendez-vous.\n\nBonne sortie !"
+                ? "Merci de vous présenter à l'heure au point de rendez-vous.\n\nBonne sortie !"
                 : "Vous pouvez consulter d'autres annonces sur la plateforme.";
 
         return "Bonjour,\n\n"
@@ -119,29 +119,29 @@ public class NotificationEmailSmsService {
                 + "-- L'équipe de la plateforme\n";
     }
 
-            private String buildCorpsHtml(ParticipationSortie p, AnnonceSortie a, boolean accepte) {
-            String date = a.getDateSortie() != null ? DT_FMT.format(a.getDateSortie()) : "—";
-            String budget = a.getBudgetMax() <= 0 ? "Aucun budget défini" : (a.getBudgetMax() + " TND max");
+    private String buildCorpsHtml(ParticipationSortie p, AnnonceSortie a, boolean accepte) {
+        String date = a.getDateSortie() != null ? DT_FMT.format(a.getDateSortie()) : "—";
+        String budget = a.getBudgetMax() <= 0 ? "Aucun budget défini" : (a.getBudgetMax() + " TND max");
 
-            String statusLabel = accepte ? "ACCEPTÉE" : "REFUSÉE";
-            // Palette de l'application: bleu admin (#1a3a5c) pour accepté, rouge pour refusé.
-            String accent = accepte ? "#1a3a5c" : "#dc2626";
-            String intro = accepte
+        String statusLabel = accepte ? "ACCEPTÉE" : "REFUSÉE";
+        // Palette de l'application: bleu admin (#1a3a5c) pour accepté, rouge pour refusé.
+        String accent = accepte ? "#1a3a5c" : "#dc2626";
+        String intro = accepte
                 ? "Bonne nouvelle ! Votre demande de participation a été <b>ACCEPTÉE</b>."
                 : "Nous sommes désolés. Votre demande de participation a été <b>REFUSÉE</b>.";
-            String footer = accepte
+        String footer = accepte
                 ? "Merci de vous présenter à l'heure au point de rendez-vous.<br/><br/><b>Bonne sortie !</b>"
                 : "Vous pouvez consulter d'autres annonces sur la plateforme.";
 
-            String titre = escapeHtml(safe(a.getTitre()));
-            String ville = escapeHtml(safe(a.getVille()));
-            String lieu = escapeHtml(safe(a.getLieuTexte()));
-            String rdv = escapeHtml(safe(a.getPointRencontre()));
-            String activite = escapeHtml(safe(a.getTypeActivite()));
-            String places = String.valueOf(Math.max(1, p.getNbPlaces()));
+        String titre = escapeHtml(safe(a.getTitre()));
+        String ville = escapeHtml(safe(a.getVille()));
+        String lieu = escapeHtml(safe(a.getLieuTexte()));
+        String rdv = escapeHtml(safe(a.getPointRencontre()));
+        String activite = escapeHtml(safe(a.getTypeActivite()));
+        String places = String.valueOf(Math.max(1, p.getNbPlaces()));
 
-            // Simple, readable HTML with inline CSS (best compatibility).
-            return "<!doctype html>"
+        // Simple, readable HTML with inline CSS (best compatibility).
+        return "<!doctype html>"
                 + "<html><head><meta charset='utf-8'></head>"
                 + "<body style='margin:0;padding:0;background:#f4f6fb;font-family:Arial,Helvetica,sans-serif;color:#111827;'>"
                 + "<div style='max-width:680px;margin:0 auto;padding:24px 12px;'>"
@@ -176,31 +176,31 @@ public class NotificationEmailSmsService {
                 + "  </div>"
                 + "</div>"
                 + "</body></html>";
-            }
+    }
 
-            private static String rowHtml(String label, String value) {
-            String v = (value == null || value.isBlank()) ? "—" : value;
-            return "<tr>"
+    private static String rowHtml(String label, String value) {
+        String v = (value == null || value.isBlank()) ? "—" : value;
+        return "<tr>"
                 + "<td style='padding:10px 10px;border-top:1px solid #eef2f7;color:#6b7280;width:150px;vertical-align:top;font-weight:700;'>" + escapeHtml(label) + "</td>"
                 + "<td style='padding:10px 10px;border-top:1px solid #eef2f7;color:#111827;vertical-align:top;word-break:break-word;'>" + v + "</td>"
                 + "</tr>";
-            }
+    }
 
-            private static String escapeHtml(String s) {
-            if (s == null) return "";
-            return s
+    private static String escapeHtml(String s) {
+        if (s == null) return "";
+        return s
                 .replace("&", "&amp;")
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")
                 .replace("'", "&#39;");
-            }
+    }
 
     private String buildSms(ParticipationSortie p, AnnonceSortie a, boolean accepte) {
         String date   = a.getDateSortie() != null ? DT_FMT.format(a.getDateSortie()) : "-";
         String statut = accepte ? "ACCEPTÉE" : "REFUSÉE";
         return "=== fin tokhrej ===\n"
-            + "Participation " + statut + " !\n"
+                + "Participation " + statut + " !\n"
                 + "Sortie: "  + safe(a.getTitre())          + "\n"
                 + "Date: "    + date                         + "\n"
                 + "Lieu: "    + safe(a.getVille())           + " - " + safe(a.getPointRencontre()) + "\n"
@@ -307,45 +307,21 @@ public class NotificationEmailSmsService {
     }
 
     // ═══════════════════════════════════════════════════════════════════
-    //  Envoi SMS via Twilio
+    //  Envoi SMS (désactivé si aucun provider n'est intégré)
     // ═══════════════════════════════════════════════════════════════════
 
     private boolean envoyerSms(String numeroDestinataire, String corps) {
-        System.out.println("[NotifService] Tentative envoi SMS vers : " + numeroDestinataire);
+        // Le projet n'embarque pas de SDK SMS (Twilio a été retiré des dépendances).
+        // On garde la méthode pour compatibilité et on ne bloque pas le flux métier.
 
-        LoadedProps loaded = loadFileProps();
-        Properties fileProps = loaded.props;
-
-        String twilioSid = getConfig("TWILIO_ACCOUNT_SID", "", fileProps);
-        String twilioToken = getConfig("TWILIO_AUTH_TOKEN", "", fileProps);
-        String twilioFrom = getConfig("TWILIO_FROM_NUMBER", "", fileProps);
-
-        if (twilioSid.isBlank() || twilioToken.isBlank() || twilioFrom.isBlank()) {
-            System.err.println("[NotifService] Twilio non configure (TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN/TWILIO_FROM_NUMBER). SMS non envoye.");
-            return false;
-        }
-
-        String numero = numeroDestinataire.trim();
-        if (!numero.startsWith("+")) {
+        String numero = safe(numeroDestinataire).trim();
+        if (!numero.isEmpty() && !numero.startsWith("+")) {
             // Ajoute indicatif Tunisie si absent
             numero = "+216" + numero.replaceAll("[^0-9]", "");
         }
 
-        try {
-            com.twilio.Twilio.init(twilioSid, twilioToken);
-            com.twilio.rest.api.v2010.account.Message msg =
-                    com.twilio.rest.api.v2010.account.Message.creator(
-                            new com.twilio.type.PhoneNumber(numero),
-                            new com.twilio.type.PhoneNumber(twilioFrom),
-                            corps
-                    ).create();
-            System.out.println("[NotifService] SMS envoye a : " + numero + " | SID: " + msg.getSid());
-            return true;
-        } catch (Exception e) {
-            System.err.println("[NotifService] Echec envoi SMS : " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
+        System.out.println("[NotifService] SMS non envoye (provider SMS non configure). Dest=" + numero + " | Msg=" + safe(corps));
+        return true;
     }
 
     // ═══════════════════════════════════════════════════════════════════

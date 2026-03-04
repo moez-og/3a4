@@ -36,7 +36,6 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.sql.SQLException;
 import java.util.Base64;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -379,7 +378,7 @@ public class OtpVerificationController {
 
     private void navigateToResetPassword() throws Exception {
         Stage stage = resolveStage();
-        URL fxmlUrl = getClass().getResource("/fxml/common/auth/ResetPassword.fxml");
+        URL fxmlUrl = getClass().getResource("/fxml/common/auth/auth/ResetPassword.fxml");
         if (fxmlUrl == null) {
             throw new IllegalStateException("FXML introuvable: /fxml/common/auth/ResetPassword.fxml");
         }
@@ -401,7 +400,7 @@ public class OtpVerificationController {
     private void navigateToLogin() throws Exception {
         Stage stage = resolveStage();
 
-        URL fxmlUrl = getClass().getResource("/fxml/common/auth/Login.fxml");
+        URL fxmlUrl = getClass().getResource("/fxml/common/auth/auth/Login.fxml");
         if (fxmlUrl == null) {
             throw new IllegalStateException("FXML introuvable: /fxml/common/auth/Login.fxml");
         }

@@ -704,7 +704,7 @@ public class LoginController {
     private void navigateToSignup() throws Exception {
         Stage stage = resolveStage();
 
-        URL fxmlUrl = getClass().getResource("/fxml/common/auth/Signup.fxml");
+        URL fxmlUrl = getClass().getResource("/fxml/common/auth/auth/Signup.fxml");
         if (fxmlUrl == null) {
             throw new IllegalStateException("FXML introuvable: /fxml/common/auth/Signup.fxml");
         }
@@ -723,7 +723,7 @@ public class LoginController {
     private void navigateToOtpVerification(String email) throws Exception {
         Stage stage = resolveStage();
 
-        URL fxmlUrl = getClass().getResource("/fxml/common/auth/OtpVerification.fxml");
+        URL fxmlUrl = getClass().getResource("/fxml/common/auth/auth/OtpVerification.fxml");
         if (fxmlUrl == null) {
             throw new IllegalStateException("FXML introuvable: /fxml/common/auth/OtpVerification.fxml");
         }

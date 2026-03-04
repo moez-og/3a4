@@ -220,7 +220,7 @@ public class SignupController {
     private void navigateToLogin() throws Exception {
         Stage stage = resolveStage();
 
-        URL fxmlUrl = getClass().getResource("/fxml/common/auth/Login.fxml");
+        URL fxmlUrl = getClass().getResource("/fxml/common/auth/auth/Login.fxml");
         if (fxmlUrl == null) {
             throw new IllegalStateException("FXML introuvable: /fxml/common/auth/Login.fxml");
         }

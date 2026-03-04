@@ -105,8 +105,8 @@ public class NotificationsCenterController {
 
         Label title = new Label(safe(n.getTitle()));
         title.setStyle(n.isUnread()
-            ? "-fx-font-weight: 900; -fx-text-fill: #163a5c; -fx-font-size: 13px;"
-            : "-fx-font-weight: 800; -fx-text-fill: rgba(22,58,92,0.85); -fx-font-size: 13px;"
+                ? "-fx-font-weight: 900; -fx-text-fill: #163a5c; -fx-font-size: 13px;"
+                : "-fx-font-weight: 800; -fx-text-fill: rgba(22,58,92,0.85); -fx-font-size: 13px;"
         );
 
         Label body = new Label(safe(n.getBody()));
