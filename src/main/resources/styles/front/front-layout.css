@@ -7,6 +7,48 @@
     -fx-background-color: linear-gradient(to bottom, #eef3ff, #f7f9fc);
 }
 
+/* ===== GLOBAL POLISH (scrollbars + focus) ===== */
+.scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(15,23,42,0.16);
+    -fx-background-radius: 999;
+}
+
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: rgba(15,23,42,0.22);
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 2;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: rgba(15,23,42,0.35);
+}
+
+.text-field:focused,
+.text-area:focused,
+.combo-box-base:focused {
+    -fx-effect: dropshadow(gaussian, rgba(22,58,92,0.12), 14, 0.18, 0, 0);
+}
+
 .main-pane { -fx-background-color: transparent; }
 
 /* ===== APPBAR ===== */
@@ -478,255 +520,3 @@
 .theme-dark .drawerSectionTitle { -fx-text-fill: rgba(226,232,240,0.72); }
 .theme-dark .drawerBtn { -fx-background-color: rgba(255,255,255,0.06); -fx-text-fill: rgba(241,245,249,0.92); }
 .theme-dark .closeBtn { -fx-text-fill: rgba(241,245,249,0.92); }
-/* ===== NAV CHATBOT PILL ===== */
-.navPillChatbot {
-    -fx-background-color: rgba(212,175,55,0.15);
-    -fx-text-fill: #c9920f;
-    -fx-border-color: rgba(212,175,55,0.30);
-    -fx-border-radius: 999;
-    -fx-font-weight: 900;
-}
-.navPillChatbot:hover {
-    -fx-background-color: rgba(212,175,55,0.25);
-}
-.navPillChatbot:selected {
-    -fx-background-color: linear-gradient(to right, #d4af37, #c9920f);
-    -fx-text-fill: white;
-    -fx-effect: dropshadow(gaussian, rgba(212,175,55,0.45), 12, 0.2, 0, 4);
-}
-
-
-/* ===================================================
-   NOTIFICATION BELL & BADGE
-   =================================================== */
-
-.bellPane {
-    -fx-cursor: hand;
-}
-
-/* ── Red badge on the bell ───────────────────────── */
-.notifBadge {
-    -fx-background-color: #ef4444;
-    -fx-background-radius: 999;
-    -fx-text-fill: white;
-    -fx-font-size: 9px;
-    -fx-font-weight: 900;
-    -fx-min-width: 17px;
-    -fx-min-height: 17px;
-    -fx-max-width: 22px;
-    -fx-pref-width: -1;
-    -fx-alignment: center;
-    -fx-padding: 0 3px;
-    -fx-translate-x: 6px;
-    -fx-translate-y: -4px;
-    -fx-effect: dropshadow(gaussian, rgba(239,68,68,0.55), 7, 0, 0, 2);
-}
-
-/* ===================================================
-   NOTIFICATION DROPDOWN POPUP
-   Full opaque white bg — no transparency bleed-through
-   =================================================== */
-
-/* Outer wrapper: solid white, strong shadow, rounded */
-.notifPopupRoot {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 14px;
-    -fx-border-color: #dee5ef;
-    -fx-border-width: 1px;
-    -fx-border-radius: 14px;
-    -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.22), 28, 0, 0, 10);
-}
-
-/* Header zone: title + subtitle + mark-all button */
-.notifPopupHeader {
-    -fx-background-color: #f8fafc;
-    -fx-background-radius: 14px 14px 0px 0px;
-    -fx-padding: 14px 16px 12px 16px;
-    -fx-border-color: transparent transparent #e2e8f0 transparent;
-    -fx-border-width: 0 0 1px 0;
-}
-
-.notifPopupTitle {
-    -fx-font-size: 14px;
-    -fx-font-weight: 900;
-    -fx-text-fill: #0f172a;
-}
-
-.notifPopupSubtitle {
-    -fx-font-size: 11px;
-    -fx-text-fill: #64748b;
-    -fx-font-weight: 600;
-}
-
-/* "Tout marquer lu" button */
-.notifMarkAllBtn {
-    -fx-background-color: #1d4ed8;
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 11.5px;
-    -fx-font-weight: 700;
-    -fx-cursor: hand;
-    -fx-padding: 6px 14px;
-    -fx-background-radius: 20px;
-    -fx-border-color: transparent;
-    -fx-border-radius: 20px;
-    -fx-border-width: 0;
-    -fx-effect: dropshadow(gaussian, rgba(29,78,216,0.30), 6, 0, 0, 2);
-}
-.notifMarkAllBtn:hover {
-    -fx-background-color: #1e40af;
-    -fx-effect: dropshadow(gaussian, rgba(29,78,216,0.45), 10, 0, 0, 3);
-    -fx-translate-y: -1px;
-}
-.notifMarkAllBtn:pressed {
-    -fx-background-color: #1e3a8a;
-    -fx-translate-y: 0px;
-    -fx-effect: none;
-}
-
-/* ── Notification row (read) ─────────────────────── */
-.notifRow {
-    -fx-background-color: #ffffff;
-    -fx-padding: 11px 14px;
-    -fx-cursor: hand;
-}
-.notifRow:hover {
-    -fx-background-color: #f8fafc;
-}
-
-/* ── Notification row (unread) ───────────────────── */
-.notifRowUnread {
-    -fx-background-color: #eff6ff;
-}
-.notifRowUnread:hover {
-    -fx-background-color: #dbeafe;
-}
-
-/* ── Icon circle ─────────────────────────────────── */
-.notifIcon {
-    -fx-background-color: #e0f2fe;
-    -fx-background-radius: 999;
-    -fx-min-width: 42px;
-    -fx-min-height: 42px;
-    -fx-max-width: 42px;
-    -fx-max-height: 42px;
-    -fx-alignment: center;
-    -fx-font-size: 20px;
-}
-
-/* ── Text labels ─────────────────────────────────── */
-.notifLieuName {
-    -fx-font-size: 13px;
-    -fx-font-weight: 900;
-    -fx-text-fill: #0f172a;
-    -fx-wrap-text: true;
-}
-.notifLieuMeta {
-    -fx-font-size: 11px;
-    -fx-text-fill: #475569;
-    -fx-font-weight: 700;
-}
-.notifReason {
-    -fx-font-size: 11px;
-    -fx-text-fill: #64748b;
-    -fx-font-weight: 600;
-    -fx-wrap-text: true;
-}
-
-/* ── Unread dot ──────────────────────────────────── */
-.notifUnreadDot {
-    -fx-background-color: #3b82f6;
-    -fx-background-radius: 999;
-    -fx-min-width: 8px;
-    -fx-min-height: 8px;
-    -fx-max-width: 8px;
-    -fx-max-height: 8px;
-    -fx-effect: dropshadow(gaussian, rgba(59,130,246,0.5), 4, 0, 0, 0);
-}
-
-/* ── Category type chip ──────────────────────────── */
-.notifTypeChip {
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
-    -fx-text-fill: #1e40af;
-    -fx-background-color: #dbeafe;
-    -fx-background-radius: 999;
-    -fx-padding: 2px 10px;
-}
-
-/* ── Row divider ─────────────────────────────────── */
-.notifDivider {
-    -fx-background-color: #e2e8f0;
-    -fx-min-height: 1px;
-    -fx-max-height: 1px;
-    -fx-pref-height: 1px;
-}
-
-/* ── Empty state ─────────────────────────────────── */
-.notifEmpty {
-    -fx-font-size: 13px;
-    -fx-text-fill: #94a3b8;
-    -fx-font-weight: 700;
-    -fx-alignment: center;
-    -fx-padding: 28px 20px;
-    -fx-wrap-text: true;
-    -fx-text-alignment: center;
-}
-
-/* ── Footer (refresh button area) ───────────────── */
-.notifFooter {
-    -fx-background-color: #f8fafc;
-    -fx-background-radius: 0px 0px 14px 14px;
-    -fx-padding: 8px 14px;
-    -fx-border-color: #e2e8f0 transparent transparent transparent;
-    -fx-border-width: 1px 0 0 0;
-}
-
-/* ── Dark theme overrides ────────────────────────── */
-.theme-dark .notifPopupRoot {
-    -fx-background-color: #1e293b;
-    -fx-border-color: rgba(255,255,255,0.12);
-}
-.theme-dark .notifPopupHeader {
-    -fx-background-color: #0f172a;
-    -fx-border-color: rgba(255,255,255,0.08) transparent rgba(255,255,255,0.08) transparent;
-}
-.theme-dark .notifRow         { -fx-background-color: #1e293b; }
-.theme-dark .notifRow:hover   { -fx-background-color: #273549; }
-.theme-dark .notifRowUnread   { -fx-background-color: #1e3050; }
-.theme-dark .notifRowUnread:hover { -fx-background-color: #243a60; }
-.theme-dark .notifPopupTitle  { -fx-text-fill: #f1f5f9; }
-.theme-dark .notifPopupSubtitle { -fx-text-fill: #94a3b8; }
-.theme-dark .notifLieuName    { -fx-text-fill: #f1f5f9; }
-.theme-dark .notifLieuMeta    { -fx-text-fill: #94a3b8; }
-.theme-dark .notifReason      { -fx-text-fill: #64748b; }
-.theme-dark .notifDivider     { -fx-background-color: rgba(255,255,255,0.07); }
-.theme-dark .notifFooter      { -fx-background-color: #0f172a; -fx-border-color: rgba(255,255,255,0.08) transparent transparent transparent; }
-.theme-dark .notifMarkAllBtn  { -fx-background-color: #2563eb; -fx-text-fill: #ffffff; -fx-border-color: transparent; }
-.theme-dark .notifIcon        { -fx-background-color: #1e3a5f; }
-.theme-dark .notifTypeChip    { -fx-background-color: #1e3a5f; -fx-text-fill: #93c5fd; }
-.theme-dark .notifEmpty       { -fx-text-fill: #475569; }
-
-/* ── Drawer Neuro Toggle Button ──────────────────── */
-.drawerNeuroBtn {
-    -fx-background-color: #f0f4ff;
-    -fx-text-fill: #3b4fcf;
-    -fx-font-size: 13.5px;
-    -fx-font-weight: 700;
-    -fx-padding: 10px 16px;
-    -fx-background-radius: 12px;
-    -fx-border-color: #c7d2fe;
-    -fx-border-width: 1.5px;
-    -fx-border-radius: 12px;
-    -fx-cursor: hand;
-    -fx-max-width: Infinity;
-    -fx-alignment: CENTER_LEFT;
-}
-.drawerNeuroBtn:hover {
-    -fx-background-color: #e0e7ff;
-    -fx-border-color: #818cf8;
-}
-.drawerNeuroBtn:selected {
-    -fx-background-color: #4f46e5;
-    -fx-text-fill: white;
-    -fx-border-color: #4338ca;
-}
