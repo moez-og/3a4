@@ -84,6 +84,32 @@ public class ParticipationSortieService {
         }
     }
 
+    public void deleteById(int id) {
+        String sql = "DELETE FROM " + TABLE + " WHERE id=?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("ParticipationSortieService.deleteById: " + e.getMessage(), e);
+        }
+    }
+
+    public void updatePendingRequest(ParticipationSortie p) {
+        String sql = "UPDATE " + TABLE + " SET statut=?, contact_prefer=?, contact_value=?, commentaire=?, nb_places=?, reponses_json=? WHERE id=?";
+        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+            ps.setString(1, safeDefault(p.getStatut(), "EN_ATTENTE"));
+            ps.setString(2, safeDefault(p.getContactPrefer(), "EMAIL"));
+            ps.setString(3, p.getContactValue());
+            ps.setString(4, emptyToNull(p.getCommentaire()));
+            ps.setInt(5, Math.max(1, p.getNbPlaces()));
+            ps.setString(6, JsonStringArray.toJson(p.getReponses()));
+            ps.setInt(7, p.getId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("ParticipationSortieService.updatePendingRequest: " + e.getMessage(), e);
+        }
+    }
+
     public List<ParticipationSortie> getByAnnonce(int annonceId) {
         String sql = "SELECT * FROM " + TABLE + " WHERE annonce_id=? ORDER BY date_demande DESC, id DESC";
         List<ParticipationSortie> list = new ArrayList<>();
