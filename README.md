@@ -1,80 +1,60 @@
-﻿# Gestion de sortie — Notifications (participations)
+# EventManager – Event & Venue Management Application
 
-Ce projet est une application **JavaFX + JDBC (MySQL)**.
+## Overview
+This project was developed as part of the PIDEV – 3rd Year Engineering Program at **Esprit School of Engineering** (Academic Year 2025–2026).
 
-## Fonctionnalités livrées
+It is a JavaFX desktop application that allows users to manage events, venues, registrations, tickets, and user accounts through both a front-end user interface and a back-end admin dashboard.
 
-### Événements couverts
-- `PARTICIPATION_REQUESTED` : quand un participant envoie une demande (statut `EN_ATTENTE`) → notification au **créateur** de la sortie.
-- `PARTICIPATION_ACCEPTED` : quand la demande passe à `CONFIRMEE` / `ACCEPTEE` → notification au **participant**.
-- `PARTICIPATION_REFUSED` : quand la demande passe à `REFUSEE` → notification au **participant**.
+## Features
+- User authentication (Login / Signup)
+- Event creation, listing, and detail view
+- Venue (Lieu) management with geolocation (latitude/longitude)
+- Event registration and ticket management
+- Admin dashboard for users, events, and venues
+- Interactive map integration via JavaFX WebView
 
-### Centre de notifications
-- Icône **cloche** + **badge** (nombre non-lus).
-- Centre (historique) : liste des notifications, avec statut lu/non-lu.
-- Actions : **marquer comme lu** (par notification) + **tout marquer comme lu**.
+## Tech Stack
 
-### Anti-doublon & droits
-- Anti-doublon garanti par une contrainte unique DB : une notification unique par `(receiver_id, type, entity_type, entity_id)`.
-- Accès strict : les requêtes de lecture/mise à jour filtrent toujours sur `receiver_id`.
+### Frontend
+- JavaFX 21 (FXML, Controls, WebView)
 
-## Base de données
+### Backend
+- Java 17
+- MySQL (via MySQL Connector 8.0.33)
+- Maven (build & dependency management)
 
-### Table `notifications`
-Elle est **créée automatiquement** au premier accès DB (via `utils.Mydb` → `utils.db.DbSchema`).
+## Architecture
+The project follows an MVC (Model-View-Controller) architecture:
+- `models/` – Entity classes (Evenement, Lieu, User, Ticket, Inscription, EvaluationLieu)
+- `controllers/` – Front and Back controllers organized by module
+- `services/` – Business logic and database operations
+- `gui/` – JavaFX application entry points
 
-Colonnes principales :
-- `id` (BIGINT, PK)
-- `receiver_id` (INT)
-- `sender_id` (INT, nullable)
-- `type` (VARCHAR)
-- `title` (VARCHAR)
-- `body` (TEXT)
-- `entity_type` (VARCHAR)
-- `entity_id` (INT)
-- `created_at` (TIMESTAMP)
-- `read_at` (TIMESTAMP, nullable)
-- `metadata_json` (TEXT, nullable)
+## Contributors
+<!-- Add your team members here -->
+- ...
 
-Indexes : `receiver_id + created_at`, `receiver_id + read_at`, `receiver_id + type`.
+## Academic Context
+Developed at **Esprit School of Engineering – Tunisia**  
+PIDEV – 3A | 2025–2026
 
-## Où cliquer (UI)
+## Getting Started
 
-### Front Office
-- Dans la barre du haut : bouton 🔔 (cloche) → ouvre le centre de notifications.
+### Prerequisites
+- Java 17+
+- Maven 3.8+
+- MySQL Server
 
-### Back Office
-- Dans le header (à droite) : bouton 🔔 (cloche) → ouvre le centre de notifications.
+### Installation
+```bash
+git clone https://github.com/<your-username>/Esprit-PIDEV-3A21-2026-EventManager.git
+cd Esprit-PIDEV-3A21-2026-EventManager
+mvn clean install
+mvn javafx:run
+```
 
-## “Temps réel” (desktop)
+Configure your MySQL connection before running.
 
-L’app n’utilise pas WebSocket (pas de serveur HTTP ici). À la place :
-- le badge non-lus est **rafraîchi par polling** toutes les **5 secondes** (Front + Back).
-- l’historique est en DB, donc visible à la reconnexion.
-
-## Test rapide (manuel)
-
-1. Créer 2 comptes `user` dans MySQL (un créateur, un participant) et se connecter avec l’un puis l’autre.
-2. Avec le **créateur**, créer une sortie `annonce_sortie`.
-3. Avec le **participant**, ouvrir la sortie et cliquer **Participer** → envoyer la demande.
-4. Revenir sur le **créateur** : badge 🔔 augmente, et notification visible.
-5. Depuis le créateur (ou l’admin) : accepter/refuser la demande → le participant reçoit la notification correspondante.
-
-## Build / tests
-
-Ce repo utilise Maven, mais si `mvn` n’est pas disponible sur ta machine, installe Maven ou utilise le Maven intégré de ton IDE.
-
-## Emails de confirmation (SMTP)
-
-L’envoi d’email est fait via SMTP dans `services.sorties.NotificationEmailSmsService`.
-
-Pour que ça marche, il faut fournir la configuration SMTP (au choix) :
-- Variables d’environnement : `APP_SMTP_HOST`, `APP_SMTP_PORT`, `APP_SMTP_USER`, `APP_SMTP_PASS`, `APP_EMAIL_FROM`
-- Ou propriétés JVM (pratique depuis l’IDE) : `-DAPP_SMTP_HOST=... -DAPP_SMTP_PORT=587 -DAPP_SMTP_USER=... -DAPP_SMTP_PASS=... -DAPP_EMAIL_FROM=...`
-
-Option la plus simple sous Windows/IDE :
-- Copier `app-secrets.properties.example` → `app-secrets.properties` à la racine du projet
-- Remplir les valeurs (ce fichier est ignoré par git)
-- (Optionnel) Si ton répertoire de lancement n’est pas la racine: `-DAPP_SECRETS_FILE=C:\\chemin\\vers\\app-secrets.properties`
-
-Debug SMTP (optionnel) : `APP_SMTP_DEBUG=true`.
+## Acknowledgments
+Esprit School of Engineering – Tunisia  
+Academic Year 2025–2026
